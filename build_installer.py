@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-build_installer.py — Assembles LiveCodeCommunityInstaller-9_7_0_dp_1-Mac.app
+build_installer.py — Assembles HyperXTalkInstaller-1_0_0-Mac.app
 
 Replicates what `_internal deploy macosx` + toolsBuilderMakeInstaller do:
   1. Reads the Installer.app engine binary (Mach-O, arm64)
-  2. Builds a LiveCode capsule from:
+  2. Builds a HyperXTalk capsule from:
        - installer.livecode (main installer stack)
        - revliburl.livecodescript  (auxiliary script-only stack)
        - installer_utilities.livecodescript (auxiliary script-only stack)
@@ -12,7 +12,7 @@ Replicates what `_internal deploy macosx` + toolsBuilderMakeInstaller do:
   3. Deflate-compresses the capsule and patches the __PROJECT Mach-O segment
   4. Creates the full .app bundle structure with Info.plist, Installer.icns, payload
   5. Ad-hoc code-signs the result
-  6. Places the finished app in ~/livecode/
+  6. Places the finished app in _build/final/output/
 
 Usage:
   python3 build_installer.py
@@ -29,8 +29,9 @@ import zlib
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-REPO = "/Users/emily-elizabethhoward/livecode"
-ENGINE_APP  = f"{REPO}/_build/mac/Release/Installer.app"
+REPO = os.path.dirname(os.path.abspath(__file__))
+BUILD_MODE  = os.environ.get("MODE", "debug").capitalize()   # Debug or Release
+ENGINE_APP  = f"{REPO}/_build/mac/{BUILD_MODE}/Installer.app"
 ENGINE_BIN  = f"{ENGINE_APP}/Contents/MacOS/Installer"
 INSTALLER_STACK  = f"{REPO}/builder/installer.livecode"
 REVLIBURL_STACK  = f"{REPO}/ide-support/revliburl.livecodescript"
@@ -39,13 +40,13 @@ INSTALLER_ICNS   = f"{ENGINE_APP}/Contents/Resources/Installer.icns"
 DESCRIPTION_TXT  = f"{REPO}/Installer/description.txt"
 LICENSE_TXT      = f"{REPO}/ide/License Agreement.txt"
 
-VERSION   = "9_7_0_dp_1"
+VERSION   = "1_0_0"
 EDITION   = "Community"
 PLATFORM  = "macosx"
-APP_NAME  = f"LiveCode{EDITION}Installer-{VERSION}-Mac"
+APP_NAME  = f"HyperXTalkInstaller-{VERSION}-Mac"
 OUT_DIR   = f"{REPO}/_build/final/output"
 WORK_DIR  = f"{REPO}/_build/final/work"
-DEST      = f"{os.path.expanduser('~')}/livecode"
+DEST      = OUT_DIR
 
 # ---------------------------------------------------------------------------
 # Capsule section type constants  (see capsule.h)
@@ -58,6 +59,7 @@ kScriptOnlyMain    = 4
 kAuxStack          = 7
 kScriptOnlyAux     = 8
 kStartupScript     = 10
+kEditionFlags      = 13   # 1-byte edition marker: 0x01 = Community
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -110,6 +112,9 @@ def make_capsule_stream(main_stack_data, aux_stacks, startup_script_str):
     prologue_data = struct.pack(">II", 0, 0)
     write_section(kPrologue, prologue_data)
 
+    # 1b. Edition flags: 0x01 = Community (matches original distributed installer)
+    write_section(kEditionFlags, b'\x01')
+
     # 2. Main stack (binary .rev format → kMainStack)
     write_section(kMainStack, main_stack_data)
 
@@ -139,7 +144,23 @@ def make_capsule_stream(main_stack_data, aux_stacks, startup_script_str):
 def compress_capsule(raw_bytes):
     """
     Raw deflate (windowBits=-15, same as zlib deflateInit2 -15).
-    Then append 4 zero bytes (MCDeploySecuritySecureStandalone stub).
+
+    Trailing padding rules (two independent requirements both satisfied):
+
+    1.  4-byte security stub:  MCCapsuleRead keeps a 4-byte margin at the end
+        of its inflate input buffer (`avail_in = frontier - 4`).  Without at
+        least 4 bytes after the deflate end-of-stream marker, inflate never
+        sees the final bits of the stream and the capsule read stalls.
+
+    2.  4-byte alignment:  MCCapsuleReadBuckets rounds its last read DOWN to a
+        multiple of 4 (`t_total = buckets_available & ~3`).  Any remainder
+        bytes stay in the bucket.  After processing the Epilogue section,
+        MCCapsuleProcess checks `self->buckets != nil` and returns false
+        (without setting MCresult → "Unknown error occurred") if any bytes are
+        left.  So the total compressed+stub length must be divisible by 4.
+
+    Combined fix: append at least 4 zero bytes, then pad further so the
+    total is a multiple of 4.
     """
     compressor = zlib.compressobj(
         level=zlib.Z_DEFAULT_COMPRESSION,
@@ -149,7 +170,9 @@ def compress_capsule(raw_bytes):
         strategy=zlib.Z_DEFAULT_STRATEGY,
     )
     compressed = compressor.compress(raw_bytes) + compressor.flush()
-    return compressed + b'\x00\x00\x00\x00'
+    # stub_size >= 4, and (len(compressed) + stub_size) % 4 == 0
+    stub_size = 4 + ((-len(compressed)) % 4)
+    return compressed + b'\x00' * stub_size
 
 # ---------------------------------------------------------------------------
 # Parse the 64-bit Mach-O binary and patch __PROJECT
@@ -158,8 +181,10 @@ MH_MAGIC_64 = 0xFEEDFACF
 
 LC_SEGMENT_64 = 0x19
 
-def macho_align(x, align=0x1000):
-    """Align to the page size used by the Mach-O builder (4 KiB for LC segments)."""
+def macho_align(x, align=0x4000):
+    """Align to the page size used by the Mach-O builder.
+    Apple Silicon (arm64) uses 16 KiB pages; segments must be 0x4000-aligned.
+    Using 0x1000 (4 KiB) causes the kernel to SIGKILL the binary on launch."""
     return (x + align - 1) & ~(align - 1)
 
 class Segment64:
@@ -255,7 +280,7 @@ def patch_macho(engine_data, project_data):
             if seg.segname == "__LINKEDIT":
                 _shift_segment64(out, cmd_offset, file_delta)
             # dyld info, symtab, dysymtab, etc. all store offsets into __LINKEDIT
-        elif cmd == 0x22:   # LC_SYMTAB
+        elif cmd == 0x02:   # LC_SYMTAB
             _shift_linkedit_cmd(out, cmd_offset, file_delta, 8)   # symoff
             _shift_linkedit_cmd(out, cmd_offset, file_delta, 16)  # stroff
         elif cmd == 0x0B:   # LC_DYSYMTAB
@@ -264,7 +289,8 @@ def patch_macho(engine_data, project_data):
             _shift_dyld_info(out, cmd_offset, file_delta)
         elif cmd in (0x26, 0x29, 0x2B,   # LC_FUNCTION_STARTS, LC_DATA_IN_CODE, LC_DYLIB_CODE_SIGN_DRS
                      0x1D,               # LC_CODE_SIGNATURE
-                     0x2C, 0x2D):        # LC_DYLD_EXPORTS_TRIE, LC_DYLD_CHAINED_FIXUPS
+                     0x80000033,         # LC_DYLD_EXPORTS_TRIE
+                     0x80000034):        # LC_DYLD_CHAINED_FIXUPS
             _shift_linkedit_data_cmd(out, cmd_offset, file_delta)
         cmd_offset += size
 
@@ -336,8 +362,11 @@ def _shift_linkedit_cmd(buf, cmd_off, delta, field_off):
         struct.pack_into("<I", buf, cmd_off + field_off, v + delta)
 
 def _shift_dysymtab(buf, cmd_off, delta):
-    """Shift all file-offset fields in LC_DYSYMTAB."""
-    for field in (32, 40, 48, 56, 60, 64, 68, 72):
+    """Shift file-offset fields in LC_DYSYMTAB (skip count fields at 60, 68).
+    dysymtab_command file offsets: tocoff(32), modtaboff(40), extrefsymoff(48),
+    indirectsymoff(56), extreloff(64), locreloff(72).
+    Fields at 60 (nindirectsyms) and 68 (nextrel) are counts, not offsets."""
+    for field in (32, 40, 48, 56, 64, 72):
         _shift_linkedit_cmd(buf, cmd_off, delta, field)
 
 def _shift_dyld_info(buf, cmd_off, delta):
@@ -352,25 +381,18 @@ def _shift_linkedit_data_cmd(buf, cmd_off, delta):
 # ---------------------------------------------------------------------------
 # Build the Info.plist for the installer .app
 # ---------------------------------------------------------------------------
-def make_info_plist(bundle_id="com.runrev.installer", bundle_name="livecodeinstaller"):
-    # Read the existing plist from the engine as a base
-    engine_plist = f"{ENGINE_APP}/Contents/Info.plist"
+def make_info_plist():
+    # Prefer builder/mac_info.plist: has LSBackgroundOnly=true, correct bundle ID, NSPrincipalClass, etc.
+    builder_plist = os.path.join(REPO, "builder", "mac_info.plist")
+    if os.path.exists(builder_plist):
+        with open(builder_plist, "rb") as f:
+            return f.read()
+    # Fallback: use the engine's own Info.plist
+    engine_plist = os.path.join(ENGINE_APP, "Contents", "Info.plist")
     if os.path.exists(engine_plist):
         with open(engine_plist, "rb") as f:
             return f.read()
-    # Fallback minimal plist
-    return f"""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleIdentifier</key><string>{bundle_id}</string>
-    <key>CFBundleName</key><string>{bundle_name}</string>
-    <key>CFBundleExecutable</key><string>Installer</string>
-    <key>CFBundlePackageType</key><string>APPL</string>
-</dict>
-</plist>
-""".encode()
+    raise FileNotFoundError("No Info.plist source found")
 
 # ---------------------------------------------------------------------------
 # Build a real payload zip from locally available sources
@@ -468,10 +490,10 @@ def create_payload(payload_path):
 
         # ----------------------------------------------------------------
         # 1. Engine.MacOSX
-        #    Recursively install mac-bin/LiveCode-Community.app → TF
+        #    Recursively install mac-bin/HyperXTalk.app → TF
         # ----------------------------------------------------------------
         print("  Adding Engine …")
-        lc_app = f"{MAC_BIN}/LiveCode-Community.app"
+        lc_app = f"{MAC_BIN}/HyperXTalk.app"
         add_tree(lc_app, TF, zf, force_exec=True)
 
         # Extra files that go alongside the engine binary
@@ -555,12 +577,12 @@ def create_payload(payload_path):
             add_single(src, f"{ext_dir}/{bundle}", zf, is_exec=True)
 
         # ----------------------------------------------------------------
-        # 7. Runtime.MacOSX: Standalone-Community.app → Runtime/Mac OS X/arm64
+        # 7. Runtime.MacOSX: HyperXTalk-Standalone.app → Runtime/Mac OS X/arm64
         # ----------------------------------------------------------------
         print("  Adding Runtimes …")
         rt_mac = f"{SF}/Runtime/Mac OS X/arm64"
-        if os.path.isdir(f"{MAC_BIN}/Standalone-Community.app"):
-            add_tree(f"{MAC_BIN}/Standalone-Community.app",
+        if os.path.isdir(f"{MAC_BIN}/HyperXTalk-Standalone.app"):
+            add_tree(f"{MAC_BIN}/HyperXTalk-Standalone.app",
                      f"{rt_mac}/Standalone.app", zf, force_exec=True)
             add_folder_entry(f"{rt_mac}/Support")
             for fname in ["revpdfprinter.bundle", "revsecurity.dylib"]:
@@ -699,7 +721,7 @@ def main():
     os.chmod(bin_out, 0o755)
 
     # Copy resource files from source engine .app
-    for src_item in ["Installer.icns", "LiveCode-Community.rsrc"]:
+    for src_item in ["Installer.icns", "HyperXTalk.rsrc", "LiveCode-Community.rsrc"]:
         src = os.path.join(ENGINE_APP, "Contents", "Resources", src_item)
         if os.path.exists(src):
             shutil.copy2(src, resources_dir)
@@ -718,28 +740,26 @@ def main():
     # 5. Ad-hoc code-sign
     # ------------------------------------------------------------------
     print("Ad-hoc code-signing …")
-    result = subprocess.run(
-        ["xattr", "-cr", app_path],
-        capture_output=True
-    )
+    subprocess.run(["xattr", "-cr", app_path], capture_output=True)
     result = subprocess.run(
         ["codesign", "--force", "--deep", "--sign", "-", app_path],
         capture_output=True, text=True
     )
     if result.returncode != 0:
-        print(f"  codesign warning: {result.stderr.strip()}")
-    else:
-        print("  Signed successfully.")
+        print(f"  ERROR: codesign failed (rc={result.returncode}):")
+        print(f"    stdout: {result.stdout.strip()}")
+        print(f"    stderr: {result.stderr.strip()}")
+        sys.exit(1)
+    print("  Signed successfully.")
+    # Verify the signature
+    verify = subprocess.run(
+        ["codesign", "-v", "--verbose=1", app_path],
+        capture_output=True, text=True
+    )
+    if verify.returncode != 0:
+        print(f"  WARNING: codesign verify failed: {verify.stderr.strip()}")
 
-    # ------------------------------------------------------------------
-    # 6. Copy to destination
-    # ------------------------------------------------------------------
-    os.makedirs(DEST, exist_ok=True)
-    final_path = os.path.join(DEST, f"{APP_NAME}.app")
-    if os.path.exists(final_path):
-        shutil.rmtree(final_path)
-    shutil.copytree(app_path, final_path)
-    print(f"\n✓ Installer: {final_path}")
+    print(f"\n✓ Installer: {app_path}")
     return 0
 
 if __name__ == "__main__":
