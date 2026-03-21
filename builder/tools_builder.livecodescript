@@ -239,9 +239,9 @@ private command toolsBuilderMakePackage pVersion, pEdition, pPlatform, pEngineFo
       packageCompilerConfigureVariable tPackager, "TargetArchitecture", "armv6-hf"
    end if
    
-   -- Now all the names
-   local tProductName
-   put "LiveCode" && editionDisplayName(pEdition) into tProductName
+    -- Now all the names
+    local tProductName
+    put "HyperXTalk" && editionDisplayName(pEdition) into tProductName
 
    -- product tag is the lowercase product name with spaces removed
    local tProductTag
@@ -279,7 +279,7 @@ private command toolsBuilderMakePackage pVersion, pEdition, pPlatform, pEngineFo
       end if
       
       builderLog "message", "Building package '" & tPackageFile & "'"
-      packageCompilerBuild tPackager, "LiveCode", tPackageFile
+       packageCompilerBuild tPackager, "HyperXTalk", tPackageFile
       if the result is empty then
          builderLog "report", "Built package '" & tPackageFile & "'"
       else
@@ -338,9 +338,9 @@ private command toolsBuilderMakeInstaller pVersion, pEdition, pPlatform, pIdeFol
    end if
    set the mainStack of stack tResources to tInstaller
    
-   -- Make sure the installer library knows what product it is (for logging file name)
-   local tProductName
-   put "LiveCode" && editionDisplayName(pEdition) into tProductName
+    -- Make sure the installer library knows what product it is (for logging file name)
+    local tProductName
+    put "HyperXTalk" && editionDisplayName(pEdition) into tProductName
    local tProductTag
    put toLower(tProductName) into tProductTag
    replace space with empty in tProductTag
@@ -395,14 +395,14 @@ private command toolsBuilderMakeInstaller pVersion, pEdition, pPlatform, pIdeFol
    
    -- Next build up the deploy info
    local tDietParams, tSignParams, tParams
-   put "LiveCode Ltd" into tParams["version"]["CompanyName"]
-   if pEdition is "Community" then
-      put "LiveCode Community Installer" into tParams["version"]["FileDescription"]
-      put "LiveCode Community Installer" into tParams["version"]["ProductName"]
-   else
-      put "LiveCode Installer" into tParams["version"]["FileDescription"]
-      put "LiveCode Installer" into tParams["version"]["ProductName"]
-   end if
+    put "HyperXTalk Ltd" into tParams["version"]["CompanyName"]
+    if pEdition is "Community" then
+       put "HyperXTalk Community Installer" into tParams["version"]["FileDescription"]
+       put "HyperXTalk Community Installer" into tParams["version"]["ProductName"]
+    else
+       put "HyperXTalk Installer" into tParams["version"]["FileDescription"]
+       put "HyperXTalk Installer" into tParams["version"]["ProductName"]
+    end if
    put "©" && word -1 of the long date & ". All rights reserved worldwide." into tParams["version"]["LegalCopyright"]
    put pVersion into tParams["version"]["ProductVersion"]
    put pVersion into tParams["version"]["FileVersion"]
@@ -466,9 +466,9 @@ private command toolsBuilderMakeInstaller pVersion, pEdition, pPlatform, pIdeFol
             put "http://timestamp.comodoca.com/authenticode" into tSignParams["timestamper"]
             put "http://www.livecode.com" into tSignParams["url"]
             if pEdition is "Community" then
-               put "LiveCode Community Installer" into tSignParams["description"]
+               put "HyperXTalk Community Installer" into tSignParams["description"]
             else
-               put "LiveCode Installer" into tSignParams["description"]
+               put "HyperXTalk Installer" into tSignParams["description"]
             end if
             
             builderLog "message", "Signing windows installer to '" && tSignParams["output"] & "'"
@@ -624,7 +624,7 @@ command toolsBuilderMakeAppBundle pVersion, pEdition, pPlatform
    -- Copy just the executable out of the installer to use as the auto-updater
    -- (on OSX, the payload is separate and is un-neccessary)
    builderLog "message", "Adding auto-updater to app bundle"
-   get shell ("cp" && escapeArg(tAppBundle & "/LiveCode Setup.app/Contents/MacOS/Installer") && escapeArg(tAppBundle & "/Contents/MacOS/autoupdater"))
+    get shell ("cp" && escapeArg(tAppBundle & "/HyperXTalk Setup.app/Contents/MacOS/Installer") && escapeArg(tAppBundle & "/Contents/MacOS/autoupdater"))
    if the result is not zero then
       builderLog "error", "Failed to add auto-updater:" && it
       throw "failure"
@@ -632,7 +632,7 @@ command toolsBuilderMakeAppBundle pVersion, pEdition, pPlatform
    
    -- Remove the rest of the installer from the app bundle
    builderLog "message", "Removing installer from app bundle"
-   get shell("rm -r" && escapeArg(tAppBundle & "/LiveCode Setup.app"))
+    get shell("rm -r" && escapeArg(tAppBundle & "/HyperXTalk Setup.app"))
    if the result is not zero then
       builderLog "error", "Failed to clean macosx app bundle:" & it
       throw "failure"
@@ -991,7 +991,7 @@ function getReadableVersion pVersion
 end getReadableVersion
 
 function getBundleFilenameStub pVersion, pPlatform, pEdition
-   return "LiveCode" && editionDisplayName(pEdition) && getFullReadableVersion(pVersion)
+   return "HyperXTalk" && editionDisplayName(pEdition) && getFullReadableVersion(pVersion)
 end getBundleFilenameStub
 
 function getInstallerFilenameStub pVersion, pPlatform, pEdition
@@ -1011,7 +1011,7 @@ function getInstallerFilenameStub pVersion, pPlatform, pEdition
       put "Linux" into pPlatform
    end if
 
-   return "LiveCode" & editionTitleCase(pEdition) & "Installer-" & pVersion & "-" & pPlatform
+   return "HyperXTalk" & editionTitleCase(pEdition) & "Installer-" & pVersion & "-" & pPlatform
 end getInstallerFilenameStub
 
 function getDmgFilenameStub pVersion, pPlatform, pEdition
@@ -1030,7 +1030,7 @@ function getDmgFilenameStub pVersion, pPlatform, pEdition
    else if pPlatform is "linux" or pPlatform is "linux-x64" or pPlatform is "linux-armv6hf" then
       put "Linux" into pPlatform
    end if
-   return "LiveCode" & editionTitleCase(pEdition) & "-" & pVersion & "-" & pPlatform
+   return "HyperXTalk" & editionTitleCase(pEdition) & "-" & pVersion & "-" & pPlatform
 end getDmgFilenameStub
 
 function loadTextFile pFile

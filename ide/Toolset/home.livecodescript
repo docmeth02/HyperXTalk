@@ -507,6 +507,23 @@ function revInternal__StackFiles
    end repeat
    
    put return & revEnvironmentToolsetPath() & slash & "libraries" after tFolders
+
+   -- Bootstrap fix: in installed mode the dev-only repo scan (below) is skipped,
+   -- so extension-utils.livecodescript never lands in the stackFiles list.
+   -- revInternal__LoadLibrary relies on "there is a stack pFullPath" which only
+   -- returns true for files that ARE in the stackFiles registry.  Without this
+   -- entry, extension-utils fails to load, extensionInitialize throws, and
+   -- every widget/extension silently stays unloaded.
+   -- Fix: add the installed-mode extension-utils directory unconditionally so
+   -- it is always registered before extensionInitialize is called.
+   if revEnvironmentIsInstalled() then
+      local tExtUtilsDir
+      put sToolsPath & "/Extensions/com.livecode.library.extension-utils" into tExtUtilsDir
+      if there is a folder tExtUtilsDir then
+         put return & tExtUtilsDir after tFolders
+      end if
+   end if
+
    if not revEnvironmentIsInstalled() then
       put return & revEnvironmentRepositoryPath() & slash & "ide-support" after tFolders
       

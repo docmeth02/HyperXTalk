@@ -1,2 +1,9 @@
 /_build
 /_cache
+
+# Local secrets — never commit
+.env.local
+*.p12
+*.cer
+*.mobileprovision
+codesign.cfg

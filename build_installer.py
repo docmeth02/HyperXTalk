@@ -30,7 +30,12 @@ import zlib
 # Paths
 # ---------------------------------------------------------------------------
 REPO = os.path.dirname(os.path.abspath(__file__))
-BUILD_MODE  = os.environ.get("MODE", "debug").capitalize()   # Debug or Release
+BUILD_MODE       = os.environ.get("MODE", "debug").capitalize()   # Debug or Release
+# Code-signing identity.  Defaults to ad-hoc ("-").
+# Override with your Developer ID, e.g.:
+#   export CODESIGN_IDENTITY="Developer ID Application: Emily Howard (XXXXXXXXXX)"
+# Never commit this value — set it in your shell profile or CI secrets.
+CODESIGN_IDENTITY = os.environ.get("CODESIGN_IDENTITY", "-")
 ENGINE_APP  = f"{REPO}/_build/mac/{BUILD_MODE}/Installer.app"
 ENGINE_BIN  = f"{ENGINE_APP}/Contents/MacOS/Installer"
 INSTALLER_STACK  = f"{REPO}/builder/installer.livecode"
@@ -453,10 +458,17 @@ def create_payload(payload_path):
     def is_executable(path):
         return os.access(path, os.X_OK)
 
-    def add_tree(src_dir, dest_prefix, zf, force_exec=False):
+    def add_tree(src_dir, dest_prefix, zf, force_exec=False, exclude_dirs=None):
         """
         Recursively add all files from src_dir → dest_prefix in the zip.
         Generates folder + file manifest entries.
+
+        exclude_dirs: optional set/list of directory names to skip entirely
+                      (matched against the bare directory name, not the full path).
+                      E.g. exclude_dirs={'_CodeSignature'} avoids bundling a stale
+                      Apple code-signature that will be invalidated once the installer
+                      adds Contents/Tools/* into the same bundle.  A fresh ad-hoc
+                      signature is applied by the installer after all files land.
         """
         if not os.path.isdir(src_dir):
             print(f"  WARNING: source dir missing: {src_dir}")
@@ -464,6 +476,8 @@ def create_payload(payload_path):
         add_folder_entry(dest_prefix)
         for root, dirs, files in os.walk(src_dir, followlinks=True):
             dirs.sort()
+            if exclude_dirs:
+                dirs[:] = [d for d in dirs if d not in exclude_dirs]
             rel = os.path.relpath(root, src_dir)
             if rel != ".":
                 add_folder_entry(f"{dest_prefix}/{rel}")
@@ -491,10 +505,15 @@ def create_payload(payload_path):
         # ----------------------------------------------------------------
         # 1. Engine.MacOSX
         #    Recursively install mac-bin/HyperXTalk.app → TF
+        #    Skip _CodeSignature: the signature only covers the original
+        #    bundle files.  Once the installer adds Contents/Tools/** the
+        #    old CodeResources becomes stale/invalid, confusing macOS.
+        #    The installer re-signs the bundle with codesign after all
+        #    files have been extracted (see installer_utilities.livecodescript).
         # ----------------------------------------------------------------
         print("  Adding Engine …")
         lc_app = f"{MAC_BIN}/HyperXTalk.app"
-        add_tree(lc_app, TF, zf, force_exec=True)
+        add_tree(lc_app, TF, zf, force_exec=True, exclude_dirs={'_CodeSignature'})
 
         # Extra files that go alongside the engine binary
         for fname in ["revpdfprinter.bundle", "revsecurity.dylib"]:
@@ -545,10 +564,10 @@ def create_payload(payload_path):
             add_tree(modules_dir, f"{SF}/Toolchain/modules", zf)
 
         # ----------------------------------------------------------------
-        # 4. Externals.MacOSX → TF/Externals
+        # 4. Externals.MacOSX → SF/Externals
         # ----------------------------------------------------------------
         print("  Adding Externals …")
-        ext_dir = f"{TF}/Externals"
+        ext_dir = f"{SF}/Externals"
         add_folder_entry(ext_dir)
         for bundle in ["revspeech.bundle", "revxml.bundle",
                        "revbrowser.bundle", "revzip.bundle"]:
@@ -556,7 +575,7 @@ def create_payload(payload_path):
             add_single(src, f"{ext_dir}/{bundle}", zf, is_exec=True)
 
         # ----------------------------------------------------------------
-        # 5. Databases.MacOSX → TF/Externals  +  TF/Externals/Database Drivers
+        # 5. Databases.MacOSX → SF/Externals  +  SF/Externals/Database Drivers
         # ----------------------------------------------------------------
         for bundle in ["revdb.bundle"]:
             src = f"{MAC_BIN}/{bundle}"
@@ -570,7 +589,7 @@ def create_payload(payload_path):
             add_single(src, f"{db_dir}/{bundle}", zf, is_exec=True)
 
         # ----------------------------------------------------------------
-        # 6. Mobile.MacOSX: reviphone.bundle, revandroid.bundle → TF/Externals
+        # 6. Mobile.MacOSX: reviphone.bundle, revandroid.bundle → SF/Externals
         # ----------------------------------------------------------------
         for bundle in ["reviphone.bundle", "revandroid.bundle"]:
             src = f"{MAC_BIN}/{bundle}"
@@ -739,10 +758,11 @@ def main():
     # ------------------------------------------------------------------
     # 5. Ad-hoc code-sign
     # ------------------------------------------------------------------
-    print("Ad-hoc code-signing …")
+    identity_label = "ad-hoc" if CODESIGN_IDENTITY == "-" else CODESIGN_IDENTITY
+    print(f"Code-signing ({identity_label}) …")
     subprocess.run(["xattr", "-cr", app_path], capture_output=True)
     result = subprocess.run(
-        ["codesign", "--force", "--deep", "--sign", "-", app_path],
+        ["codesign", "--force", "--deep", "--sign", CODESIGN_IDENTITY, app_path],
         capture_output=True, text=True
     )
     if result.returncode != 0:

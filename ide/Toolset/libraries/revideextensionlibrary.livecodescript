@@ -10,21 +10,21 @@ private function __PathToExtensionUtils
 end __PathToExtensionUtils
 
 on extensionInitialize
-   if the target is not me then
-      pass extensionInitialize
-   end if
-   
-   insert script of me into back
-   
-   # Explicitly load extension utils first
-   revInternal__LoadLibrary "extension-utils", __PathToExtensionUtils()
+    if the target is not me then
+       pass extensionInitialize
+    end if
+    
+    insert script of me into back
+    
+    # Explicitly load extension utils first
+    revInternal__LoadLibrary "extension-utils", __PathToExtensionUtils()
 
-   if the result is not empty then
-      throw the result
-   end if
+    if the result is not empty then
+       throw the result
+    end if
 
-   # Load all the extensions ready for use
-   __extensionsLoad
+    # Load all the extensions ready for use
+    __extensionsLoad
 end extensionInitialize
 
 on extensionFinalize
@@ -930,8 +930,8 @@ on __extensionsLoad
    
    local tLoadOrder
    put extensionOrderByDependency(tExtensionsList, tRequiresA) into \
-         tLoadOrder
-   
+          tLoadOrder
+    
    repeat for each line tLine in tLoadOrder
       # Extension utils is explicitly loaded
       if tLine is kExtensionUtils then
@@ -1067,6 +1067,7 @@ end __MapCodeLibraryForIDE
 private command __LoadExtension pCacheIndex, pExtensionType, pSourceType, \
       pSourceFile, pFolder, pStatus, @xError
    revInternal__Log "Message", the params
+   write "DEBUG __LoadExtension: type=" & pExtensionType & " source=" & pSourceType & " folder=" & pFolder & return to stderr
    if xError is empty then
       local tFileToLoad
       if not __extensionNeedsLoad(pExtensionType) then
@@ -1162,14 +1163,16 @@ private command __revIDELCBExtensionLoad pID, pFolder, pVersion, pStatus, \
    # Check for sample stacks
    __extensionPropertySet tCacheIndex, "samples", __extensionSampleStacks(pID,pFolder)
    
-   # Store the extension's metadata
-   revIDEExtensionSetInfo pID
-   
-   local tUserVisiblePref
-   put revIDEGetPreferenceOfSet(pID, "uservisible") into tUserVisiblePref
-   if tUserVisiblePref is not empty then
-      __extensionPropertySet tCacheIndex, "uservisible", tUserVisiblePref
-   end if
+    # Store the extension's metadata
+    revIDEExtensionSetInfo pID
+    
+    local tUserVisiblePref
+    put revIDEGetPreferenceOfSet(pID, "uservisible") into tUserVisiblePref
+    if tUserVisiblePref is not empty then
+       __extensionPropertySet tCacheIndex, "uservisible", tUserVisiblePref
+    else
+       __extensionPropertySet tCacheIndex, "uservisible", true
+    end if
    
    # Deal with the various icon possibilities
    if sExtensionProperties[pID]["svgicon"] is empty then

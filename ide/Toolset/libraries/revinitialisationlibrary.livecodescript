@@ -22,8 +22,13 @@ command revInternal__LoadLibrary pLibrary, pFullPath
       put pLibrary into tStackName
    else if there is a stack (kLCLibraryPrefix & "." & pLibrary) then
       put kLCLibraryPrefix & "." & pLibrary into tStackName
-   else if the environment begins with "development" and \
+   else if pFullPath is not empty and \
          there is a stack pFullPath then
+      -- Allow loading via pFullPath in any environment (not just development).
+      -- In installed mode, revInternal__StackFiles may not register every
+      -- extension (e.g. extension-utils) so the name-based checks above fail.
+      -- Falling back to the caller-supplied full path is safe because the caller
+      -- already computed the canonical location for the library.
       put the short name of stack pFullPath into tStackName
    else
       return "no stack for library" && pLibrary

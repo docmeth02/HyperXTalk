@@ -545,6 +545,18 @@ command actionInstall pPath, pRecord, pOptions
    -- If there was no error, report that we are done. Otherwise, if this was not a 'cancel' error,
    -- then throw it.
    if tError is empty or tError is "cancel" then
+      -- On macOS: the installed .app bundle has no _CodeSignature (intentionally omitted
+      -- from the payload because the original signature only covered the pre-Tools files).
+      -- Apply a fresh ad-hoc signature so macOS accepts the bundle and all code inside it
+      -- (including native .dylib files in Contents/Tools/Extensions).
+      if the platform is "macos" and tError is empty then
+         log "Install: Applying ad-hoc code signature to '" & pPath & "'"
+         get shell("xattr -cr " & quote & pPath & quote)
+         get shell("codesign --force --deep --sign - " & quote & pPath & quote)
+         if the result is not 0 then
+            log "Install: Warning - codesign returned non-zero exit: " & it
+         end if
+      end if
       reportFinished
    else
       throw tError

@@ -23,9 +23,9 @@
 //  ProductTag:
 //    livecode_4_5_dp_5
 //  ProductName:
-//    LiveCode
+//    HyperXTalk
 
-installer LiveCode
+installer HyperXTalk
 	// if BaseEdition is Commercial then
 	//	additional manifest "../Installer/commercial-package.txt"
 	include Misc
@@ -86,20 +86,20 @@ installer LiveCode
 		include Runtime.Android
 		include Runtime.Emscripten
 		shortcut "Desktop/[[ProductTitle]]" to "[[TargetFolder]]/[[ProductName]].exe"
-		shortcut "Programs/LiveCode/[[ProductTitle]]" to "[[TargetFolder]]/[[ProductName]].exe"
+		shortcut "Programs/HyperXTalk/[[ProductTitle]]" to "[[TargetFolder]]/[[ProductName]].exe"
 	if TargetPlatform is Linux then
 		include Mobile.Linux
 		include Runtime.Android
 		include Runtime.Emscripten
-		desktop application "repo:Installer/application.desktop" as "runrev-[[ProductTag]]-[[TargetArchitecture]]"
+		desktop application "repo:Installer/application.desktop" as "hyperxtalk-[[ProductTag]]-[[TargetArchitecture]]"
 		if TargetEdition is Community then
-			desktop icon "repo:Installer/application.png" as "runrev-[[ProductTag]]-[[TargetArchitecture]]"
+			desktop icon "repo:Installer/application.png" as "hyperxtalk-[[ProductTag]]-[[TargetArchitecture]]"
 		if TargetEdition is CommunityPlus then
-			desktop icon "private:engine/rsrc/CommunityPlus/android-notify-icon.png" as "runrev-[[ProductTag]]-[[TargetArchitecture]]"
+			desktop icon "private:engine/rsrc/CommunityPlus/android-notify-icon.png" as "hyperxtalk-[[ProductTag]]-[[TargetArchitecture]]"
 		if TargetEdition is Indy then
-			desktop icon "private:engine/rsrc/Indy/android-notify-icon.png" as "runrev-[[ProductTag]]-[[TargetArchitecture]]"
+			desktop icon "private:engine/rsrc/Indy/android-notify-icon.png" as "hyperxtalk-[[ProductTag]]-[[TargetArchitecture]]"
 		if TargetEdition is Business then
-			desktop icon "private:engine/rsrc/Business/android-notify-icon.png" as "runrev-[[ProductTag]]-[[TargetArchitecture]]"
+			desktop icon "private:engine/rsrc/Business/android-notify-icon.png" as "hyperxtalk-[[ProductTag]]-[[TargetArchitecture]]"
 	include Uninstaller
 	if TargetEdition is CommunityPlus then
 		include Commercial.CommunityPlusComponents
@@ -149,13 +149,13 @@ component Uninstaller
 			register value "InstallLocation" as path "[[TargetFolder]]"
 			register value "NoModify" as 1
 			register value "NoRepair" as 1
-			register value "Publisher" as "LiveCode Ltd."
+			register value "Publisher" as "HyperXTalk Ltd."
 			register value "Version" as "[[VersionTag]]"
 			register value "UninstallString" as path "\q[[TargetFolder]]/.setup.exe\q uninstall"
 	if TargetPlatform is "Linux" then
 		place uninstaller at "[[TargetFolder]]/setup.[[TargetArchitecture]]"
 	if TargetPlatform is "MacOSX" then
-		place uninstaller at "[[TargetFolder]]/LiveCode Setup.app"
+		place uninstaller at "[[TargetFolder]]/HyperXTalk Setup.app"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -521,7 +521,7 @@ component Toolchain.Linux
 
 component Engine.Linux
 	into [[TargetFolder]] place
-		executable linux-[[TargetArchitecture]]:LiveCode[[EditionTagUpper]] as [[ProductName]].[[TargetArchitecture]]
+		executable linux-[[TargetArchitecture]]:HyperXTalk as [[ProductName]].[[TargetArchitecture]]
 		executable linux-[[TargetArchitecture]]:revpdfprinter.so
 		executable linux-[[TargetArchitecture]]:revsecurity.so
 
@@ -533,7 +533,7 @@ component Mobile.Linux
 
 component Engine.Windows
 	into [[TargetFolder]] place
-		executable win-[[TargetArchitecture]]:LiveCode[[EditionTagUpper]].exe as [[ProductName]].exe
+		executable win-[[TargetArchitecture]]:HyperXTalk.exe as [[ProductName]].exe
 		executable win-[[TargetArchitecture]]:revpdfprinter.dll
 		executable win-[[TargetArchitecture]]:revsecurity.dll
 
@@ -567,7 +567,7 @@ component Mobile.MacOSX
 		executable macosx:revandroid.bundle
 
 component Engine.MacOSX
-	executable macosx:LiveCode[[EditionTagUpper]].app as "[[TargetFolder]]"
+	executable macosx:HyperXTalk.app as "[[TargetFolder]]"
 	executable macosx:revpdfprinter.bundle as "[[TargetFolder]]/Contents/MacOS/revpdfprinter.bundle"
 	executable macosx:revsecurity.dylib as "[[TargetFolder]]/Contents/MacOS/revsecurity.dylib"
 
@@ -599,7 +599,7 @@ component Runtime.Windows
 
 component Runtime.MacOSX
 	into [[TargetFolder]] place
-		executable macosx:Standalone[[BaseEditionTagUpper]].app as Standalone.app
+		executable macosx:HyperXTalk-Standalone.app as Standalone.app
 	into [[TargetFolder]]/Support place
 		executable macosx:revpdfprinter.bundle
 		executable macosx:revsecurity.dylib
