@@ -50,6 +50,13 @@ endif
 # Prettifying output for CI builds
 XCODEBUILD_FILTER ?=
 
+# Code-signing identity used by compile-mac, package-mac, and package-mac-bin.
+# Defaults to ad-hoc ("-").  Override on the command line or via the environment:
+#   make package-mac-bin CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+# or:
+#   export CODESIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+CODESIGN_IDENTITY ?= -
+
 include Makefile.common
 
 ################################################################
@@ -196,10 +203,10 @@ endif
 	  find "_build/mac/$(BUILDTYPE)/HyperXTalk.app" \
 	      \( -name "*.framework" -o -name "*.dylib" \) | \
 	    sort -r | while read F; do \
-	    codesign --force --sign - "$$F" 2>/dev/null || true; \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	  done; \
 	  echo "Signing HyperXTalk.app with Hardened Runtime + entitlements..."; \
-	  codesign --force --sign - \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
 	    --entitlements HyperXTalk.entitlements \
 	    "_build/mac/$(BUILDTYPE)/HyperXTalk.app"; \
@@ -210,7 +217,7 @@ endif
 	@echo "Signing external bundles in _build/mac/$(BUILDTYPE)/..."
 	@find "_build/mac/$(BUILDTYPE)" -maxdepth 1 \
 	    \( -name "*.bundle" -o -name "*.dylib" \) | while read F; do \
-	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
 ifneq ($(TRAVIS),undefined)
 	@echo "travis_fold:end:compile"
@@ -353,12 +360,12 @@ package-mac:
 	@echo "Re-signing bundle contents..."
 	@find "$(BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
 	    sort -r | while read F; do \
-	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
 	@find "$(BUNDLE)" -name "*.bundle" | while read F; do \
-	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
-	@codesign --force --sign - \
+	@codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
 	    --entitlements HyperXTalk.entitlements \
 	    "$(BUNDLE)"
@@ -482,12 +489,12 @@ package-mac-bin:
 	@echo "Re-signing bundle contents..."
 	@find "$(MACBIN_BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
 	    sort -r | while read F; do \
-	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
 	@find "$(MACBIN_BUNDLE)" -name "*.bundle" | while read F; do \
-	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
-	@codesign --force --sign - \
+	@codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
 	    --entitlements HyperXTalk.entitlements \
 	    "$(MACBIN_BUNDLE)"
