@@ -232,6 +232,266 @@ endif
 all-mac:
 	$(MAKE) config-mac
 	$(MAKE) compile-mac
+	$(MAKE) package-mac
+
+################################################################
+# Mac packaging (self-contained bundle, no installer required)
+################################################################
+
+# Paths derived from the current build type
+MAC_BIN     = _build/mac/$(BUILDTYPE)
+BUNDLE      = $(MAC_BIN)/HyperXTalk.app
+TOOLS_DIR   = $(BUNDLE)/Contents/Tools
+SUPPORT_DIR = $(BUNDLE)/Contents/Support
+RUNTIME_ARM64 = $(TOOLS_DIR)/Runtime/Mac OS X/arm64
+
+package-mac:
+	@echo "=== Packaging $(BUNDLE) ==="
+	@# ----------------------------------------------------------------
+	@# Directory structure
+	@# ----------------------------------------------------------------
+	@mkdir -p "$(TOOLS_DIR)/Toolset/libraries"
+	@mkdir -p "$(TOOLS_DIR)/Plugins"
+	@mkdir -p "$(TOOLS_DIR)/Externals/Database Drivers"
+	@mkdir -p "$(RUNTIME_ARM64)/Support"
+	@mkdir -p "$(RUNTIME_ARM64)/Externals/Database Drivers"
+	@mkdir -p "$(TOOLS_DIR)/Extensions"
+	@mkdir -p "$(TOOLS_DIR)/Toolchain"
+	@mkdir -p "$(SUPPORT_DIR)"
+	@# ----------------------------------------------------------------
+	@# Edition marker
+	@# ----------------------------------------------------------------
+	@echo "Community" > "$(TOOLS_DIR)/edition.txt"
+	@# ----------------------------------------------------------------
+	@# Toolset: copy the entire IDE toolset tree
+	@# ----------------------------------------------------------------
+	@cp -R ide/Toolset/. "$(TOOLS_DIR)/Toolset/"
+	@# ----------------------------------------------------------------
+	@# Toolset libraries: IDE support scripts from ide-support/
+	@# ----------------------------------------------------------------
+	@for f in \
+	    revsblibrary revsaveasstandalone \
+	    revsaveasiosstandalone revsaveasandroidstandalone \
+	    revsaveasemscriptenstandalone revliburl \
+	    revdeploylibraryios revdeploylibraryandroid \
+	    revdeploylibraryemscripten revhtml5urllibrary; do \
+	  [ -f "ide-support/$$f.livecodescript" ] && \
+	    cp "ide-support/$$f.livecodescript" "$(TOOLS_DIR)/Toolset/libraries/" \
+	    || true; \
+	done
+	@cp -f ide-support/revdocsparser.livecodescript \
+	    "$(TOOLS_DIR)/Toolset/libraries/" 2>/dev/null || true
+	@# ----------------------------------------------------------------
+	@# Plugins
+	@# ----------------------------------------------------------------
+	@[ -d ide/Plugins ] && cp -R ide/Plugins/. "$(TOOLS_DIR)/Plugins/" || true
+	@# ----------------------------------------------------------------
+	@# Externals (IDE runtime use)
+	@# ----------------------------------------------------------------
+	@for b in revbrowser revxml revspeech revzip; do \
+	  [ -d "$(MAC_BIN)/$$b.bundle" ] && \
+	    cp -R "$(MAC_BIN)/$$b.bundle" "$(TOOLS_DIR)/Externals/" || true; \
+	done
+	@[ -d "$(MAC_BIN)/revdb.bundle" ] && \
+	    cp -R "$(MAC_BIN)/revdb.bundle" "$(TOOLS_DIR)/Externals/" || true
+	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	  [ -d "$(MAC_BIN)/$$b.bundle" ] && \
+	    cp -R "$(MAC_BIN)/$$b.bundle" \
+	      "$(TOOLS_DIR)/Externals/Database Drivers/" || true; \
+	done
+	@# ----------------------------------------------------------------
+	@# Externals discovery files (read by the standalone builder)
+	@# ----------------------------------------------------------------
+	@printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
+	    > "$(RUNTIME_ARM64)/Externals/Externals.txt"
+	@printf 'Database,revdb.bundle\n' \
+	    >> "$(RUNTIME_ARM64)/Externals/Externals.txt"
+	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
+	    > "$(RUNTIME_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@# ----------------------------------------------------------------
+	@# Runtime: arm64 standalone engine + support libraries
+	@# ----------------------------------------------------------------
+	@[ -d "$(MAC_BIN)/HyperXTalk-Standalone.app" ] && \
+	    cp -R "$(MAC_BIN)/HyperXTalk-Standalone.app" \
+	      "$(RUNTIME_ARM64)/Standalone.app" || true
+	@[ -d "$(MAC_BIN)/revpdfprinter.bundle" ] && \
+	    cp -R "$(MAC_BIN)/revpdfprinter.bundle" \
+	      "$(RUNTIME_ARM64)/Support/" || true
+	@[ -f "$(MAC_BIN)/revsecurity.dylib" ] && \
+	    cp "$(MAC_BIN)/revsecurity.dylib" \
+	      "$(RUNTIME_ARM64)/Support/" || true
+	@# ----------------------------------------------------------------
+	@# Toolchain: compiler, runner, LCB modules
+	@# ----------------------------------------------------------------
+	@[ -f "$(MAC_BIN)/lc-compile" ] && \
+	    cp "$(MAC_BIN)/lc-compile" "$(TOOLS_DIR)/Toolchain/" || true
+	@[ -f "$(MAC_BIN)/lc-run" ] && \
+	    cp "$(MAC_BIN)/lc-run" "$(TOOLS_DIR)/Toolchain/" || true
+	@[ -f "$(MAC_BIN)/lc-compile-ffi-java" ] && \
+	    cp "$(MAC_BIN)/lc-compile-ffi-java" \
+	      "$(TOOLS_DIR)/Toolchain/" || true
+	@[ -d "$(MAC_BIN)/modules" ] && \
+	    cp -R "$(MAC_BIN)/modules" "$(TOOLS_DIR)/Toolchain/" || true
+	@# ----------------------------------------------------------------
+	@# Extensions
+	@# ----------------------------------------------------------------
+	@[ -d "$(MAC_BIN)/packaged_extensions" ] && \
+	    cp -R "$(MAC_BIN)/packaged_extensions/." \
+	      "$(TOOLS_DIR)/Extensions/" || true
+	@# ----------------------------------------------------------------
+	@# Support: licence and about text
+	@# ----------------------------------------------------------------
+	@[ -f "ide/License Agreement.txt" ] && \
+	    cp "ide/License Agreement.txt" "$(SUPPORT_DIR)/" || true
+	@[ -f "ide/about.txt" ] && \
+	    cp "ide/about.txt" "$(SUPPORT_DIR)/" || true
+	@[ -f "ide/Open Source Licenses.txt" ] && \
+	    cp "ide/Open Source Licenses.txt" "$(SUPPORT_DIR)/" || true
+	@# ----------------------------------------------------------------
+	@# Re-sign the bundle now that new files have been added
+	@# ----------------------------------------------------------------
+	@echo "Re-signing bundle contents..."
+	@find "$(BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
+	    sort -r | while read F; do \
+	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	done
+	@find "$(BUNDLE)" -name "*.bundle" | while read F; do \
+	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	done
+	@codesign --force --sign - \
+	    --options runtime \
+	    --entitlements HyperXTalk.entitlements \
+	    "$(BUNDLE)"
+	@echo "=== Package complete: $(BUNDLE) ==="
+
+################################################################
+# mac-bin packaging (self-contained bundle from ./mac-bin)
+################################################################
+
+MACBIN_BIN       = mac-bin
+MACBIN_BUNDLE    = $(MACBIN_BIN)/HyperXTalk.app
+MACBIN_TOOLS     = $(MACBIN_BUNDLE)/Contents/Tools
+MACBIN_SUPPORT   = $(MACBIN_BUNDLE)/Contents/Support
+MACBIN_RT_ARM64  = $(MACBIN_TOOLS)/Runtime/Mac OS X/arm64
+
+package-mac-bin:
+	@echo "=== Packaging $(MACBIN_BUNDLE) ==="
+	@# ----------------------------------------------------------------
+	@# Directory structure
+	@# ----------------------------------------------------------------
+	@mkdir -p "$(MACBIN_TOOLS)/Toolset/libraries"
+	@mkdir -p "$(MACBIN_TOOLS)/Plugins"
+	@mkdir -p "$(MACBIN_TOOLS)/Externals/Database Drivers"
+	@mkdir -p "$(MACBIN_RT_ARM64)/Support"
+	@mkdir -p "$(MACBIN_RT_ARM64)/Externals/Database Drivers"
+	@mkdir -p "$(MACBIN_TOOLS)/Extensions"
+	@mkdir -p "$(MACBIN_TOOLS)/Toolchain"
+	@mkdir -p "$(MACBIN_SUPPORT)"
+	@# ----------------------------------------------------------------
+	@# Edition marker
+	@# ----------------------------------------------------------------
+	@echo "Community" > "$(MACBIN_TOOLS)/edition.txt"
+	@# ----------------------------------------------------------------
+	@# Toolset: copy the entire IDE toolset tree
+	@# ----------------------------------------------------------------
+	@cp -R ide/Toolset/. "$(MACBIN_TOOLS)/Toolset/"
+	@# ----------------------------------------------------------------
+	@# Toolset libraries: IDE support scripts from ide-support/
+	@# ----------------------------------------------------------------
+	@for f in \
+	    revsblibrary revsaveasstandalone \
+	    revsaveasiosstandalone revsaveasandroidstandalone \
+	    revsaveasemscriptenstandalone revliburl \
+	    revdeploylibraryios revdeploylibraryandroid \
+	    revdeploylibraryemscripten revhtml5urllibrary; do \
+	  [ -f "ide-support/$$f.livecodescript" ] && \
+	    cp "ide-support/$$f.livecodescript" "$(MACBIN_TOOLS)/Toolset/libraries/" \
+	    || true; \
+	done
+	@cp -f ide-support/revdocsparser.livecodescript \
+	    "$(MACBIN_TOOLS)/Toolset/libraries/" 2>/dev/null || true
+	@# ----------------------------------------------------------------
+	@# Plugins
+	@# ----------------------------------------------------------------
+	@[ -d ide/Plugins ] && cp -R ide/Plugins/. "$(MACBIN_TOOLS)/Plugins/" || true
+	@# ----------------------------------------------------------------
+	@# Externals (IDE runtime use)
+	@# ----------------------------------------------------------------
+	@for b in revbrowser revxml revspeech revzip; do \
+	  [ -d "$(MACBIN_BIN)/$$b.bundle" ] && \
+	    cp -R "$(MACBIN_BIN)/$$b.bundle" "$(MACBIN_TOOLS)/Externals/" || true; \
+	done
+	@[ -d "$(MACBIN_BIN)/revdb.bundle" ] && \
+	    cp -R "$(MACBIN_BIN)/revdb.bundle" "$(MACBIN_TOOLS)/Externals/" || true
+	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	  [ -d "$(MACBIN_BIN)/$$b.bundle" ] && \
+	    cp -R "$(MACBIN_BIN)/$$b.bundle" \
+	      "$(MACBIN_TOOLS)/Externals/Database Drivers/" || true; \
+	done
+	@# ----------------------------------------------------------------
+	@# Externals discovery files (read by the standalone builder)
+	@# ----------------------------------------------------------------
+	@printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
+	    > "$(MACBIN_RT_ARM64)/Externals/Externals.txt"
+	@printf 'Database,revdb.bundle\n' \
+	    >> "$(MACBIN_RT_ARM64)/Externals/Externals.txt"
+	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
+	    > "$(MACBIN_RT_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@# ----------------------------------------------------------------
+	@# Runtime: arm64 standalone engine + support libraries
+	@# ----------------------------------------------------------------
+	@[ -d "$(MACBIN_BIN)/HyperXTalk-Standalone.app" ] && \
+	    cp -R "$(MACBIN_BIN)/HyperXTalk-Standalone.app" \
+	      "$(MACBIN_RT_ARM64)/Standalone.app" || true
+	@[ -d "$(MACBIN_BIN)/revpdfprinter.bundle" ] && \
+	    cp -R "$(MACBIN_BIN)/revpdfprinter.bundle" \
+	      "$(MACBIN_RT_ARM64)/Support/" || true
+	@[ -f "$(MACBIN_BIN)/revsecurity.dylib" ] && \
+	    cp "$(MACBIN_BIN)/revsecurity.dylib" \
+	      "$(MACBIN_RT_ARM64)/Support/" || true
+	@# ----------------------------------------------------------------
+	@# Toolchain: compiler, runner, LCB modules
+	@# ----------------------------------------------------------------
+	@[ -f "$(MACBIN_BIN)/lc-compile" ] && \
+	    cp "$(MACBIN_BIN)/lc-compile" "$(MACBIN_TOOLS)/Toolchain/" || true
+	@[ -f "$(MACBIN_BIN)/lc-run" ] && \
+	    cp "$(MACBIN_BIN)/lc-run" "$(MACBIN_TOOLS)/Toolchain/" || true
+	@[ -f "$(MACBIN_BIN)/lc-compile-ffi-java" ] && \
+	    cp "$(MACBIN_BIN)/lc-compile-ffi-java" \
+	      "$(MACBIN_TOOLS)/Toolchain/" || true
+	@[ -d "$(MACBIN_BIN)/modules" ] && \
+	    cp -R "$(MACBIN_BIN)/modules" "$(MACBIN_TOOLS)/Toolchain/" || true
+	@# ----------------------------------------------------------------
+	@# Extensions
+	@# ----------------------------------------------------------------
+	@[ -d "$(MACBIN_BIN)/packaged_extensions" ] && \
+	    cp -R "$(MACBIN_BIN)/packaged_extensions/." \
+	      "$(MACBIN_TOOLS)/Extensions/" || true
+	@# ----------------------------------------------------------------
+	@# Support: licence and about text
+	@# ----------------------------------------------------------------
+	@[ -f "ide/License Agreement.txt" ] && \
+	    cp "ide/License Agreement.txt" "$(MACBIN_SUPPORT)/" || true
+	@[ -f "ide/about.txt" ] && \
+	    cp "ide/about.txt" "$(MACBIN_SUPPORT)/" || true
+	@[ -f "ide/Open Source Licenses.txt" ] && \
+	    cp "ide/Open Source Licenses.txt" "$(MACBIN_SUPPORT)/" || true
+	@# ----------------------------------------------------------------
+	@# Re-sign the bundle now that new files have been added
+	@# ----------------------------------------------------------------
+	@echo "Re-signing bundle contents..."
+	@find "$(MACBIN_BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
+	    sort -r | while read F; do \
+	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	done
+	@find "$(MACBIN_BUNDLE)" -name "*.bundle" | while read F; do \
+	  codesign --force --sign - "$$F" 2>/dev/null || true; \
+	done
+	@codesign --force --sign - \
+	    --options runtime \
+	    --entitlements HyperXTalk.entitlements \
+	    "$(MACBIN_BUNDLE)"
+	@echo "=== Package complete: $(MACBIN_BUNDLE) ==="
 
 ################################################################
 # iOS rules
