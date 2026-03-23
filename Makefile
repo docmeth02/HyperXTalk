@@ -387,6 +387,12 @@ package-mac:
 	@[ -f "ide/Open Source Licenses.txt" ] && \
 	    cp "ide/Open Source Licenses.txt" "$(SUPPORT_DIR)/" || true
 	@# ----------------------------------------------------------------
+	@# Strip extended attributes (resource forks, Finder info, etc.)
+	@# xattr -cr must run before codesign or signing will be rejected.
+	@# ----------------------------------------------------------------
+	@echo "Stripping extended attributes..."
+	@xattr -cr "$(BUNDLE)"
+	@# ----------------------------------------------------------------
 	@# Re-sign the bundle now that new files have been added
 	@# ----------------------------------------------------------------
 	@echo "Re-signing bundle contents..."
@@ -547,6 +553,12 @@ package-mac-bin:
 	    cp "ide/about.txt" "$(MACBIN_SUPPORT)/" || true
 	@[ -f "ide/Open Source Licenses.txt" ] && \
 	    cp "ide/Open Source Licenses.txt" "$(MACBIN_SUPPORT)/" || true
+	@# ----------------------------------------------------------------
+	@# Strip extended attributes (resource forks, Finder info, etc.)
+	@# xattr -cr must run before codesign or signing will be rejected.
+	@# ----------------------------------------------------------------
+	@echo "Stripping extended attributes..."
+	@xattr -cr "$(MACBIN_BUNDLE)"
 	@# ----------------------------------------------------------------
 	@# Re-sign the bundle now that new files have been added
 	@# ----------------------------------------------------------------

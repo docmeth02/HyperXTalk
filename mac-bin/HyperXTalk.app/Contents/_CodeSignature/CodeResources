@@ -719,7 +719,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			0sFpOCFmlZOnXfH9J8g/ogfLaE+vPUrGTvOcSZ15+8I=
+			Cj74rj8/0U/3vyR+Z2YIUb1jrj7irqwxxHTFgOyeiPA=
 			</data>
 		</dict>
 		<key>Tools/Extensions/com.livecode.library.ini/ini.lcb</key>
@@ -950,7 +950,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BkN4BLCWX6zhPQ+H4DcFLgR8bVqZzfmaVBBkCilaKlo=
+			M7D3KG2+jkPBpXh+bwV/w8o+pm2S5ChEyD89dte8GBQ=
 			</data>
 		</dict>
 		<key>Tools/Extensions/com.livecode.library.timezone/manifest.xml</key>
@@ -5507,7 +5507,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			TXvvO1nD5gdY3eXmB4UIMf6V3RGZzyJLhvNBlEZDYvc=
+			0/PjYaL5FABEydqMjZQJCzERirHgBBBEkqQpT6D3oME=
 			</data>
 		</dict>
 		<key>Tools/Externals/Database Drivers/dbmysql.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5528,7 +5528,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			w9FVOha2xRZPQQ7w0yK1IEINS6Q4pIg+KzN7mL4wVHk=
+			AUF7fcmJa+Sd3g0rTQ3RlKNmTjPF6aXtJDnptc1RNxg=
 			</data>
 		</dict>
 		<key>Tools/Externals/Database Drivers/dbodbc.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5549,7 +5549,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			cScmLe20JC1PepuoUcnuFPHxzWE+AvdpxWNN6IDXmho=
+			QEoTEIYKn1CnUP7BVf1TkOcYjD/89MZEQapVxaN/j8Y=
 			</data>
 		</dict>
 		<key>Tools/Externals/Database Drivers/dbpostgresql.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5570,7 +5570,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			a7tQbmSr1L7gCjtcM8aA/IBb1HRZQ5+PEI2sotLWP4w=
+			nkca948hP/xxKaRSlGeDcXAz/rtmuJQBG9vcaAbJSjs=
 			</data>
 		</dict>
 		<key>Tools/Externals/Database Drivers/dbsqlite.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5591,7 +5591,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			chrpPWpceeBjbdGdTU/vEp1FBJKyx46AMpDUE/davgM=
+			xNd+KzxEeqRRjhP1lr+9HYlv4Avq+R9+LG9hkGR8Kg4=
 			</data>
 		</dict>
 		<key>Tools/Externals/revbrowser.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5612,7 +5612,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			9n3EDzr12pcT4rAF4LxRzQSfTVAwyKg8kHb1CnvGF9I=
+			Gk0HTJRH2bp47wK4s+fbEhEWCiqCjbd2UZq4h1mVINo=
 			</data>
 		</dict>
 		<key>Tools/Externals/revdb.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5633,7 +5633,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			XIQBsAH9hI3+8aYY8Kxf5+CHo2wemY2vKQsu+BdtkB4=
+			Ob8uuXZYHTxQAI/kCaEXe6nsfsWJWavCpwquhXNEeiI=
 			</data>
 		</dict>
 		<key>Tools/Externals/revspeech.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5654,7 +5654,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			hYYsrpoDJv51zftZIXxlPk9ScysY+SEaXH6fpsG1UOQ=
+			L5MNZTOoTroE6d3yI7bXCFouEMdw7YlHjOF6Ngy7pPU=
 			</data>
 		</dict>
 		<key>Tools/Externals/revxml.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5675,7 +5675,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			JySV/J68dXzveXGHnRLNefl6ppoCRpoIlYWQgS7TFFA=
+			c4d3BYKEYjlFf16MJH/dUmbsoYYh79VKlDBk/3J/fUc=
 			</data>
 		</dict>
 		<key>Tools/Externals/revzip.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5773,7 +5773,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			khtEBdIEz2f8ybFjjoNLu9vNWQpIi/4CXBzrjfGCYbk=
+			2NiVK5mssPg6td0rYT67aw4RQ7IQLPa8HNswDIe6xTI=
 			</data>
 		</dict>
 		<key>Tools/Runtime/Mac OS X/arm64/Standalone.app/Contents/PkgInfo</key>
@@ -5955,7 +5955,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			h3TiSLMTI/oVDgZJV/Qm7rvB9UImuSNovM5TWVMHHQk=
+			Oqlq2mw7H4mes4yUSK+krweNqTQDXvGGpZYaPIYjImQ=
 			</data>
 		</dict>
 		<key>Tools/Runtime/Mac OS X/arm64/Support/revpdfprinter.bundle/Contents/_CodeSignature/CodeResources</key>
@@ -5969,28 +5969,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			2r66a2pX7roSSGHYukLzGmw6FS1+RS3mWDT6iuvo83E=
+			9kCqIxIx4HpCIKU6I/G2i0XvETC6HoMm4VaeJVV1YIw=
 			</data>
 		</dict>
 		<key>Tools/Toolchain/lc-compile</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			wVVTmi4pChgAAkG9kxmoMAAoBn5x/pmvyIhcssdiVmk=
+			S8TIRcUUJGiPbUrP4I/F2zyIWiaG0kNurrxEXhNq6OA=
 			</data>
 		</dict>
 		<key>Tools/Toolchain/lc-compile-ffi-java</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			hwmSE4bzNdKrR7/S8RDkBcUsBKrrsQkFZnjZYAMT/Mc=
+			83YRsPdIFTdbjA5lO3Qgv0mggREgztq36V4yIGyviQY=
 			</data>
 		</dict>
 		<key>Tools/Toolchain/lc-run</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ryi+8wsh0a9oGgUUN2iJYVEiG/AubWiE4LP6pTbnw0c=
+			1cNZr4CR1PsMIPMF7LGg8H29Sd8lI/IunbasdUY1lbQ=
 			</data>
 		</dict>
 		<key>Tools/Toolchain/modules/lci/__builtin__.lci</key>
@@ -8923,7 +8923,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			QzTzWBDwhSP0fBLuJTSOxBS03jQK3Q9cL5Kx+p+qKRw=
+			7asLi4lYwfzLYPdrFFd8bGn+FTp4wyiJxMSTzuOF3cY=
 			</data>
 		</dict>
 		<key>Tools/Toolset/palettes/standalone settings/revstandalonesettingsandroidbehavior.livecodescript</key>
