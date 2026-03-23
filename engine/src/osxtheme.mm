@@ -960,7 +960,71 @@ void MCMacDrawTheme(MCThemeDrawType p_type, MCThemeDrawInfo& p_info, CGContextRe
 			
 		case THEME_DRAW_TYPE_BUTTON:
 		{
-			HIThemeDrawButton(&p_info.button.bounds, &p_info.button.info, t_context, kHIThemeOrientationNormal, NULL);
+            // Use AppKit NSButtonCell instead of the deprecated HIThemeDrawButton
+            // so button rendering is consistent with the arm64 path and stays
+            // correct on future macOS versions.
+            //
+            // Extract state from the HIThemeButtonDrawInfo that was populated by
+            // getthemebuttonpartandstate() in the caller.
+            const HIThemeButtonDrawInfo& binfo = p_info.button.info;
+            bool t_disabled = (binfo.state == kThemeStateInactive);
+            bool t_pressed  = (binfo.state == kThemeStatePressed);
+            bool t_hilited  = (binfo.value  == kThemeButtonOn);
+            bool t_default  = (binfo.adornment == kThemeAdornmentDefault);
+
+            // The bounding rect was already adjusted by getthemebuttonpartandstate
+            // (bottom -= 2, etc.).  Map it back to a local NSRect so we draw
+            // into the per-button off-screen buffer at (0,0).
+            CGFloat bt = p_info.button.bounds.origin.y;
+            CGFloat bl = p_info.button.bounds.origin.x;
+            CGFloat bw = p_info.button.bounds.size.width;
+            CGFloat bh = p_info.button.bounds.size.height;
+
+            // Build the CGContext-backed NSGraphicsContext the same way the
+            // arm64 path does.  The t_context here is already set up with a
+            // y-flip transform and an origin offset, so translate back to
+            // (0,0) relative coordinates for the cell drawing.
+            NSGraphicsContext *t_ns_ctx =
+                [NSGraphicsContext graphicsContextWithCGContext:t_context flipped:YES];
+            [NSGraphicsContext saveGraphicsState];
+            [NSGraphicsContext setCurrentContext:t_ns_ctx];
+
+            NSRect t_r = NSMakeRect(bl, bt, bw, bh);
+            // Add 1px top inset so the rounded-bezel inner highlight doesn't
+            // bleed into the very first row of the draw rect.
+            t_r.origin.y    += 1.0;
+            t_r.size.height -= 1.0;
+
+            NSView *t_view = [[[NSView alloc] initWithFrame:NSMakeRect(0,0,4096,4096)] autorelease];
+
+            NSButtonCell *t_cell = [[[NSButtonCell alloc] init] autorelease];
+            switch (binfo.kind)
+            {
+                case kThemeCheckBox:
+                case kThemeSmallCheckBox:
+                    [t_cell setButtonType:NSButtonTypeSwitch];
+                    break;
+                case kThemeRadioButton:
+                case kThemeSmallRadioButton:
+                    [t_cell setButtonType:NSButtonTypeRadio];
+                    break;
+                default:  // kThemePushButton, kThemeBevelButton, etc.
+                    [t_cell setButtonType:NSButtonTypeMomentaryPushIn];
+                    [t_cell setBezelStyle:NSBezelStyleRounded];
+                    break;
+            }
+            [t_cell setTitle:@""];
+            [t_cell setEnabled:!t_disabled];
+            [t_cell setHighlighted:t_pressed || t_hilited];
+            if (t_default)
+                [t_cell setKeyEquivalent:@"\r"];
+
+            NSAppearance *t_appearance = [NSApp effectiveAppearance];
+            [t_appearance performAsCurrentDrawingAppearance:^{
+                [t_cell drawWithFrame:t_r inView:t_view];
+            }];
+
+            [NSGraphicsContext restoreGraphicsState];
 		}
 			break;
 			

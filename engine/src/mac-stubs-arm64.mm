@@ -317,9 +317,29 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
     if (t_dest.width <= 0 || t_dest.height <= 0)
         return false;
 
+    // ── HiDPI / Retina scale ─────────────────────────────────────────
+    // Render the off-screen buffer at device pixels (up to 2×) so widgets
+    // look crisp on Retina displays.  The x86 path (osxtheme.mm) has done
+    // this since 2014; here we mirror the same approach.
+    MCGAffineTransform t_mcg_transform = MCGContextGetDeviceTransform(p_context);
+    MCGFloat t_ui_scale = 1.0;
+    if (MCGAffineTransformIsRectangular(t_mcg_transform))
+    {
+        MCGFloat t_scale = MCGAffineTransformGetEffectiveScale(t_mcg_transform);
+        if (t_scale > 1.0)
+            t_ui_scale = 2.0;
+    }
+
+    // Buffer is t_dest.size * t_ui_scale device pixels.
+    // The destination rect in MCGContext space is always the logical rect —
+    // MCGContextDrawPixels handles the scale mapping when blitting back.
+    uint32_t t_buf_width  = (uint32_t)(t_dest.width  * (int)t_ui_scale);
+    uint32_t t_buf_height = (uint32_t)(t_dest.height * (int)t_ui_scale);
+    MCGRectangle t_dst_mcg = MCRectangleToMCGRectangle(t_dest);
+
     // ── Off-screen pixel buffer ──────────────────────────────────────
     MCImageBitmap *t_bitmap = nil;
-    if (!MCImageBitmapCreate(t_dest.width, t_dest.height, t_bitmap))
+    if (!MCImageBitmapCreate(t_buf_width, t_buf_height, t_bitmap))
         return false;
     MCImageBitmapClear(t_bitmap);
 
@@ -332,8 +352,16 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
 
     // CGBitmapContext has (0,0) at bottom-left; flip so (0,0) is top-left,
     // matching what AppKit expects when we wrap it with flipped:YES.
-    CGContextTranslateCTM(t_cgcontext, 0.0, (CGFloat)t_dest.height);
+    // NOTE: we do NOT add an origin shift here.  All widgets are drawn at
+    // NSMakeRect(0, 0, width, height) — local to the buffer.  The x86 path
+    // needs a shift because MCMacDrawTheme uses the widget's on-screen
+    // coordinates directly; arm64 always draws at (0,0) so no shift is needed.
+    CGContextTranslateCTM(t_cgcontext, 0.0, (CGFloat)t_buf_height);
     CGContextScaleCTM   (t_cgcontext, 1.0, -1.0);
+
+    // Apply the HiDPI scale so AppKit renders at device-pixel resolution.
+    if (t_ui_scale != 1.0)
+        CGContextScaleCTM(t_cgcontext, t_ui_scale, t_ui_scale);
 
     // ── NSGraphicsContext wrapper ────────────────────────────────────
     NSGraphicsContext *t_ns_ctx =
@@ -342,7 +370,11 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:t_ns_ctx];
 
-    NSRect  t_frame = NSMakeRect(0, 0, (CGFloat)t_dest.width, (CGFloat)t_dest.height);
+    // All widgets draw into (0, 0, t_dest.width, t_dest.height) — i.e. local
+    // to this off-screen buffer.  The MCGContextDrawPixels call below places
+    // the result at the correct position in the destination MCGContext.
+    NSRect  t_frame = NSMakeRect(0, 0,
+                                 (CGFloat)t_dest.width, (CGFloat)t_dest.height);
     NSView *t_view  = GetDummyView();
 
     bool t_disabled = (p_info->state & WTHEME_STATE_DISABLED)         != 0;
@@ -421,7 +453,12 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
                     if (t_default)
                         [t_cell setKeyEquivalent:@"\r"];
                     NSRect t_r = t_frame;
-                    t_r.size.height -= 2.0;
+                    // On modern macOS NSBezelStyleRounded renders a top inner
+                    // border/highlight that bleeds into row 0 of the draw rect.
+                    // Inset the rect 1px from the top so it clips cleanly; keep
+                    // 2px at the bottom for the native drop-shadow.
+                    t_r.origin.y    += 1.0;
+                    t_r.size.height -= 3.0;
                     [t_appearance performAsCurrentDrawingAppearance:^{
                         [t_cell drawWithFrame:t_r inView:t_view];
                     }];
@@ -640,6 +677,10 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
     CGContextRelease(t_cgcontext);
 
     // ── Blit rendered pixels → MCGContext ────────────────────────────
+    // t_dst_mcg is the widget's logical rect in MCGContext space.
+    // The bitmap may be 2× wider/taller than that rect on Retina displays,
+    // but MCGContextDrawPixels with kMCGImageFilterMedium handles the
+    // mapping and renders at full device-pixel quality.
     MCGRaster t_raster;
     t_raster.width  = t_bitmap->width;
     t_raster.height = t_bitmap->height;
@@ -647,11 +688,7 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
     t_raster.stride = t_bitmap->stride;
     t_raster.format = kMCGRasterFormat_ARGB;
 
-    MCGRectangle t_dst = MCGRectangleMake(
-        (MCGFloat)t_dest.x, (MCGFloat)t_dest.y,
-        (MCGFloat)t_dest.width, (MCGFloat)t_dest.height);
-
-    MCGContextDrawPixels(p_context, t_raster, t_dst, kMCGImageFilterMedium);
+    MCGContextDrawPixels(p_context, t_raster, t_dst_mcg, kMCGImageFilterMedium);
 
     MCImageFreeBitmap(t_bitmap);
     return true;

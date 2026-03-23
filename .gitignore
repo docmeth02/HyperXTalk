@@ -1,5 +1,6 @@
 /_build
 /_cache
+/mac-bin
 
 # Local secrets — never commit
 .env.local
@@ -7,6 +8,3 @@
 *.cer
 *.mobileprovision
 codesign.cfg
-/mac-bin
-/mac-bin
-/mac-bin
