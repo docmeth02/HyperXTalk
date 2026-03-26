@@ -445,14 +445,14 @@ command revInternal__SetupCustomizationPath
       local tOldFolder
       put the folder into tOldFolder
       set the folder to "~"
-      put the folder & slash & "my_livecode" into sCustomizationPath
+      put the folder & slash & "hyperxtalk_customization" into sCustomizationPath
       set the folder to tOldFolder
       break
     case "Windows"
-      put specialFolderPath(0x0005) & "/My LiveCode" into sCustomizationPath
+      put specialFolderPath(0x0005) & "/HyperXTalk" into sCustomizationPath
       break
     case "MacOS X"
-      put specialFolderPath("docs") & "/My LiveCode" into sCustomizationPath
+      put specialFolderPath("docs") & "/HyperXTalk" into sCustomizationPath
       break
     end switch
     
