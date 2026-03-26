@@ -24,6 +24,7 @@
 #include "redraw.h"
 #include "context.h"
 #include "graphics_util.h"
+#include "util.h"
 #define _MAC_DESKTOP
 #include "hc.h"
 #include "exec.h"
@@ -133,6 +134,118 @@ public:
     virtual Boolean iswidgetsupported(Widget_Type wtype)
     {
         return True;
+    }
+
+    virtual Widget_Part hittest(const MCWidgetInfo &winfo, int2 mx, int2 my, const MCRectangle &drect) override
+    {
+        // For scrollbars, determine which part was clicked
+        if (winfo.type == WTHEME_TYPE_SCROLLBAR || winfo.type == WTHEME_TYPE_SMALLSCROLLBAR)
+        {
+            if (winfo.datatype == WTHEME_DATA_SCROLLBAR && winfo.data != nil)
+            {
+                MCWidgetScrollBarInfo *sb = (MCWidgetScrollBarInfo *)winfo.data;
+                bool t_horizontal = (drect.width > drect.height);
+                
+                CGFloat t_length = t_horizontal ? drect.width : drect.height;
+                CGFloat t_thickness = t_horizontal ? drect.height : drect.width;
+                
+                double t_range = sb->endvalue - sb->startvalue;
+                CGFloat t_thumb_x = 0, t_thumb_w = t_length;
+                
+                if (t_range > 0.0 && sb->thumbsize < t_range)
+                {
+                    double t_scrollable = t_range - sb->thumbsize;
+                    CGFloat t_norm = (CGFloat)((sb->thumbpos - sb->startvalue) / t_scrollable);
+                    CGFloat t_thumb_len = (CGFloat)(sb->thumbsize / t_range) * t_length;
+                    if (t_thumb_len < 8.0f) t_thumb_len = 8.0f;
+                    t_thumb_x = t_norm * (t_length - t_thumb_len);
+                    t_thumb_w = t_thumb_len;
+                }
+                
+                // Check if mouse is in thumb area
+                if (t_horizontal) {
+                    if (mx >= drect.x + t_thumb_x && mx <= drect.x + t_thumb_x + t_thumb_w &&
+                        my >= drect.y && my <= drect.y + t_thickness) {
+                        return WTHEME_PART_THUMB;
+                    }
+                    // Check track
+                    if (my >= drect.y && my <= drect.y + t_thickness) {
+                        if (mx < drect.x + t_thumb_x)
+                            return WTHEME_PART_TRACK_DEC;
+                        else if (mx > drect.x + t_thumb_x + t_thumb_w)
+                            return WTHEME_PART_TRACK_INC;
+                    }
+                } else {
+                    if (mx >= drect.x && mx <= drect.x + t_thickness &&
+                        my >= drect.y + t_thumb_x && my <= drect.y + t_thumb_x + t_thumb_w) {
+                        return WTHEME_PART_THUMB;
+                    }
+                    // Check track
+                    if (mx >= drect.x && mx <= drect.x + t_thickness) {
+                        if (my < drect.y + t_thumb_x)
+                            return WTHEME_PART_TRACK_DEC;
+                        else if (my > drect.y + t_thumb_x + t_thumb_w)
+                            return WTHEME_PART_TRACK_INC;
+                    }
+                }
+            }
+            // Default to thumb if we can't determine
+            return WTHEME_PART_THUMB;
+        }
+        
+        // For other widgets, use default behavior
+        return MCU_point_in_rect(drect, mx, my) ? WTHEME_PART_ALL : WTHEME_PART_UNDEFINED;
+    }
+
+    virtual void getwidgetrect(const MCWidgetInfo &winfo, Widget_Metric wmetric, const MCRectangle &srect, MCRectangle &drect) override
+    {
+        // For scrollbars, compute the thumb rect
+        if ((winfo.type == WTHEME_TYPE_SCROLLBAR || winfo.type == WTHEME_TYPE_SMALLSCROLLBAR)
+            && wmetric == WTHEME_METRIC_PARTSIZE)
+        {
+            if (winfo.datatype == WTHEME_DATA_SCROLLBAR && winfo.data != nil)
+            {
+                MCWidgetScrollBarInfo *sb = (MCWidgetScrollBarInfo *)winfo.data;
+                // Use the rect's aspect to determine orientation (matching scrolbar.cpp logic)
+                bool t_horizontal = (srect.width > srect.height);
+                
+                CGFloat t_length = t_horizontal ? srect.width : srect.height;
+                CGFloat t_thickness = t_horizontal ? srect.height : srect.width;
+                
+                double t_range = sb->endvalue - sb->startvalue;
+                
+                if (t_range > 0.0 && sb->thumbsize < t_range)
+                {
+                    CGFloat t_norm = (CGFloat)((sb->thumbpos - sb->startvalue) / (t_range - sb->thumbsize));
+                    CGFloat t_thumb_len = (CGFloat)(sb->thumbsize / t_range) * t_length;
+                    if (t_thumb_len < 8.0f) t_thumb_len = 8.0f;
+                    
+                    CGFloat t_thumb_x = t_norm * (t_length - t_thumb_len);
+                    
+                    if (t_horizontal) {
+                        drect.x = srect.x + t_thumb_x;
+                        drect.y = srect.y;
+                        drect.width = t_thumb_len;
+                        drect.height = t_thickness;
+                    } else {
+                        drect.x = srect.x;
+                        drect.y = srect.y + t_thumb_x;
+                        drect.width = t_thickness;
+                        drect.height = t_thumb_len;
+                    }
+                    return;
+                }
+                else if (t_range > 0.0 && sb->thumbsize >= t_range)
+                {
+                    // No scrolling needed - full thumb
+                    drect = srect;
+                    return;
+                }
+            }
+        }
+        
+        // Default: zero rect
+        drect.x = drect.y = drect.width = drect.height = 0;
     }
 
     virtual Boolean drawwidget(MCDC *dc, const MCWidgetInfo &winfo, const MCRectangle &d);
@@ -479,10 +592,31 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
                         // focus.  colorUsingColorSpace: collapses the dynamic
                         // colour into a plain RGBA value in the current appearance
                         // context — stable in both foreground and background.
-                        NSColor *t_accent =
-                            [[NSColor controlAccentColor]
-                                colorUsingColorSpace:[NSColorSpace sRGBColorSpace]]
-                            ?: [NSColor systemBlueColor];
+                        NSColor *t_accent = nil;
+                        
+                        // Try controlAccentColor first (macOS 10.14+)
+                        NSColor *t_candidate = [NSColor controlAccentColor];
+                        if (t_candidate != nil) {
+                            t_accent = [t_candidate colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+                        }
+                        
+                        // Fallback to tintedControlColor (macOS 15+)
+                        if (t_accent == nil && [NSColor respondsToSelector:@selector(tintedControlColor)]) {
+                            t_candidate = [NSColor performSelector:@selector(tintedControlColor)];
+                            if (t_candidate != nil) {
+                                t_accent = [t_candidate colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+                            }
+                        }
+                        
+                        // Fallback to systemBlueColor
+                        if (t_accent == nil) {
+                            t_accent = [[NSColor systemBlueColor] colorUsingColorSpace:[NSColorSpace sRGBColorSpace]];
+                        }
+                        
+                        // Final fallback
+                        if (t_accent == nil) {
+                            t_accent = [NSColor systemBlueColor];
+                        }
 
                         // Background colour for each state.
                         // Priority: disabled → pressed/hilited → default → normal.
