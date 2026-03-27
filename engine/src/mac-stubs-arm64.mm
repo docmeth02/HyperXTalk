@@ -972,25 +972,36 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
         // ── Progress bar ──────────────────────────────────────────────
         case THEME_DRAW_TYPE_PROGRESS:
         {
-            NSProgressIndicator *t_ind =
-                [[NSProgressIndicator alloc] initWithFrame:t_frame];
-            [t_ind setStyle:NSProgressIndicatorStyleBar];
-            [t_ind setIndeterminate:NO];
-            [t_ind setMinValue:p_info->scrollbar.startvalue];
-            [t_ind setMaxValue:p_info->scrollbar.endvalue];
-            [t_ind setDoubleValue:p_info->scrollbar.thumbpos];
-            // NSProgressIndicator is NSView, not NSControl — no setEnabled:.
-            // A disabled progress bar is visually handled by the appearance.
-            [t_ind setWantsLayer:NO];
-
-            [t_view addSubview:t_ind positioned:NSWindowBelow relativeTo:nil];
-
             [t_appearance performAsCurrentDrawingAppearance:^{
-                [t_ind drawRect:t_frame];
+                CGFloat t_total = p_info->scrollbar.endvalue - p_info->scrollbar.startvalue;
+                CGFloat t_current = p_info->scrollbar.thumbpos - p_info->scrollbar.startvalue;
+                CGFloat t_fraction = (t_total > 0) ? (t_current / t_total) : 0;
+                if (t_fraction < 0) t_fraction = 0;
+                if (t_fraction > 1) t_fraction = 1;
+                
+                // Draw track (background)
+                NSRect t_track = NSInsetRect(t_frame, 1, 1);
+                NSBezierPath *t_track_path = [NSBezierPath bezierPathWithRoundedRect:t_track xRadius:3.0 yRadius:3.0];
+                [[NSColor controlColor] setFill];
+                [t_track_path fill];
+                
+                // Draw progress with accent color
+                if (t_fraction > 0) {
+                    CGFloat t_height = t_track.size.height;
+                    CGFloat t_width = t_track.size.width * t_fraction;
+                    NSRect t_fill_rect;
+                    if (p_info->scrollbar.horizontal) {
+                        t_fill_rect = NSMakeRect(t_track.origin.x, t_track.origin.y, t_width, t_height);
+                    } else {
+                        t_fill_rect = NSMakeRect(t_track.origin.x, t_track.origin.y + t_height * (1 - t_fraction), t_width, t_height * t_fraction);
+                    }
+                    
+                    NSColor *t_accent = [NSColor controlAccentColor];
+                    NSBezierPath *t_fill_path = [NSBezierPath bezierPathWithRoundedRect:t_fill_rect xRadius:2.5 yRadius:2.5];
+                    [t_accent setFill];
+                    [t_fill_path fill];
+                }
             }];
-
-            [t_ind removeFromSuperview];
-            [t_ind release];
             break;
         }
 
