@@ -148,7 +148,8 @@
 				'libraries/ini/ini.lcb',
 				'libraries/timezone/timezone.lcb',
 				'libraries/macstatusmenu/macstatusmenu.lcb',
-				'libraries/macOSAnimateResize/com.hyperxtalk.macosanimateresize.lcb',
+				'libraries/macOSAnimateResize/macosanimateresize.lcb',
+				'libraries/macOSRequestUserAttention/macOSRequestUserAttention.lcb',
 
 				'widgets/macbutton/macbutton.lcb',
 				'widgets/mactextfield/mactextfield.lcb',

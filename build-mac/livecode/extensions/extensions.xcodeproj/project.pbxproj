@@ -314,12 +314,14 @@
 		5639D219F8700C49E7040060 /* revzip.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = revzip.xcodeproj; path = "../build-mac/livecode/revzip/revzip.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		5F2AF10051ED786F313D001D /* engine.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = engine.xcodeproj; path = "../build-mac/livecode/engine/engine.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		6390F4DB7E5A4051B07069E1 /* notarealfile.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = notarealfile.txt; sourceTree = "<group>"; };
+		65CE03138916997105C445E1 /* macosanimateresize.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = macosanimateresize.lcb; sourceTree = "<group>"; };
 		6630AAAA7A41190BC4C1B84C /* oauth2.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = oauth2.livecodescript; sourceTree = "<group>"; };
 		665D0B93AD1E5609725B9ADA /* tz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = tz.xcodeproj; path = "../build-mac/livecode/extensions/libraries/timezone/tz/tz.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		68E5C703E02E896682648F2A /* clock.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = clock.lcb; sourceTree = "<group>"; };
 		6BBA71530A6FB2322423DA56 /* win32.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = win32.gypi; path = ../config/win32.gypi; sourceTree = "<group>"; };
 		6BC75C0AE7CB027A66739C09 /* treeview.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = treeview.lcb; sourceTree = "<group>"; };
 		6E07C42613B40C44DAB99E40 /* gradientrampeditor.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = gradientrampeditor.lcb; sourceTree = "<group>"; };
+		6EF4669F60EB059BA7515216 /* macOSRequestUserAttention.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = macOSRequestUserAttention.lcb; sourceTree = "<group>"; };
 		711F5E47E4304D6C6516ED98 /* graph.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = graph.lcb; sourceTree = "<group>"; };
 		7146F95DAFE7DDEED0526911 /* getopt.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = getopt.livecodescript; sourceTree = "<group>"; };
 		75BB35F2E7ACCD89B8A5E859 /* paletteactions.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = paletteactions.lcb; sourceTree = "<group>"; };
@@ -351,7 +353,6 @@
 		D874E23AA3C1A8E51E893F81 /* lc-compile.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "lc-compile.xcodeproj"; path = "../build-mac/livecode/toolchain/lc-compile/lc-compile.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		DE508F1F93C39DEB0A854BDC /* ini.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = ini.lcb; sourceTree = "<group>"; };
 		EBC76BE81EA572A18D0C0830 /* macstatusmenu.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = macstatusmenu.lcb; sourceTree = "<group>"; };
-		ECE0DC51FA658DD1B9E4B5A8 /* com.hyperxtalk.macosanimateresize.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = com.hyperxtalk.macosanimateresize.lcb; sourceTree = "<group>"; };
 		F0AB51543817E71EA6A9A182 /* common.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = common.gypi; path = ../common.gypi; sourceTree = "<group>"; };
 		F6ECDDAAAF475C70A02EAFCE /* exclusions.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = exclusions.gypi; path = ../config/exclusions.gypi; sourceTree = "<group>"; };
 		FCEF34BEEF0960AAE10B75F4 /* timezone.lcb */ = {isa = PBXFileReference; lastKnownFileType = text; path = timezone.lcb; sourceTree = "<group>"; };
@@ -401,20 +402,28 @@
 			path = com.livecode.library.oauth2;
 			sourceTree = "<group>";
 		};
+		19240535E16B62EB071A6612 /* libraries */ = {
+			isa = PBXGroup;
+			children = (
+				E821D02578CB81C23B1731A9 /* canvas */,
+				7045E98444D8ED188924CA43 /* iconsvg */,
+				BCB58FCE91D48A1A19F31D8E /* ini */,
+				82F4A7FC27905018637EDCFD /* json */,
+				53F7F8E85D41E7D5BC417B6B /* macOSAnimateResize */,
+				4B2266A70914DD7AABF469B9 /* macOSRequestUserAttention */,
+				3A6144ACA15A44D24952664C /* macstatusmenu */,
+				96AC3424D5160F898744D5A8 /* objectrepository */,
+				EF048964F9D832D12E51B4E7 /* timezone */,
+			);
+			path = libraries;
+			sourceTree = "<group>";
+		};
 		1D2C256ED3AF73DF1D76FBC6 /* gradientrampeditor */ = {
 			isa = PBXGroup;
 			children = (
 				6E07C42613B40C44DAB99E40 /* gradientrampeditor.lcb */,
 			);
 			path = gradientrampeditor;
-			sourceTree = "<group>";
-		};
-		240445E417563CC8EA4D48B9 /* macOSAnimateResize */ = {
-			isa = PBXGroup;
-			children = (
-				ECE0DC51FA658DD1B9E4B5A8 /* com.hyperxtalk.macosanimateresize.lcb */,
-			);
-			path = macOSAnimateResize;
 			sourceTree = "<group>";
 		};
 		25E8F2B132C5DCBFEFA7FF0D /* modules */ = {
@@ -495,11 +504,27 @@
 			path = diff;
 			sourceTree = "<group>";
 		};
+		4B2266A70914DD7AABF469B9 /* macOSRequestUserAttention */ = {
+			isa = PBXGroup;
+			children = (
+				6EF4669F60EB059BA7515216 /* macOSRequestUserAttention.lcb */,
+			);
+			path = macOSRequestUserAttention;
+			sourceTree = "<group>";
+		};
 		53A835F3A0C8C300BAD662B8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		53F7F8E85D41E7D5BC417B6B /* macOSAnimateResize */ = {
+			isa = PBXGroup;
+			children = (
+				65CE03138916997105C445E1 /* macosanimateresize.lcb */,
+			);
+			path = macOSAnimateResize;
 			sourceTree = "<group>";
 		};
 		62B11DB0B211D1A8FED60C8A /* dropbox */ = {
@@ -637,21 +662,6 @@
 			path = com.livecode.library.qr;
 			sourceTree = "<group>";
 		};
-		7868218962C2AE2F7B879765 /* libraries */ = {
-			isa = PBXGroup;
-			children = (
-				E821D02578CB81C23B1731A9 /* canvas */,
-				7045E98444D8ED188924CA43 /* iconsvg */,
-				BCB58FCE91D48A1A19F31D8E /* ini */,
-				82F4A7FC27905018637EDCFD /* json */,
-				240445E417563CC8EA4D48B9 /* macOSAnimateResize */,
-				3A6144ACA15A44D24952664C /* macstatusmenu */,
-				96AC3424D5160F898744D5A8 /* objectrepository */,
-				EF048964F9D832D12E51B4E7 /* timezone */,
-			);
-			path = libraries;
-			sourceTree = "<group>";
-		};
 		7D19E026758C886C07B274B1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -699,7 +709,7 @@
 			children = (
 				FAE473DD255136C9E5E1D437 /* .. */,
 				A9CA42319CA817D0BE14A385 /* BUILT_PRODUCTS_DIR */,
-				7868218962C2AE2F7B879765 /* libraries */,
+				19240535E16B62EB071A6612 /* libraries */,
 				25E8F2B132C5DCBFEFA7FF0D /* modules */,
 				0BCC969BD7CB2CF8C53558B6 /* script-libraries */,
 				6ED7B665D37EA34CE950C70E /* widgets */,
@@ -1115,7 +1125,8 @@
 				libraries/ini/ini.lcb,
 				libraries/timezone/timezone.lcb,
 				libraries/macstatusmenu/macstatusmenu.lcb,
-				libraries/macOSAnimateResize/com.hyperxtalk.macosanimateresize.lcb,
+				libraries/macOSAnimateResize/macosanimateresize.lcb,
+				libraries/macOSRequestUserAttention/macOSRequestUserAttention.lcb,
 				widgets/macbutton/macbutton.lcb,
 				widgets/mactextfield/mactextfield.lcb,
 				widgets/browser/browser.lcb,
@@ -1140,7 +1151,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo note: \"Building extensions\"\nexec \"${BUILT_PRODUCTS_DIR}/server-community\" script-libraries/extension-utils/resources/extension-utils.lc \"${not_a_real_variable}buildlcbextensions\" ../ide-support/revdocsparser.livecodescript \"${BUILT_PRODUCTS_DIR}/packaged_extensions\" \"${not_a_real_variable}false\" \"${BUILT_PRODUCTS_DIR}/lc-compile\" \"${BUILT_PRODUCTS_DIR}/modules/lci\" \"${not_a_real_variable}\" modules/widget-utils/widget-utils.lcb modules/scriptitems/scriptitems.lcb libraries/canvas/canvas.lcb libraries/iconsvg/iconsvg.lcb libraries/json/json.lcb libraries/objectrepository/objectrepository.lcb libraries/ini/ini.lcb libraries/timezone/timezone.lcb libraries/macstatusmenu/macstatusmenu.lcb libraries/macOSAnimateResize/com.hyperxtalk.macosanimateresize.lcb widgets/macbutton/macbutton.lcb widgets/mactextfield/mactextfield.lcb widgets/browser/browser.lcb widgets/clock/clock.lcb widgets/graph/graph.lcb widgets/header/header.lcb widgets/iconpicker/iconpicker.lcb widgets/navbar/navbar.lcb widgets/paletteactions/paletteactions.lcb widgets/segmented/segmented.lcb widgets/svgpath/svgpath.lcb widgets/switchbutton/switchbutton.lcb widgets/treeview/treeview.lcb widgets/colorswatch/colorswatch.lcb widgets/gradientrampeditor/gradientrampeditor.lcb widgets/tile/tile.lcb widgets/spinner/spinner.lcb\nexit 1\n";
+			shellScript = "echo note: \"Building extensions\"\nexec \"${BUILT_PRODUCTS_DIR}/server-community\" script-libraries/extension-utils/resources/extension-utils.lc \"${not_a_real_variable}buildlcbextensions\" ../ide-support/revdocsparser.livecodescript \"${BUILT_PRODUCTS_DIR}/packaged_extensions\" \"${not_a_real_variable}false\" \"${BUILT_PRODUCTS_DIR}/lc-compile\" \"${BUILT_PRODUCTS_DIR}/modules/lci\" \"${not_a_real_variable}\" modules/widget-utils/widget-utils.lcb modules/scriptitems/scriptitems.lcb libraries/canvas/canvas.lcb libraries/iconsvg/iconsvg.lcb libraries/json/json.lcb libraries/objectrepository/objectrepository.lcb libraries/ini/ini.lcb libraries/timezone/timezone.lcb libraries/macstatusmenu/macstatusmenu.lcb libraries/macOSAnimateResize/macosanimateresize.lcb libraries/macOSRequestUserAttention/macOSRequestUserAttention.lcb widgets/macbutton/macbutton.lcb widgets/mactextfield/mactextfield.lcb widgets/browser/browser.lcb widgets/clock/clock.lcb widgets/graph/graph.lcb widgets/header/header.lcb widgets/iconpicker/iconpicker.lcb widgets/navbar/navbar.lcb widgets/paletteactions/paletteactions.lcb widgets/segmented/segmented.lcb widgets/svgpath/svgpath.lcb widgets/switchbutton/switchbutton.lcb widgets/treeview/treeview.lcb widgets/colorswatch/colorswatch.lcb widgets/gradientrampeditor/gradientrampeditor.lcb widgets/tile/tile.lcb widgets/spinner/spinner.lcb\nexit 1\n";
 			showEnvVarsInLog = 0;
 		};
 		D23FCBCA2BD88F099B34123D /* Rule "build_script_extension" */ = {

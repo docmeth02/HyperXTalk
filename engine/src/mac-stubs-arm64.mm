@@ -255,21 +255,37 @@ public:
                 }
             }
             
-            // Check if mouse is in thumb area
+            // Check if mouse is in thumb area or track
             if (t_horizontal) {
                 if (mx >= drect.x + t_thumb_x && mx <= drect.x + t_thumb_x + t_thumb_len &&
                     my >= drect.y && my <= drect.y + t_thickness) {
                     return WTHEME_PART_THUMB;
                 }
-                // Check track - for sliders, return thumb to enable dragging anywhere
-                return WTHEME_PART_THUMB;
+                // For sliders, return thumb to enable dragging anywhere
+                if (t_is_slider) {
+                    return WTHEME_PART_THUMB;
+                }
+                // For scrollbars, return track part based on position relative to thumb
+                if (mx < drect.x + t_thumb_x) {
+                    return WTHEME_PART_TRACK_DEC;
+                } else {
+                    return WTHEME_PART_TRACK_INC;
+                }
             } else {
                 if (mx >= drect.x && mx <= drect.x + t_thickness &&
                     my >= drect.y + t_thumb_x && my <= drect.y + t_thumb_x + t_thumb_len) {
                     return WTHEME_PART_THUMB;
                 }
-                // Check track - for sliders, return thumb to enable dragging anywhere
-                return WTHEME_PART_THUMB;
+                // For sliders, return thumb to enable dragging anywhere
+                if (t_is_slider) {
+                    return WTHEME_PART_THUMB;
+                }
+                // For scrollbars, return track part based on position relative to thumb
+                if (my < drect.y + t_thumb_x) {
+                    return WTHEME_PART_TRACK_DEC;
+                } else {
+                    return WTHEME_PART_TRACK_INC;
+                }
             }
         }
         
@@ -390,6 +406,7 @@ Boolean MCNativeTheme::drawwidget(MCDC *dc, const MCWidgetInfo &winfo, const MCR
         case WTHEME_TYPE_OPTIONBUTTON:
         case WTHEME_TYPE_PULLDOWN:
         case WTHEME_TYPE_COMBOBUTTON:
+        case WTHEME_TYPE_COMBO:
             dc->drawtheme(THEME_DRAW_TYPE_BUTTON, &t_info);
             break;
 
@@ -466,6 +483,7 @@ Boolean MCNativeTheme::drawwidget(MCDC *dc, const MCWidgetInfo &winfo, const MCR
         // ── Text field / combo / listbox frame ────────────────────────
         case WTHEME_TYPE_TEXTFIELD_FRAME:
         case WTHEME_TYPE_COMBOTEXT:
+        case WTHEME_TYPE_COMBOFRAME:
         case WTHEME_TYPE_LISTBOX_FRAME:
             dc->drawtheme(THEME_DRAW_TYPE_FRAME, &t_info);
             break;
@@ -724,6 +742,44 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
                         [t_cell drawWithFrame:t_r inView:t_view];
                     }];
                     [t_cell release];
+                    break;
+                }
+                case WTHEME_TYPE_COMBO:
+                {
+                    // Draw combo box - just white background with separator and arrow
+                    NSRect t_main_rect = NSInsetRect(t_frame, 4, 4);
+                    
+                    // White background
+                    NSBezierPath *t_bg = [NSBezierPath bezierPathWithRoundedRect:t_main_rect xRadius:4.0 yRadius:4.0];
+                    [[NSColor whiteColor] setFill];
+                    [t_bg fill];
+                    
+                    // Separator between text and dropdown
+                    CGFloat t_sep_x = t_main_rect.origin.x + t_main_rect.size.width - 24;
+                    NSBezierPath *t_sep = [NSBezierPath bezierPath];
+                    [t_sep moveToPoint:NSMakePoint(t_sep_x, t_main_rect.origin.y + 2)];
+                    [t_sep lineToPoint:NSMakePoint(t_sep_x, t_main_rect.origin.y + t_main_rect.size.height - 2)];
+                    [[NSColor separatorColor] setStroke];
+                    [t_sep setLineWidth:1.0];
+                    [t_sep stroke];
+                    
+                    // Dropdown arrow (chevron)
+                    CGFloat t_ax = t_sep_x + 12;
+                    CGFloat t_ay = t_main_rect.origin.y + t_main_rect.size.height / 2;
+                    NSBezierPath *t_arrow = [NSBezierPath bezierPath];
+                    [t_arrow setLineWidth:1.5];
+                    [t_arrow setLineCapStyle:NSLineCapStyleRound];
+                    [t_arrow setLineJoinStyle:NSLineJoinStyleRound];
+                    [t_arrow moveToPoint:NSMakePoint(t_ax - 3.5, t_ay - 1.5)];
+                    [t_arrow lineToPoint:NSMakePoint(t_ax, t_ay + 2.0)];
+                    [t_arrow lineToPoint:NSMakePoint(t_ax + 3.5, t_ay - 1.5)];
+                    [[NSColor controlTextColor] setStroke];
+                    [t_arrow stroke];
+                    
+                    // Border
+                    [[NSColor separatorColor] setStroke];
+                    [t_bg setLineWidth:6.0];
+                    [t_bg stroke];
                     break;
                 }
                 default:   // push button, bevel button, pulldown, combo button
@@ -1076,18 +1132,18 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
         }
 
         // ── Text-field / combo / listbox frame ────────────────────────
-        // Draw a rounded-rectangle inset border with a white fill.
+        // Draw white background with 2px gray border and 4px focus ring when focused.
         case THEME_DRAW_TYPE_FRAME:
         {
-            NSRect t_r = NSInsetRect(t_frame, 1.0, 1.0);
-            [[NSColor controlBackgroundColor] setFill];
-            [[NSBezierPath bezierPathWithRoundedRect:t_r
-                                             xRadius:3.0
-                                             yRadius:3.0] fill];
-            [[NSColor separatorColor] setStroke];
-            [[NSBezierPath bezierPathWithRoundedRect:t_r
-                                             xRadius:3.0
-                                             yRadius:3.0] stroke];
+            // Draw white background for text field areas (no inset)
+            [[NSColor whiteColor] setFill];
+            NSRectFill(t_frame);
+            
+            // 2px gray border (on the frame itself, no inset)
+            [[NSColor colorWithCalibratedWhite:0.7 alpha:1.0] setStroke];
+            NSBezierPath *t_border = [NSBezierPath bezierPathWithRoundedRect:t_frame xRadius:3.0 yRadius:3.0];
+            [t_border setLineWidth:2.0];
+            [t_border stroke];
             break;
         }
 
