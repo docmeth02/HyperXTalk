@@ -9,12 +9,19 @@ source "${BASEDIR}/scripts/util.inc"
 ICU_CONFIG="--disable-shared --enable-static --prefix=/ --sbindir=/bin --with-data-packaging=archive --disable-samples --disable-tests --disable-extras"
 ICU_CFLAGS="-DU_USING_ICU_NAMESPACE=0 -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
 
-ICU_VERSION_ALT=$(echo "${ICU_VERSION}" | sed 's/\./_/g')
+ICU_VERSION_DASH=$(echo "${ICU_VERSION}" | sed 's/\./-/g')
+ICU_VERSION_UNDERSCORE=$(echo "${ICU_VERSION}" | sed 's/\./_/g')
 ICU_VERSION_MAJOR=$(echo "${ICU_VERSION}" | sed 's/\..*//g')
+ICU_CHECKSUM=$(echo "${ICU_CHECKSUM}")
+
+echo icu checksum is ${ICU_CHECKSUM}
+
+# mdw 2023.11.10 new download url
+ICU_ROOT="https://github.com/unicode-org/icu/releases/download/release-"
 
 # Grab the source for the library
-ICU_TGZ="icu-${ICU_VERSION}.tar.gz"
 ICU_SRC="icu-${ICU_VERSION}"
+ICU_MD5="icu-${ICU_VERSION}.md5"
 cd "${BUILDDIR}"
 
 # Needed for cross-compiles
@@ -30,23 +37,91 @@ case $(uname) in
 		;;
 esac
 
+ICU_URL="${ICU_ROOT}${ICU_VERSION_DASH}/icu4c-${ICU_VERSION_UNDERSCORE}-src.tgz"
+ICU_TGZ="icu4c-${ICU_VERSION_UNDERSCORE}-src.tgz"
+
 if [ ! -d "$ICU_SRC" ] ; then
 	if [ ! -e "$ICU_TGZ" ] ; then
 		echo "Fetching ICU source"
-		fetchUrl "https://downloads.sourceforge.net/project/icu/ICU4C/${ICU_VERSION}/icu4c-${ICU_VERSION_ALT}-src.tgz" "${ICU_TGZ}"
+		fetchUrl ${ICU_URL} "${ICU_TGZ}"
 		if [ $? != 0 ] ; then
 			echo "    failed"
-			if [ -e "${ICU_TGZ}" ] ; then 
-				rm ${ICU_TGZ} 
+			if [ -e "${ICU_TGZ}" ] ; then
+				rm ${ICU_TGZ}
 			fi
 			exit
 		fi
 	fi
-	
+
+# the shasum check file is named differently in different versions.
+	if [ "${ICU_VERSION_MAJOR}" == "65" ] ; then
+		ICU_MD5_URL="SHASUM512.txt"
+	elif [ "${ICU_VERSION_MAJOR}" == "63" ] ; then
+		ICU_MD5_URL="icu4c-SHASUM512.txt.asc"
+	elif [ "${ICU_VERSION_MAJOR}" == "58" ] ; then
+		ICU_MD5_URL="icu4c-SHASUM512.txt.asc"
+	else
+		echo "bad shasum url for icu version ${ICU_VERSION}"
+	fi
+	ICU_SHASUM_URL="${ICU_ROOT}${ICU_VERSION_DASH}/${ICU_MD5_URL}"
+
+	# validate the checksum
+	if [ 0 != "${ICU_CHECKSUM}" ] ; then
+		echo "Fetching checksum file ${ICU_CHECKSUM} "
+		fetchUrl ${ICU_CHECKSUM} "KEYS"
+		if [ $? != 0 ] ; then
+			echo "downloading checksum file failed"
+			if [ -e "${ICU_TGZ}" ] ; then
+				rm ${ICU_TGZ}
+			fi
+			exit
+		fi
+
+		# validate using gpg if gpg is installed
+		if [ `gpg --help` ] ; then
+			gpg --import KEYS
+		fi
+
+		echo "Fetching shasum file ${ICU_SHASUM_URL}"
+		fetchUrl ${ICU_SHASUM_URL} "${ICU_MD5_URL}"
+		if [ $? != 0 ] ; then
+			echo "downloading shasum file failed"
+			if [ -e "${ICU_TGZ}" ] ; then
+				rm ${ICU_TGZ}
+			fi
+			exit
+		fi
+
+#		if [ ! `gpg --verify KEYS` == ${ICU_TGZ} ] ; then
+#			echo "checksum verification failed"
+#			if [ -e "${ICU_TGZ}" ] ; then
+#				rm ${ICU_TGZ}
+#			fi
+#			exit
+#		fi
+
+		shasum -c -s --ignore-missing ${ICU_MD5_URL}
+		if [ $? != 0 ] ; then
+			echo "checksum verification failed"
+			if [ -e "${ICU_TGZ}" ] ; then
+				rm ${ICU_TGZ}
+			fi
+			exit
+		fi
+
+	fi
+
 	echo "Unpacking ICU source"
 	tar -xf "${ICU_TGZ}"
 	mv icu "${ICU_SRC}"
 fi
+
+# copy header files from prebuilt/build/icu-58-2/source/common to prebuilt/include/unicode
+# echo source = ${BUILDDIR}/${ICU_SRC}/source/common
+# echo dest = ${BUILDDIR}/../include/unicode
+mkdir -p ${BUILDDIR}/../include/unicode
+cp ${BUILDDIR}/${ICU_SRC}/source/common/*.h ${BUILDDIR}/../include/unicode
+cp ${BUILDDIR}/${ICU_SRC}/source/common/unicode/*.h ${BUILDDIR}/../include/unicode
 
 ICU_LIBS="data i18n io le lx tu uc"
 ICU_BINARIES="icupkg pkgdata"
@@ -55,6 +130,8 @@ function buildICU {
 	local PLATFORM=$1
 	local ARCH=$2
 	local SUBPLATFORM=$3
+
+echo "PLATFORM = ${PLATFORM}, ARCH = ${ARCH} HOST_ARCH = ${HOST_ARCH}"
 
 	# Platform-specific options for ICU
 	case "${PLATFORM}" in
@@ -110,7 +187,7 @@ function buildICU {
 	# Copy the source to a target-specific directory
 	if [ ! -d "${ICU_ARCH_SRC}" ] ; then
 		echo "Creating ICU build directory for ${NAME}"
-		mkdir "${ICU_ARCH_SRC}"
+		mkdir -p "${ICU_ARCH_SRC}"
 	fi
 
 	# Get the command used to build a previous copy, if any
@@ -126,10 +203,10 @@ function buildICU {
 	if [ "${ICU_ARCH_CONFIG}" != "${ICU_ARCH_CURRENT_CONFIG}" ] ; then
 		cd "${ICU_ARCH_SRC}"
 		echo "Configuring ICU for ${NAME}"
-		
-		echo "*DEBUG* calling setCCForArch"
+
+		echo "*DEBUG* calling setCCForArch ${ARCH}"
 		setCCForTarget "${PLATFORM}" "${ARCH}" "${SUBPLATFORM}"
-		
+
 		# We need to pass the target triple for Android builds
 		if [ "${PLATFORM}" == "android" ] ; then
 			CONFIG_TYPE+=" --host=${ANDROID_TRIPLE}"
@@ -142,20 +219,21 @@ function buildICU {
 		else
 			"../${ICU_SRC}/source/runConfigureICU" ${CONFIG_TYPE} ${ICU_CONFIG} ${CONFIG_FLAGS}
 		fi
-		
+
 		echo "*DEBUG* disabling c++11 support on incompatible platforms"
 		# Disable C++11 support on platforms where we can't guarantee a compatible runtime
+#			android|linux)
 		case "${PLATFORM}" in
-			android|linux)
+			android)
 				sed -i -e "s/\(^CXXFLAGS.*\)--std=c++0x/\1/" icudefs.mk
 				;;
-		esac	
+		esac
 
 		# Make sure U_HAVE_STRTOD_L is 0 on android
- 		if [ "${PLATFORM}" == "android" ] ; then
+ 		if [ "android" == "${PLATFORM}" ] ; then
  			sed -i -e "s/U_HAVE_STRTOD_L=1/U_HAVE_STRTOD_L=0/" icudefs.mk
  		fi
- 		
+
 		echo "Building ICU for ${NAME}"
 		export VERBOSE=1
 		${EMMAKE} make clean && \
@@ -163,9 +241,9 @@ function buildICU {
 			${EMMAKE} make DESTDIR="${INSTALL_DIR}/${NAME}" install
 		RESULT=$?
 		cd ..
-		
+
 		# Save the configuration for this build
-		if [ $RESULT == 0 ] ; then
+		if [ 0 == $RESULT  ] ; then
 			echo "${ICU_ARCH_CONFIG}" > "${ICU_ARCH_SRC}/config.cmd"
 		else
 			echo "    failed"
@@ -180,46 +258,46 @@ function buildICU {
 	else
 		HOST_ICU_BINDIR="${HOST_ICU_DIR}/bin"
 	fi
-	
+
 	# Copy data file, if not done yet
 	if [ ! -f "${OUTPUT_DIR}/share/icudt${ICU_VERSION_MAJOR}l.dat" ] ; then
 		echo "Copying icu data file"
 		mkdir -p "${OUTPUT_DIR}/share"
 		cp "${INSTALL_DIR}/${NAME}/share/icu/${ICU_VERSION}/icudt${ICU_VERSION_MAJOR}l.dat" "${OUTPUT_DIR}/share/icudt${ICU_VERSION_MAJOR}l.dat"
 	fi
-	
+
 	# Copy libraries
 	for L in ${ICU_LIBS} ; do
 		if [ -f "${INSTALL_DIR}/${NAME}/lib/libicu${L}.a" ] ; then
-			if [ "${PLATFORM}" == "mac" -o "${PLATFORM}" == "ios" ] ; then
-				VAR="ICU${L}_LIBS"
-				eval "$VAR+=\"${INSTALL_DIR}/${NAME}/lib/libicu${L}.a \""
-			else
+			#if [ "${PLATFORM}" == "mac" -o "${PLATFORM}" == "ios" ] ; then
+				#VAR="ICU${L}_LIBS"
+				#eval "$VAR+=\"${INSTALL_DIR}/${NAME}/lib/libicu${L}.a \""
+			#else
 				mkdir -p "${OUTPUT_DIR}/lib/${NAME}"
 				cp "${INSTALL_DIR}/${NAME}/lib/libicu${L}.a" "${OUTPUT_DIR}/lib/${NAME}/libicu${L}.a"
-			fi
+			#fi
 		fi
 	done
 
 	# Copy executables
 	for B in ${ICU_BINARIES} ; do
 		if [ -f "${INSTALL_DIR}/${NAME}/bin/${B}" ] ; then
-			if [ "${PLATFORM}" == "mac" -o "${PLATFORM}" == "ios" ] ; then
-				VAR="ICU${B}_BINARIES"
-				eval "$VAR+=\"${INSTALL_DIR}/${NAME}/bin/${B} \""
-			else
+			#if [ "${PLATFORM}" == "mac" -o "${PLATFORM}" == "ios" ] ; then
+				#VAR="ICU${B}_BINARIES"
+				#eval "$VAR+=\"${INSTALL_DIR}/${NAME}/bin/${B} \""
+			#else
 				mkdir -p "${OUTPUT_DIR}/bin/${NAME}"
 				cp "${INSTALL_DIR}/${NAME}/bin/${B}" "${OUTPUT_DIR}/bin/${NAME}/${B}"
-			fi
+			#fi
 		fi
 	done
-	
+
 	# Copy over the headers, if it has not yet been done
 	if [ ! -e "${OUTPUT_DIR}/include/unicode" ] ; then
-		echo "Copying ICU headers"
-		mkdir -p "${OUTPUT_DIR}/include"
+		echo "Copying ICU headers from ${INSTALL_DIR}/${NAME}/include"
+		mkdir -p "${OUTPUT_DIR}/include/unicode"
 		cp -r "${INSTALL_DIR}/${NAME}/include"/* "${OUTPUT_DIR}/include/"
-		
+
 		# Some header massaging is required in order to avoid Win32 link errors
 		# NOTE - need to provide backup file extension for compatability with both MacOSX & Linux
 		sed -i.bak -e 's/define U_IMPORT __declspec(dllimport)/define U_IMPORT/g' "${OUTPUT_DIR}/include/unicode/platform.h"
@@ -237,19 +315,19 @@ if [ "${HOST_PLATFORM}" != "${PLATFORM}" ] ; then
 	TMP_CUSTOM_CXX="${CUSTOM_CXX}"
 	CUSTOM_CC=
 	CUSTOM_CXX=
-	
+
 	buildICU "${HOST_PLATFORM}" "${HOST_ARCH}"
-	
+
 	# Restore custom c/c++ vars
 	CUSTOM_CC="${TMP_CUSTOM_CC}"
 	CUSTOM_CXX="${TMP_CUSTOM_CXX}"
-	
+
 	# clear universal libs lists
 	for L in ${ICU_LIBS} ; do
 		VAR="ICU${L}_LIBS"
 		eval "$VAR="
 	done
-	
+
 	#clear universal binaries lists
 	for B in ${ICU_BINARIES} ; do
 		VAR="ICU${B}_BINARIES"
@@ -268,7 +346,7 @@ if [ "${ARCH}" == "universal" ] ; then
 	# Create the universal libraries
 	echo "Creating ICU ${PLATFORM_NAME} universal libraries"
 	mkdir -p "${OUTPUT_DIR}/lib/${PLATFORM}/${SUBPLATFORM}"
-	
+
 	for L in ${ICU_LIBS} ; do
 		VAR="ICU${L}_LIBS"
 		eval VALUE=\$$VAR
@@ -281,7 +359,7 @@ if [ "${ARCH}" == "universal" ] ; then
 	# Create the universal binaries
 	echo "Creating ICU ${PLATFORM_NAME} universal binaries"
 	mkdir -p "${OUTPUT_DIR}/bin/${PLATFORM}/${SUBPLATFORM}"
-	
+
 	for B in ${ICU_BINARIES} ; do
 		VAR="ICU${B}_BINARIES"
 		eval VALUE=\$$VAR

@@ -11,9 +11,11 @@ CURL_CONFIG="--disable-debug \
             --disable-manual \
             --enable-shared=no \
             --disable-sspi --disable-crypto-auth --disable-cookies \
+			--without-libpsl \
             --without-gnutls --without-polarssl --without-nss --without-libssh2 --without-librtmp --without-libidn"
 
 # Grab the source for the library
+CURL_ROOT="https://curl.haxx.se/download/curl-"
 CURL_TGZ="curl-${Curl_VERSION}.tar.gz"
 CURL_SRC="curl-${Curl_VERSION}"
 cd "${BUILDDIR}"
@@ -21,7 +23,7 @@ cd "${BUILDDIR}"
 if [ ! -d "$CURL_SRC" ] ; then
 	if [ ! -e "$CURL_TGZ" ] ; then
 		echo "Fetching Curl source"
-		fetchUrl "https://curl.haxx.se/download/curl-${Curl_VERSION}.tar.gz" "${CURL_TGZ}"
+		fetchUrl "${CURL_ROOT}${Curl_VERSION}.tar.gz" "${CURL_TGZ}"
 		if [ $? != 0 ] ; then
 			echo "    failed"
 			if [ -e "${CURL_TGZ}" ] ; then 
@@ -111,4 +113,3 @@ else
 	buildCurl "${PLATFORM}" "${ARCH}" "${SUBPLATFORM}"
 fi
 
-	
