@@ -6,14 +6,14 @@ ARCHS_android=( armv7 arm64 x86 x86_64 )
 ARCHS_mac=( Universal )
 ARCHS_ios=( Universal )
 ARCHS_win32=( x86 x86_64 )
-ARCHS_linux=( i386 x86_64 )
+ARCHS_linux=( i386 x86_64 armv7)
 ARCHS_emscripten=( js )
-LIBS_android=( Thirdparty OpenSSL ICU )
-LIBS_mac=( Thirdparty OpenSSL ICU )
-LIBS_ios=( Thirdparty OpenSSL ICU )
-LIBS_win32=( Thirdparty OpenSSL Curl ICU CEF )
-LIBS_linux=( Thirdparty OpenSSL Curl ICU CEF )
-LIBS_emscripten=( Thirdparty ICU )
+LIBS_android=( OpenSSL ICU )
+LIBS_mac=( OpenSSL ICU )
+LIBS_ios=( OpenSSL ICU )
+LIBS_win32=( OpenSSL Curl ICU CEF )
+LIBS_linux=( OpenSSL Curl ICU CEF )
+LIBS_emscripten=( ICU )
 
 SUBPLATFORMS_ios=(iPhoneSimulator11.2 iPhoneSimulator12.1 iPhoneSimulator13.2 iPhoneSimulator14.4 iPhoneSimulator14.5 iPhoneOS11.2 iPhoneOS12.1 iPhoneOS13.2 iPhoneOS14.4 iPhoneOS14.5)
 SUBPLATFORMS_win32=(v141_static_debug v141_static_release)
@@ -21,24 +21,16 @@ SUBPLATFORMS_android=(ndk16r15)
 
 # Fetch settings
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-
-# Skip fetch if the output library directory for the requested platform is
-# already populated (e.g. libraries were built from source or extracted
-# manually). This avoids hitting the authenticated LiveCode prebuilt server
-# during local development builds.
-if [ "$#" -ge 1 ]; then
-    _FETCH_PLATFORM=$(basename "$1")
-    _LIB_OUT="${SCRIPT_DIR}/lib/${_FETCH_PLATFORM}"
-    if [ -d "${_LIB_OUT}" ] && [ -n "$(ls -A "${_LIB_OUT}" 2>/dev/null)" ]; then
-        echo "note: prebuilt libraries for ${_FETCH_PLATFORM} already present at ${_LIB_OUT}, skipping fetch"
-        exit 0
-    fi
-fi
-
 FETCH_DIR="${SCRIPT_DIR}/fetched"
 EXTRACT_DIR="${SCRIPT_DIR}"
 WIN32_EXTRACT_DIR="${SCRIPT_DIR}/unpacked"
-URL="https://downloads.livecode.com/prebuilts"
+#URL="https://downloads.livecode.com/prebuilts"
+URLCURL="https://github.com/curl/curl/archive/refs/heads/master.zip"
+URLOPENSSL="https://github.com/openssl/openssl/archive/refs/heads/master.zip"
+URLICU="https://github.com/unicode-org/icu/archive/refs/heads/main.zip"
+URLCEF="https://github.com/chromiumembedded/cef/archive/refs/heads/master.zip"
+# the sqlite url is unfortunately pegged to release year and version
+URLSQLITE="https://sqlite.org/2023/sqlite-amalgamation-3420000.zip"
 
 # Platform specific settings
 if [ "${OS}" = "Windows_NT" ]; then
@@ -62,10 +54,11 @@ if [ ! -z "${PREBUILT_CACHE_DIR}" ] ; then
 fi
 
 function fetchLibrary {
-	local LIB=$1
-	local PLATFORM=$2
-	local ARCH=$3
-	local SUBPLATFORM=$4
+	local LIBURL=$1
+	local LIB=$2
+	local PLATFORM=$3
+	local ARCH=$4
+	local SUBPLATFORM=$5
 
 	eval "local VERSION=\${${LIB}_VERSION}"
 	eval "local BUILDREVISION=\${${LIB}_BUILDREVISION}"
@@ -80,29 +73,34 @@ function fetchLibrary {
 			NAME+="-${SUBPLATFORM}"
 		fi
 	fi
-	
+
 	if [ ! -z "${BUILDREVISION}" ] ; then
 		NAME+="-${BUILDREVISION}"
 	fi
 
+	# see if we have already fetched the latest
 	if [ ! -f "${FETCH_DIR}/${NAME}.tar.bz2" ]; then
 		if [ -f "${LOCAL_DIR}/${NAME}.tar.bz2" ]; then
 			echo "Fetching local library: ${NAME}"
 			cp "${LOCAL_DIR}/${NAME}.tar.bz2" "${FETCH_DIR}/${NAME}.tar.bz2"
 		else
-			echo "Fetching remote library: ${NAME}"
-		
-			# Download using an HTTP client of some variety
+			echo "Fetching remote library: ${LIBURL}/${NAME}"
+
+			# Download using an HTTP client of some variety : first choice is curl
 			if $(which curl 1>/dev/null 2>/dev/null) ; then
-				curl -k "${URL}/${NAME}.tar.bz2" -o "${FETCH_DIR}/${NAME}.tar.bz2" --fail
+				curl -k "${LIBURL}/${NAME}" -o "${FETCH_DIR}/${NAME}.tar.bz2" --fail
 			elif $(which wget 1>/dev/null 2>/dev/null) ; then
-				wget "${URL}/${NAME}.tar.bz2" -O "${FETCH_DIR}/${NAME}.tar.bz2"
+				# curl is not available on the build system... try wget
+				wget "${LIBURL}/${NAME}" -O "${FETCH_DIR}/${NAME}.tar.bz2"
 			else
 				# Perl as a last resort (useful for Cygwin)
 				perl -MLWP::Simple -e "getstore('${URL}/${NAME}.tar.bz2', '${FETCH_DIR}/${NAME}.tar.bz2') == 200 or exit 1"
 			fi
 		fi
-
+# these three lines added per bug report #23285
+    else
+        echo "Already fetched: ${NAME}"
+    fi
 		if [ ! -e "${FETCH_DIR}/${NAME}.tar.bz2" ]; then
 			echo "Failed to find library ${NAME} either remotely or locally"
 			exit 1
@@ -124,9 +122,9 @@ function fetchLibrary {
 			exit 1
 		fi
 
-	else
-		echo "Already fetched: ${NAME}"
-	fi
+#	else
+#		echo "Already fetched: ${NAME}"
+#	fi
 }
 
 if [ 0 -eq "$#" ]; then
@@ -182,10 +180,10 @@ for PLATFORM in ${SELECTED_PLATFORMS} ; do
 		for LIB in "${LIBS[@]}" ; do
 			if [ ! -z "${SUBPLATFORMS}" ] ; then
 				for SUBPLATFORM in "${SUBPLATFORMS[@]}" ; do
-					fetchLibrary "${LIB}" "${PLATFORM}" "${ARCH}" "${SUBPLATFORM}"
+					fetchLibrary "${ARCH}URL" "${LIB}" "${PLATFORM}" "${ARCH}" "${SUBPLATFORM}"
 				done
 			else
-				fetchLibrary "${LIB}" "${PLATFORM}" "${ARCH}"
+				fetchLibrary "${ARCH}URL" "${LIB}" "${PLATFORM}" "${ARCH}"
 			fi
 		done
 	done
@@ -195,11 +193,12 @@ for PLATFORM in ${SELECTED_PLATFORMS} ; do
 	# but the prebuilt naming uniformly uses "i386".  Workaround
 	# this by renaming the "i386" output folder to "x86"
 	if [ -d "${EXTRACT_DIR}/lib/${PLATFORM}/i386" ] ; then
-		if [ ! -d "${EXTRACT_DIR}/lib/${PLATFORM}/x86" ] ; then
-			mkdir "${EXTRACT_DIR}/lib/${PLATFORM}/x86"
-		fi
-		cp -R "${EXTRACT_DIR}/lib/${PLATFORM}/i386/"* "${EXTRACT_DIR}/lib/${PLATFORM}/x86/"
-		rm -r "${EXTRACT_DIR}/lib/${PLATFORM}/i386"
+		#if [ ! -d "${EXTRACT_DIR}/lib/${PLATFORM}/x86" ] ; then
+			mkdir -p "${EXTRACT_DIR}/lib/${PLATFORM}/x86"
+		#fi
+		#cp -R "${EXTRACT_DIR}/lib/${PLATFORM}/i386/"* "${EXTRACT_DIR}/lib/${PLATFORM}/x86/"
+		#rm -r "${EXTRACT_DIR}/lib/${PLATFORM}/i386"
+		mv "${EXTRACT_DIR}/lib/${PLATFORM}/i386/"* "${EXTRACT_DIR}/lib/${PLATFORM}/x86/"
 	fi
 
         # Windows-only hacks
@@ -227,7 +226,7 @@ for PLATFORM in ${SELECTED_PLATFORMS} ; do
                         done
                 done
         done
-                        
+
         for ARCH in ${SELECTED_ARCHS} ; do
                 for LIB in "${LIBS[@]}" ; do
                         echo "Monkey patching toolset/arch for ${LIB} library"
@@ -247,7 +246,7 @@ done
 
 # Don't forget the headers & data on non-Windows platforms
 if [ 0 -eq "$FETCH_HEADERS" ]; then
-	fetchLibrary OpenSSL All Universal Headers
-	fetchLibrary ICU All Universal Headers
-	fetchLibrary ICU All Universal Data
+	fetchLibrary "${URL}" OpenSSL All Universal Headers
+	fetchLibrary "${URL}" ICU All Universal Headers
+	fetchLibrary "${URL}" ICU All Universal Data
 fi

@@ -104,9 +104,9 @@ def validate_target(opts):
 
 def exec_fetch_libraries(build_platform, build_arch):
 	if platform.system() == 'Windows':
-		args = [".\util\invoke-unix.bat", "prebuilt/fetch-libraries.sh", build_platform, build_arch]
+		args = [".\util\invoke-unix.bat", "prebuilt/build-libraries.sh", build_platform, build_arch]
 	else:
-		args = ["./prebuilt/fetch-libraries.sh", build_platform, build_arch]
+		args = ["./prebuilt/build-libraries.sh", build_platform, build_arch]
 	print(' '.join(args))
 	status = subprocess.call(args)
 	if status != 0:

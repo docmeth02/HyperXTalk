@@ -201,9 +201,23 @@
 	'targets':
 	[
 		{
-			'target_name': 'fetch-all',
+			'target_name': 'build-all',
 			'type': 'none',
 			
+			'dependencies':
+			[
+				'fetch-android',
+				'fetch-linux',
+				'fetch-mac',
+				'fetch-win',
+				'fetch-ios',
+				'fetch-emscripten',
+			],
+		},
+		{
+			'target_name': 'fetch-all',
+			'type': 'none',
+
 			'dependencies':
 			[
 				'fetch-android',
@@ -306,7 +320,7 @@
 					
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 					
 					'outputs':
@@ -316,7 +330,7 @@
 					
 					'action':
 					[
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						'android',
 						'>(target_arch)',
 					],
@@ -331,11 +345,11 @@
 			[
 				{
 					'action_name': 'fetch',
-					'message': 'Fetching prebuilt libraries for Linux',
+					'message': 'Building prebuilt libraries for Linux',
 					
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 					
 					'outputs':
@@ -346,7 +360,7 @@
 					
 					'action':
 					[
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						'linux',
 						'<(host_arch)',
 					],
@@ -361,11 +375,11 @@
 			[
 				{
 					'action_name': 'fetch',
-					'message': 'Fetching prebuilt libraries for OSX',
+					'message': 'Building prebuilt libraries for OSX',
 					
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 					
 					'outputs':
@@ -376,8 +390,9 @@
 					
 					'action':
 					[
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						'mac',
+						'<(host_arch)',
 					],
 				},
 			],
@@ -406,11 +421,11 @@
 			[
 				{
 					'action_name': 'fetch',
-					'message': 'Fetching prebuilt libraries for Windows',
+					'message': 'Building prebuilt libraries for Windows',
 					
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 					
 					'outputs':
@@ -424,7 +439,7 @@
 					[
 						'call',
 						'../util/invoke-unix.bat',
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						# Ensure gyp does not treat these parameters as paths
 						'$(not_a_real_variable)win32',
 						'$(not_a_real_variable)>(fetch_arch)',
@@ -440,11 +455,11 @@
 			[
 				{
 					'action_name': 'fetch',
-					'message': 'Fetching prebuilt libraries for iOS',
+					'message': 'Building prebuilt libraries for iOS',
 					
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 					
 					'outputs':
@@ -454,8 +469,9 @@
 					
 					'action':
 					[
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						'ios',
+						'<(host_arch)',
 					],
 				},
 			],
@@ -468,11 +484,11 @@
 			[
 				{
 					'action_name': 'fetch',
-					'message': 'Fetching prebuilt libraries for Emscripten',
+					'message': 'Building prebuilt libraries for Emscripten',
 
 					'inputs':
 					[
-						'fetch-libraries.sh',
+						'build-libraries.sh',
 					],
 
 					'outputs':
@@ -482,8 +498,9 @@
 
 					'action':
 					[
-						'./fetch-libraries.sh',
+						'./build-libraries.sh',
 						'emscripten',
+						'<(host_arch)',
 					],
 				},
 			],

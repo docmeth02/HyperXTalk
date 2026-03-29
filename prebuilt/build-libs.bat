@@ -36,6 +36,10 @@ REM is installed as part of 64-bit cygwin at C:\Cygwin\bin
 REM This script checks for nasm in the path. If it is not present it assumes it
 REM is installed at %ProgramFiles(x86)%\NASM
 
+REM
+REM This file is called as a subroutine by build-all-libs.bat
+REM
+
 REM # get the drive & path of the folder this script lives in
 REM # (note: ends with \ path delimiter)
 FOR /F "delims=" %%A IN ("%0") DO SET _TOOLS_DIR=%%~dpA
@@ -135,10 +139,16 @@ IF %ERRORLEVEL% NEQ 0 (
 	EXIT /B 1
 )
 
+CALL :ENSURE_CYGWIN
+CALL :ENSURE_NASM
+CALL :BUILD_PREBUILT_LIBRARIES
+GOTO :EOF
+
 REM Ensure Cygwin and NASM are in the path
 
 REM Is Cygwin already in the path?
 REM If not, look in a couple of likely locations for it
+:ENSURE_CYGWIN
 WHERE /Q cygpath.exe 1>NUL 2>NUL
 IF %ERRORLEVEL% EQU 0 (
   SET cygwin_path=
@@ -162,7 +172,9 @@ IF %ERRORLEVEL% NEQ 0 (
 	ECHO Cannot find 'bash'. Make sure Cygwin64 is installed with root C:\Cygwin64 and bash is present.
 	EXIT /B 1
 )
+EXIT /B
 
+:ENSURE_NASM
 WHERE /Q nasm 1>NUL 2>NUL
 IF %ERRORLEVEL% EQU 0 (
     SET nasm_path=
@@ -184,7 +196,9 @@ IF %ERRORLEVEL% NEQ 0 (
 	ECHO Cannot find 'nasm'. Make sure nasm is installed in "%ProgramFiles%\NASM" or "%ProgramFiles(x86)%\NASM"
 	EXIT /B 1
 )
+EXIT /B
 
+:BUILD_PREBUILT_LIBRARIES
 IF %1=="" (
 	REM Build OpenSSL
 	CALL "scripts\build-openssl.bat"
@@ -205,3 +219,6 @@ IF %1=="" (
 	CALL "scripts\build-%1.bat" %2
 	IF %ERRORLEVEL% NEQ 0 EXIT /B %ERRORLEVEL%
 )
+EXIT /B
+
+:EOF

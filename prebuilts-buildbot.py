@@ -37,7 +37,7 @@ import config
 #import fetch
 
 # The set of build tasks that this branch supports
-BUILDBOT_TARGETS = ('fetch', 'config', 'compile', 'bin-archive', 'bin-extract', 'prebuilts-upload')
+BUILDBOT_TARGETS = ('config', 'compile', 'bin-archive', 'bin-extract', 'prebuilts-upload')
 
 SKIP_EXIT_STATUS = 88
 
@@ -231,12 +231,12 @@ def buildbot_task(target):
         return do_configure()
     elif target == 'compile':
         return do_compile()
-    elif target == 'bin-archive':
-        return do_bin_archive()
+#    elif target == 'bin-archive':
+#        return do_bin_archive()
     elif target == 'bin-extract':
         return do_bin_extract()
-    elif target == 'prebuilts-upload':
-        return do_prebuilts_upload()
+#    elif target == 'prebuilts-upload':
+#        return do_prebuilts_upload()
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
