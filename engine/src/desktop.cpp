@@ -15,7 +15,6 @@
  along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 #include "platform.h"
-
 #include "globdefs.h"
 #include "filedefs.h"
 #include "osspec.h"
@@ -189,13 +188,29 @@ void MCPlatformHandleSystemAppearanceChanged(void)
     //   end systemAppearanceChanged
     char t_color_buf[8];
     MCplatformGetWindowBackgroundColor(t_color_buf, sizeof(t_color_buf));
-    MCStringRef t_color_str;
-    /* UNCHECKED */ MCStringCreateWithCString(t_color_buf, t_color_str);
-    MCscreen -> delaymessage(MCdefaultstackptr -> getcurcard(),
-                             MCM_system_appearance_changed,
-                             MCplatformIsDarkMode() ? MCSTR("dark") : MCSTR("light"),
-                             t_color_str);
-    MCValueRelease(t_color_str);
+    bool t_is_dark = MCplatformIsDarkMode();
+    
+    // Send to all open stacks (not just the default stack)
+    MCStacknode *t_stack_node = MCstacks->topnode();
+    MCStacknode *t_first_node = t_stack_node;
+    while (t_stack_node != NULL)
+    {
+        MCStack *t_stack = t_stack_node->getstack();
+        if (t_stack != nil && t_stack->getcurcard() != nil)
+        {
+            MCStringRef t_color_str;
+            /* UNCHECKED */ MCStringCreateWithCString(t_color_buf, t_color_str);
+            MCscreen->delaymessage(t_stack->getcurcard(),
+                                     MCM_system_appearance_changed,
+                                     t_is_dark ? MCSTR("dark") : MCSTR("light"),
+                                     t_color_str);
+            MCValueRelease(t_color_str);
+        }
+        t_stack_node = t_stack_node->next();
+        // Stop when we loop back to the first node
+        if (t_stack_node == t_first_node)
+            break;
+    }
 #else
 	MCscreen -> delaymessage(MCdefaultstackptr -> getcurcard(), MCM_system_appearance_changed);
 #endif

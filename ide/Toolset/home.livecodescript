@@ -1388,9 +1388,9 @@ end revInternal__SetupStackFiles
 
 command revInternal__InitialiseDefaults
    revInternal__Log "Enter", "Defaults Initialisation"
-      
+   
    set the _ideoverride of stack "home" to true
-
+   
    switch the platform
       case "MacOS"
          set the stackFileType to "RevoRSTK"
@@ -1398,8 +1398,8 @@ command revInternal__InitialiseDefaults
          set the dontUseNS to false
          set the itemdelimiter to "."
          revInternal__Log "message", "Trying to set the default text of stack home"
-
-         delete stack "revCursors"  // HyperXTalk
+         
+         --         delete stack "revCursors"  // HXT
          hide stack "revMacCursors"    
          break
       case "Win32"
