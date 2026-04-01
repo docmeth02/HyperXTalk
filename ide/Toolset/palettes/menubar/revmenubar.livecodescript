@@ -18,12 +18,14 @@ on preOpenStack
    revIDEPositionPalette the short name of me
    
    if the systemAppearance is "dark" then
-      set the backColor of me to "black"
+      set the backColor of me to "#323232"
       set the foreColor of me to "white"
    else
-      set the backColor of me to "white"
+      set the backColor of me to "#ececec"
       set the foreColor of me to "black"
    end if
+   
+   dispatch "revIDEPositionPaletteDefault" to stack "revIDElibrary" with "revMenubar"
    
    # Since the menubar is topleveled on Linux and Windows, set the cantModify to true
    # to prevent users being able to alter the menubar stack.
@@ -267,7 +269,10 @@ on setMenuProperties
          --screen rect > 800 by 600
          if revIDEGetPreference("cREVMenuBarTopLeft") is empty
          then set the loc of me to item 1 of revIDEStackScreenLoc(the short name of this stack), 54
-         else set the topLeft of me to revIDEGetPreference("cREVMenuBarTopLeft")
+         else 
+            put revIDEGetPreference("cREVMenuBarTopLeft")
+            set the topLeft of me to revIDEGetPreference("cREVMenuBarTopLeft")
+         end if
       end if
    end if
    
@@ -302,6 +307,7 @@ on idePreferenceChanged pPreference
          updateMenubarPreference
          layoutMenu
          ideSetWindowBoundingRect
+         dispatch "revIDEPositionPaletteDefault" to stack "revIDElibrary" with "revMenubar"
          unlock screen
          break
    end switch
@@ -375,9 +381,16 @@ on generateMenubarUI
       if tItem is "Divide" then
          local tName
          put tItem & tDividerCount into tName
-         create image tName in group "toolbar"of me
+         create image tName in group "toolbar" of me
          set the id of it to revIDENewIconID()
          set the filename of image tName of group "toolbar" of me to revMenubarButtonNameToIconPath(tItem)
+         set the visible of image tName to (the systemAppearance is "light")
+         // HXT dark mode
+         put tItem & tDividerCount & "-DM" into tName
+         create image tName in group "toolbar" of me
+         set the id of it to revIDENewIconID()
+         set the filename of image tName of group "toolbar" of me to revMenubarButtonNameToDMIconPath(tItem)
+         set the visible of image tName to (the systemAppearance is "dark")
          add 1 to tDividerCount
       else
          create invisible image tItem in group "icons" of me
@@ -386,6 +399,45 @@ on generateMenubarUI
          local tFilename
          repeat for each item tStyle in "hilited,disabled,depressed,hilited-depressed" 
             put revMenubarButtonNameToIconPath(tItem, tStyle) into tFilename
+            if there is a file tFilename then
+               create invisible image (tItem & "-" & tStyle) in group "icons" of me
+               set the id of it to revIDENewIconID()
+               set the filename of image (tItem & "-" & tStyle) of me to tFilename
+               if tStyle is "hilited" then 
+                  set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+               else if tStyle is "depressed" then
+                  set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+               else if tStyle is "hilited-depressed" then
+                  set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+               else if tStyle is "disabled" then
+                  set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+               end if
+            else
+               if tStyle is "hilited" then 
+                  set the cHighlightedIcon of the templatebutton to the cIcon of the templatebutton
+               else if tStyle is "disabled" then
+                  set the disabledIcon of the templatebutton to the cIcon of the templatebutton
+               else if tStyle is "depressed" then
+                  set the cDepressedIcon of the templatebutton to the cIcon of the templatebutton
+               else if tStyle is "hilited-depressed" then
+                  set the cHighlightedDepressedIcon of the templatebutton to the cDepressedIcon of the templatebutton
+               end if
+            end if
+         end repeat
+         
+         create button tItem in group "toolbar" of me
+         set the cIcon of it to the id of image tItem of group "icons" of me
+         set the icon of it to the cIcon of it
+         set the label of it to revIDELocalizeMenuItem(tItem)
+         
+         // HXT dark mode
+         put "-DM" after tItem
+         create invisible image tItem in group "icons" of me
+         set the id of it to revIDENewIconID()
+         set the filename of image tItem of me to revMenubarButtonNameToDMIconPath(tItem)
+         #local tFilename
+         repeat for each item tStyle in "hilited,disabled,depressed,hilited-depressed" 
+            put revMenubarButtonNameToDMIconPath(tItem, tStyle) into tFilename
             if there is a file tFilename then
                create invisible image (tItem & "-" & tStyle) in group "icons" of me
                set the id of it to revIDENewIconID()
@@ -578,8 +630,8 @@ constant kDividerWidth = 2
 constant kDividerHeight = 41
 constant kMenuBarHeight = 26
 constant kMenuBarTop = 3
-//eh constant kUpgradeButtonMarginVertical = 8
-//eh constant kUpgradeButtonMarginHorizontal = 15
+// HXT constant kUpgradeButtonMarginVertical = 8
+// HXT constant kUpgradeButtonMarginHorizontal = 15
 on layoutMenu
    lock screen
    lock messages
@@ -605,6 +657,12 @@ on layoutMenu
          put tItem & tDividerCount into tName
          set the rect of image tName of group "toolbar" of me to 0, 0, kDividerWidth, kDividerHeight
          set the topleft of image tName of group "toolbar" of me to tLeft + kPadding / 2 - kDividerWidth / 2, tTop
+         //add 1 to tDividerCount
+         add kPadding to tLeft
+         // HXT dark mode
+         put tItem & tDividerCount & "-DM" into tName
+         set the rect of image tName of group "toolbar" of me to 0, 0, kDividerWidth, kDividerHeight
+         set the topleft of image tName of group "toolbar" of me to tLeft + kPadding / 2 - kDividerWidth / 2, tTop
          add 1 to tDividerCount
          add kPadding to tLeft
          put the long id of image tName into tLastDivide
@@ -614,6 +672,12 @@ on layoutMenu
          put revMenubarButtonFormattedWidth(tItem) into tWidth
          set the width of button tItem of group "toolbar" of me to tWidth
          set the topleft of button tItem of group "toolbar" of me to tLeft,tTop
+         set the visible of button tItem of group "toolbar" of me to (the systemAppearance is "light")
+         // HXT dark mode
+         set the width of button (tItem & "-DM") of group "toolbar" of me to (the width of button tItem of group "toolbar" of me)
+         set the topLeft of button (tItem & "-DM") of group "toolbar" of me to (the topLeft of button tItem of group "toolbar" of me)
+         set the visible of button (tItem & "-DM") of group "toolbar" of me to (the systemAppearance is "dark")
+         
          add tWidth to tLeft
       end if
    end repeat
@@ -629,13 +693,13 @@ on layoutMenu
    set the rect of button "Divider" of group "revMenuBar" of me to 0, kMenuBarHeight - kDividerWidth, tLeft + kPadding, kMenuBarHeight
    set the topleft of me to tTopLeft
    unlock messages
-      
+   
    updateButtonState
    unlock screen
 end layoutMenu	
 
 function revMenubarItems
-   return "Inspector,Code,Message Box,Divide,Group,Edit Group,Select Grouped,Divide,Messages,Errors,Divide,Dictionary,Divide"
+   return "Inspector,Code,Message Box,Divide,Group,Edit Group,Select Grouped,Divide,Messages,Errors,Divide,Dictionary"
 --   Sample Stacks,Tutorials,Resources,Dictionary,Divide,Test,Divide"
 end revMenubarItems
 
@@ -702,7 +766,7 @@ on updateMenubarPreference
       end if
    end if
    
-/*
+/* HXT
    set the width of field "label" of group "upgrade" of me to 1000
    set the height of field "label" of group "upgrade" of me to the formattedHeight of field "label" of group "upgrade" of me
    local tLabelWidth
@@ -891,6 +955,17 @@ function revMenubarButtonNameToIconPath pName, pStyle
    return tIcon & ".png"
 end revMenubarButtonNameToIconPath
 
+function revMenubarButtonNameToDMIconPath pName, pStyle
+   local tPath, tIcon
+   put revIDEPaletteResourcePath("images/") into tPath
+   replace " " with "-" in pName
+   put tPath & toLower(pName) into tIcon
+   if pStyle is not empty then
+      put "-" & pStyle after tIcon
+   end if
+   return tIcon & ".png"
+end revMenubarButtonNameToDMIconPath
+
 function revMenubarButtonText pName, pHilited
    if pHIlited is false then
       return pName
@@ -927,6 +1002,9 @@ function revMenubarButtonFormattedWidth pName
 end revMenubarButtonFormattedWidth
 
 function revIDELocalizeMenuItem pItem
+   if (pItem ends with "-DM") then
+      replace "-DM" with EMPTY in pItem
+   end if
    return pItem
 end revIDELocalizeMenuItem
 
@@ -3132,6 +3210,26 @@ end revMenubarHelpMenuPick
 // HXT
 on systemAppearanceChanged pMode, pWindowColor
    set the backgroundColor of this stack to pWindowColor
+   local tDividerCounter
+   put 1 into tDividerCounter
+   repeat for each item tItem in revMenubarItems()
+      local tModeIsLight, tModeIsDark
+      if (pMode is "light") then
+         put TRUE into tModeIsLight
+         put FALSE into tModeIsDark
+      else
+         put FALSE into tModeIsLight
+         put TRUE into tModeIsDark
+      end if
+      if (tItem = "Divide") then
+         set the visible of image (tItem & tDividerCounter) of group "Toolbar" of me to tModeIsLight
+         set the visible of image (tItem & tDividerCounter & "-DM") of group "Toolbar" of me to tModeIsDark
+         add 1 to tDividerCounter
+      else
+         set the visible of button tItem of group "Toolbar" of me to tModeIsLight
+         set the visible of button (tItem & "-DM") of group "Toolbar" of me to tModeIsDark
+      end if
+   end repeat
    if pMode is "dark" then
       set the foreColor of me to "white"
    else

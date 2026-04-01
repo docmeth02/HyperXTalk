@@ -268,7 +268,7 @@ public:
             else
             {
                 t_thumb_len = (CGFloat)(sb->thumbsize / (sb->endvalue - sb->startvalue)) * t_length;
-                if (t_thumb_len < 8.0f) t_thumb_len = 8.0f;
+                if (t_thumb_len < 16.0f) t_thumb_len = 16.0f; // Minimum thumb size to match visual appearance
             }
             
             double t_range = sb->endvalue - sb->startvalue;
@@ -374,7 +374,7 @@ public:
                         {
                             t_norm = (CGFloat)((sb->thumbpos - sb->startvalue) / (t_range - sb->thumbsize));
                             t_thumb_len = (CGFloat)(sb->thumbsize / t_range) * t_length;
-                            if (t_thumb_len < 8.0f) t_thumb_len = 8.0f;
+                            if (t_thumb_len < 16.0f) t_thumb_len = 16.0f; // Minimum thumb size to match visual appearance
                         }
                         else
                         {
