@@ -1059,14 +1059,14 @@ command revInternal__Log pType, pMessage
       put 0 into sLogIndent
       switch the platform
          case "Linux"
-            put "~/.runrev/logs/" & toLower(kProductName) & "_tools_log.txt" into tLogPath
+            put "~/.hyperxtalk/logs/" & toLower(kProductName) & "_tools_log.txt" into tLogPath
             break
          case "MacOS"
-            put specialFolderPath("cusr") & "/Library/Logs/RunRev/" & kProductName & "ToolsLog.txt"  into tLogPath
+            put specialFolderPath("cusr") & "/Library/Logs/HyperXTalk/" & kProductName & "ToolsLog.txt"  into tLogPath
             break
          case "Win32"
             -- Make sure we put logs in the 'Local' AppData section.
-            put specialFolderPath(0x001c) & "/RunRev/Logs/" & kProductName & "ToolsLog.txt" into tLogPath
+            put specialFolderPath(0x001c) & "/HyperXTalk/Logs/" & kProductName & "ToolsLog.txt" into tLogPath
             break
       end switch
       set the itemDelimiter to "/"
@@ -1114,29 +1114,29 @@ command revInternal__InitialiseSystem
    if it is empty then
       get "Small"
    end if
-   /* HyperXTalk
-   if sLicensePlatform is "Windows" and it is not "None" then
-      local tCrashSettings, tVersion
-      put the version into tVersion
-      replace "." with "_" in tVersion
-      replace "-" with "_" in tVersion
-      */
-      local tCrashSettings
-      put it is "Medium" into tCrashSettings["verbose"]
-      
-      convert the seconds to dateItems
-      put format("%s/%s-%s-%04d_%02d_%02d-%02d_%02d_%02d.dmp", \
-            sCrashLogPath, kProductName, "", item 1 of it, item 2 of it, item 3 of it, \
-            item 4 of it, item 5 of it, item 6 of it) into tCrashSettings["filename"]
-      
-      revInternal__Log "Message", "Configuring crash log output to" && tCrashSettings["filename"]
-      do "set the revCrashReportSettings to tCrashSettings"
-      // HyperXTalk end if
-      
-      revInternal__Log "Leave", "System Initialisation"
-      
-      return tSuccess
-   end revInternal__InitialiseSystem
+   // HXT
+   --   if sLicensePlatform is "Windows" and it is not "None" then
+   --      local tCrashSettings, tVersion
+   --      put the version into tVersion
+   --      replace "." with "_" in tVersion
+   --      replace "-" with "_" in tVersion
+   
+   local tCrashSettings
+   put it is "Medium" into tCrashSettings["verbose"]
+   
+   convert the seconds to dateItems
+   put format("%s/%s-%s-%04d_%02d_%02d-%02d_%02d_%02d.dmp", \
+         sCrashLogPath, kProductName, "", item 1 of it, item 2 of it, item 3 of it, \
+         item 4 of it, item 5 of it, item 6 of it) into tCrashSettings["filename"]
+   
+   revInternal__Log "Message", "Configuring crash log output to" && tCrashSettings["filename"]
+   do "set the revCrashReportSettings to tCrashSettings"
+   // HXT end if
+   
+   revInternal__Log "Leave", "System Initialisation"
+   
+   return tSuccess
+end revInternal__InitialiseSystem
 
 command revInternal__InitialiseGlobals
    revInternal__Log "Enter", "Globals Initialisation"
