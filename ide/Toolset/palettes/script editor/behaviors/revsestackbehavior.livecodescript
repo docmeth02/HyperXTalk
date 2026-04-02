@@ -2577,14 +2577,32 @@ command revSEInitialize pDontCheckTarget
    
    # On OS X, toplevel windows have a white background, which is both inconsistent with the rest of the IDE
    # and looks bad.
-   if seGetPlatform() is "MacOS" then
+   if (the platform is "MacOS") then
       set the backgroundColor of me to "236,236,236"
    end if
    
    actionResizeStack true
    
    set the showInvisibles of me to false
+   
+   // HXT dark mode
+   if (the systemAppearance is "dark") then
+      set the backColor of me to "#323232"
+   else
+      set the backColor of me to "#ececec"
+   end if
 end revSEInitialize
+
+// HXT
+on systemAppearanceChanged pMode, pWindowColor
+   set the backgroundColor of this stack to pWindowColor
+   if pMode is "dark" then
+      set the foreColor of me to "white"
+   else
+      set the foreColor of me to "black"
+   end if
+end systemAppearanceChanged
+
 
 on idePreferenceChanged pPreference, pValue
    switch pPreference

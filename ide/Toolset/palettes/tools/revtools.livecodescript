@@ -1,4 +1,4 @@
-﻿script "revTools"
+﻿script "revTools" with behavior "revPaletteBehavior"
 constant BLOCK_SIZE = 20
 
 constant kToolsColumnCountDefault = 3
@@ -56,6 +56,14 @@ on openStack
    lock screen
    layoutpalette
    registerForMessages
+   
+   // HXT dark mode
+   if (the systemAppearance is "dark") then
+      set the backColor of me to "#323232"
+   else
+      set the backColor of me to "#ececec"
+   end if
+   
    set the visible of me to true
    unlock screen
 end openStack
@@ -1257,3 +1265,14 @@ on moveStack
    ideSetWindowBoundingRect
    pass moveStack
 end moveStack
+
+
+// HXT
+on systemAppearanceChanged pMode, pWindowColor
+   set the backgroundColor of this stack to pWindowColor
+   if pMode is "dark" then
+      set the foreColor of me to "white"
+   else
+      set the foreColor of me to "black"
+   end if
+end systemAppearanceChanged

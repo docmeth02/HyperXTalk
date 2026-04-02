@@ -267,6 +267,15 @@ public:
             }
             else
             {
+                // Check if there's content to scroll - if not, return track part
+                if (sb->thumbsize <= 0.0)
+                {
+                    if (t_horizontal) {
+                        return (mx < drect.x + drect.width / 2) ? WTHEME_PART_TRACK_DEC : WTHEME_PART_TRACK_INC;
+                    } else {
+                        return (my < drect.y + drect.height / 2) ? WTHEME_PART_TRACK_DEC : WTHEME_PART_TRACK_INC;
+                    }
+                }
                 t_thumb_len = (CGFloat)(sb->thumbsize / (sb->endvalue - sb->startvalue)) * t_length;
                 if (t_thumb_len < 16.0f) t_thumb_len = 16.0f; // Minimum thumb size to match visual appearance
             }
@@ -284,6 +293,15 @@ public:
             {
                 // Scrollbar: subtract thumb size from scrollable range
                 double t_scrollable = t_range - sb->thumbsize;
+                if (sb->thumbsize <= 0.0)
+                {
+                    // No content - return track part
+                    if (t_horizontal) {
+                        return (mx < drect.x + drect.width / 2) ? WTHEME_PART_TRACK_DEC : WTHEME_PART_TRACK_INC;
+                    } else {
+                        return (my < drect.y + drect.height / 2) ? WTHEME_PART_TRACK_DEC : WTHEME_PART_TRACK_INC;
+                    }
+                }
                 if (t_scrollable > 0)
                 {
                     CGFloat t_norm = (CGFloat)((sb->thumbpos - sb->startvalue) / t_scrollable);
@@ -370,6 +388,12 @@ public:
                     else
                     {
                         // Scrollbar: subtract thumb size from scrollable range
+                        if (sb->thumbsize <= 0.0)
+                        {
+                            // No content - hide thumb completely
+                            drect.x = drect.y = drect.width = drect.height = 0;
+                            return;
+                        }
                         if (sb->thumbsize < t_range)
                         {
                             t_norm = (CGFloat)((sb->thumbpos - sb->startvalue) / (t_range - sb->thumbsize));
@@ -1067,7 +1091,16 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
         {
             double t_range = p_info->scrollbar.endvalue - p_info->scrollbar.startvalue;
             CGFloat t_pos = 0.0f, t_proportion = 1.0f;
-            if (t_range > 0.0)
+            
+            // HXT: If thumbsize >= range, there's no content to scroll - hide the knob completely
+            // This happens when the field is empty (thumbsize equals field height = range)
+            bool t_has_content = (p_info->scrollbar.thumbsize < t_range);
+            if (!t_has_content)
+            {
+                t_pos = 0.0f;
+                t_proportion = 0.0f;
+            }
+            else if (t_range > 0.0)
             {
                 double t_scrollable = t_range - p_info->scrollbar.thumbsize;
                 if (t_scrollable > 0.0)
@@ -1127,7 +1160,9 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
                 // The knob must be drawn separately.  Both methods draw into the
                 // current NSGraphicsContext (already set to t_ns_ctx above).
                 [t_scroller drawKnobSlotInRect:t_native_frame highlight:t_hilited];
-                [t_scroller drawKnob];
+                // Only draw knob if there's content to scroll
+                if (t_proportion > 0.0f)
+                    [t_scroller drawKnob];
 
                 CGContextRestoreGState(t_cgcontext);
             }];
