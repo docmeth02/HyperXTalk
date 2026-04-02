@@ -389,7 +389,7 @@ on generateMenubarUI
          put tItem & tDividerCount & "-DM" into tName
          create image tName in group "toolbar" of me
          set the id of it to revIDENewIconID()
-         set the filename of image tName of group "toolbar" of me to revMenubarButtonNameToDMIconPath(tItem)
+         set the filename of image tName of group "toolbar" of me to revMenubarButtonNameToDMIconPath(tItem & "-DM")
          set the visible of image tName to (the systemAppearance is "dark")
          add 1 to tDividerCount
       else
@@ -431,25 +431,24 @@ on generateMenubarUI
          set the label of it to revIDELocalizeMenuItem(tItem)
          
          // HXT dark mode
-         put "-DM" after tItem
-         create invisible image tItem in group "icons" of me
+         --         put "-DM" after tItem
+         create invisible image tItem & "-DM" in group "icons" of me
          set the id of it to revIDENewIconID()
-         set the filename of image tItem of me to revMenubarButtonNameToDMIconPath(tItem)
-         #local tFilename
+         set the filename of image (tItem & "-DM") of me to revMenubarButtonNameToDMIconPath(tItem & "-DM")
          repeat for each item tStyle in "hilited,disabled,depressed,hilited-depressed" 
-            put revMenubarButtonNameToDMIconPath(tItem, tStyle) into tFilename
+            put revMenubarButtonNameToDMIconPath(tItem & "-DM", tStyle) into tFilename
             if there is a file tFilename then
-               create invisible image (tItem & "-" & tStyle) in group "icons" of me
+               create invisible image (tItem & "-" & tStyle & "-DM") in group "icons" of me
                set the id of it to revIDENewIconID()
-               set the filename of image (tItem & "-" & tStyle) of me to tFilename
+               set the filename of image (tItem & "-" & tStyle & "-DM") of me to tFilename
                if tStyle is "hilited" then 
-                  set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                  set the cHighlightedIcon of the templatebutton to the id of image (tItem & "-" & tStyle & "-DM") of group "icons" of me
                else if tStyle is "depressed" then
-                  set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                  set the cDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle & "-DM") of group "icons" of me
                else if tStyle is "hilited-depressed" then
-                  set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                  set the cHighlightedDepressedIcon of the templatebutton to the id of image (tItem & "-" & tStyle & "-DM") of group "icons" of me
                else if tStyle is "disabled" then
-                  set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle) of group "icons" of me
+                  set the disabledIcon of the templatebutton to the id of image (tItem & "-" & tStyle & "-DM") of group "icons" of me
                end if
             else
                if tStyle is "hilited" then 
@@ -464,8 +463,9 @@ on generateMenubarUI
             end if
          end repeat
          
-         create button tItem in group "toolbar" of me
-         set the cIcon of it to the id of image tItem of group "icons" of me
+         
+         create button (tItem & "-DM") in group "toolbar" of me
+         set the cIcon of it to the id of image (tItem & "-DM") of group "icons" of me
          set the icon of it to the cIcon of it
          set the label of it to revIDELocalizeMenuItem(tItem)
       end if
@@ -766,42 +766,42 @@ on updateMenubarPreference
       end if
    end if
    
-/* HXT
-   set the width of field "label" of group "upgrade" of me to 1000
-   set the height of field "label" of group "upgrade" of me to the formattedHeight of field "label" of group "upgrade" of me
-   local tLabelWidth
-   put the formattedwidth of field "label" of group "upgrade" of me into tLabelWidth
-   set the width of field "label" of group "upgrade" of me to tLabelWidth
-   set the loc of field "label" of group "upgrade" of me to 0,0
+   // HXT
+   --   set the width of field "label" of group "upgrade" of me to 1000
+   --   set the height of field "label" of group "upgrade" of me to the formattedHeight of field "label" of group "upgrade" of me
+   --   local tLabelWidth
+   --   put the formattedwidth of field "label" of group "upgrade" of me into tLabelWidth
+   --   set the width of field "label" of group "upgrade" of me to tLabelWidth
+   --   set the loc of field "label" of group "upgrade" of me to 0,0
    
-   if tShowIcons is false then
-      set the visible of graphic "bg" of group "upgrade" of me to false
-      set the textColor of field "label" of group "upgrade" of me to "black"
-   else
-      set the visible of graphic "bg" of group "upgrade" of me to true
-      set the textColor of field "label" of group "upgrade" of me to "white"
-      
-      local tHeight
-      put the height of me - kPadding into tHeight
-      
-      if the platform is not "MacOS" then
-         subtract kMenuBarHeight from tHeight
-      end if
-      
-      local tRect
-      put the rect of field "label" of group "upgrade" of me into tRect
-      put item 1 of tRect - kUpgradeButtonMarginHorizontal, \
-            -tHeight div 2, \
-            item 3 of tRect + kUpgradeButtonMarginHorizontal, \
-            tHeight div 2 into tRect
-      
-      set the rect of graphic "bg" of group "upgrade" of me to tRect
-   end if
-   set the rect of group "upgrade" of me to the formattedRect of group "upgrade" of me
-
+   --   if tShowIcons is false then
+   --      set the visible of graphic "bg" of group "upgrade" of me to false
+   --      set the textColor of field "label" of group "upgrade" of me to "black"
+   --   else
+   --      set the visible of graphic "bg" of group "upgrade" of me to true
+   --      set the textColor of field "label" of group "upgrade" of me to "white"
+   
+   --      local tHeight
+   --      put the height of me - kPadding into tHeight
+   
+   --      if the platform is not "MacOS" then
+   --         subtract kMenuBarHeight from tHeight
+   --      end if
+   
+   --      local tRect
+   --      put the rect of field "label" of group "upgrade" of me into tRect
+   --      put item 1 of tRect - kUpgradeButtonMarginHorizontal, \
+   --            -tHeight div 2, \
+   --            item 3 of tRect + kUpgradeButtonMarginHorizontal, \
+   --            tHeight div 2 into tRect
+   
+   --      set the rect of graphic "bg" of group "upgrade" of me to tRect
+   --   end if
+   --   set the rect of group "upgrade" of me to the formattedRect of group "upgrade" of me
+   
    set the topleft of me to tTopLeft
-*/
-
+   
+   
    unlock messages
    unlock screen
 end updateMenubarPreference
@@ -849,7 +849,7 @@ on updateButtonHilite pTargetName, pValue
    end if
    
    set the showIcon of tTargetLongID to tShowIcon
-
+   
    unlock messages
    unlock screen
 end updateButtonHilite
@@ -960,10 +960,11 @@ function revMenubarButtonNameToDMIconPath pName, pStyle
    put revIDEPaletteResourcePath("images/") into tPath
    replace " " with "-" in pName
    put tPath & toLower(pName) into tIcon
+   replace "-DM" with EMPTY in tIcon
    if pStyle is not empty then
       put "-" & pStyle after tIcon
    end if
-   return tIcon & ".png"
+   return tIcon & "-DM" & ".png"
 end revMenubarButtonNameToDMIconPath
 
 function revMenubarButtonText pName, pHilited
@@ -1002,6 +1003,7 @@ function revMenubarButtonFormattedWidth pName
 end revMenubarButtonFormattedWidth
 
 function revIDELocalizeMenuItem pItem
+   // HXT
    if (pItem ends with "-DM") then
       replace "-DM" with EMPTY in pItem
    end if
@@ -1155,6 +1157,9 @@ on highlightObject pObject
 end highlightObject
 
 on revMenubarMenuButtonClicked pWhich
+   if (pWhich ends with "-DM") then
+      replace "-DM" with EMPTY in pWhich
+   end if
    switch pWhich
       case "Inspector"
          if (the selectedObject) is empty then
@@ -3198,12 +3203,12 @@ on revMenubarHelpMenuPick pWhich
       case "All Guides"
          revIDEOpenPalette "guide"
          break
-         //eh case "Relicense"
-         //eh revIDEActionRelicense
-         //eh break
-         //eh case "Update"
-         //eh revIDECheckForUpdates
-         //eh break
+         // HXT case "Relicense"
+         // HXT revIDEActionRelicense
+         // HXT break
+         // HXT case "Update"
+         // HXT revIDECheckForUpdates
+         // HXT break
    end switch
 end revMenubarHelpMenuPick
 
