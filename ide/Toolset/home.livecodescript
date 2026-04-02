@@ -298,26 +298,20 @@ constant kProductName = "HyperXTalk"
 -- Internal Setup Functions
 --
 
-/* HyperXTalk
-private command revInternal__SetupLicense 
-   revInternal__Log "Enter", "License Setup"
-   
-   put line 1 of the revLicenseInfo into sLicenseName
-   put line 2 of the revLicenseInfo into sLicenseOrganization
-   put line 3 of the revLicenseInfo into sLicenseClass
-   put line 4 of the revLicenseInfo into sLicenseMultiplicity
-   
-   if sLicenseMultiplicity is empty then
-      put 1 into sLicenseMultiplicity
-   end if
-   
-   put the version && "build" && the buildnumber into sLicenseVersion
-   
-   put revEnvironmentPlatform() into sLicensePlatform
-   
-   revInternal__Log "Leave", "License Setup"
-end revInternal__SetupLicense
-*/
+// HXT
+--private command revInternal__SetupLicense 
+--   revInternal__Log "Enter", "License Setup"
+--   put line 1 of the revLicenseInfo into sLicenseName
+--   put line 2 of the revLicenseInfo into sLicenseOrganization
+--   put line 3 of the revLicenseInfo into sLicenseClass
+--   put line 4 of the revLicenseInfo into sLicenseMultiplicity
+--   if sLicenseMultiplicity is empty then
+--      put 1 into sLicenseMultiplicity
+--   end if
+--   put the version && "build" && the buildnumber into sLicenseVersion
+--   put revEnvironmentPlatform() into sLicensePlatform
+--   revInternal__Log "Leave", "License Setup"
+--end revInternal__SetupLicense
 
 
 private command revInternal__SetupPaths
@@ -337,18 +331,18 @@ private command revInternal__SetupPaths
    set the itemDelimiter to "/"
    switch the platform
       case "Linux"
-         /* HyperXTalk
-         local tOldFolder
-         put the folder into tOldFolder
-         set the folder to "~"
-         put the folder & slash & ".hyperxtalk/hyperxtalk/enterprise/preferences" into sOldPreferencesPath
-         if there is no folder sOldPreferencesPath then
-            put the folder & slash & ".hyperxtalk/hyperxtalk/studio/preferences" into sOldPreferencesPath
-         end if
-         if there is no folder sOldPreferencesPath then
-            put the folder & slash & ".hyperxtalk/hyperxtalk/media/preferences" into sOldPreferencesPath
-         end if
-         */
+         // HTX
+         --         local tOldFolder
+         --         put the folder into tOldFolder
+         --         set the folder to "~"
+         --         put the folder & slash & ".hyperxtalk/hyperxtalk/enterprise/preferences" into sOldPreferencesPath
+         --         if there is no folder sOldPreferencesPath then
+         --            put the folder & slash & ".hyperxtalk/hyperxtalk/studio/preferences" into sOldPreferencesPath
+         --         end if
+         --         if there is no folder sOldPreferencesPath then
+         --            put the folder & slash & ".hyperxtalk/hyperxtalk/media/preferences" into sOldPreferencesPath
+         --         end if
+         
          local tOldFolder
          put the folder into tOldFolder
          put the folder & slash & ".hyperxtalk/preferences" into sPreferencesPath
@@ -362,15 +356,14 @@ private command revInternal__SetupPaths
          break
       case "MacOS"
          
-         /* HyperXTalk
-         put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Enterprise" into sOldPreferencesPath
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Studio" into sOldPreferencesPath
-         end if
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Media" into sOldPreferencesPath
-         end if
-         */
+         // HyperXTalk
+         --         put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Enterprise" into sOldPreferencesPath
+         --         if there is no folder sOldPreferencesPath then
+         --            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Studio" into sOldPreferencesPath
+         --         end if
+         --         if there is no folder sOldPreferencesPath then
+         --            put specialFolderPath("Preferences") & "/Runtime Revolution/Revolution Media" into sOldPreferencesPath
+         --         end if
          
          put specialFolderPath("Preferences") & "/HyperXTalk" into sPreferencesPath
          put specialFolderPath("cusr") & "/Library/Application Support/HyperXTalk/Cache" into sCachePath
@@ -381,16 +374,15 @@ private command revInternal__SetupPaths
          put item 1 to -5 of tEnginePath into tEnginePath
          break
       case "Windows"
-         /* HyperXTalk
-         -- We put prefereces into the 'Roaming' AppData folder.
-         put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Enterprise/Preferences" into sOldPreferencesPath
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Studio/Preferences" into sOldPreferencesPath
-         end if
-         if there is no folder sOldPreferencesPath then
-            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Media/Preferences" into sOldPreferencesPath
-         end if
-         */
+         // HXT
+         --         -- We put prefereces into the 'Roaming' AppData folder.
+         --         put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Enterprise/Preferences" into sOldPreferencesPath
+         --         if there is no folder sOldPreferencesPath then
+         --            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Studio/Preferences" into sOldPreferencesPath
+         --         end if
+         --         if there is no folder sOldPreferencesPath then
+         --            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Media/Preferences" into sOldPreferencesPath
+         --         end if
          
          put specialFolderPath(0x001a) & "/HyperXTalk/Preferences" into sPreferencesPath
          -- We put everything else in the 'Local' AppData folder.
