@@ -75,11 +75,14 @@ on saveStackRequest
    pass saveStackRequest
 end saveStackRequest
 
+local sLogPath
 on preOpenStack
    local tEdition, tSplashPath
    if the short name of the owner of the target is not "Home" then
       pass preOpenStack
    end if
+   
+   open file sLogPath for text write  // HXT
    
    revInternal__Log "Enter", "Pre-Open Stack"
    
@@ -99,6 +102,11 @@ on openStack
    
    revInternal__Log "Leave", "Open Stack"
 end openStack
+
+// HXT
+on CloseStack
+   close file sLogPath
+end CloseStack
 
 local sSplashStartTime
 on revInternal__openStack
@@ -993,13 +1001,14 @@ command revInternal__InstallFileAssociations
    end if
 end revInternal__InstallFileAssociations
 
-local sLogIndent, sLogPath, sLog
+--local sLogIndent, sLogPath, sLog  // HXT
+local sLogIndent, sLog
 private command revInternal__LogToFile pType, pMessage   
    if sLogPath is empty then
       exit revInternal__LogToFile
    end if
    
-   open file sLogPath for text append
+   --   open file sLogPath for text append  // HXT
    
    if pType is not "Message" then
       put pType && pMessage into pMessage
@@ -1012,7 +1021,7 @@ private command revInternal__LogToFile pType, pMessage
       write tLine & return to file sLogPath
    end repeat
    
-   close file sLogPath
+   --   close file sLogPath  // HXT
 end revInternal__LogToFile
 
 private command revInternal__LogToVariable pType, pMessage  
