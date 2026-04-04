@@ -4,12 +4,10 @@
   Author:   HyperXTalk
   Platform: macOS
   Description:
-    Provides access to the macOS Contacts framework (AddressBook / CNContactStore)
-    via LiveCode Builder foreign function interface (FFI).
+    Provides access to the macOS Contacts framework (AddressBook / CNContactStore).
 
   Requirements:
     • macOS 10.11+ (Contacts framework)
-    • OpenXTalk 1.14+ or LiveCode 9.6+ (LCB with ObjC bridge)
     • App must have NSContactsUsageDescription in its Info.plist
       (or the standalone builder settings) and the user must grant access.
 

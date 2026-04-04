@@ -1,3 +1,20 @@
+Library: com.hyperxtalk.macoscontacts
+
+Type: library
+
+Summary:
+Provides access to the macOS Contacts framework (AddressBook / CNContactStore).
+
+Tags: macOS, Contacts, Library
+
+version: 1.0.0
+
+author: HyperXTalk
+
+
+
+
+
 Name: contactsGroups
 
 Type: handler

@@ -1,9 +1,347 @@
-Library: 
+Library: com.hyperxtalk.macosdock
 
-Type: 
+Type: library
 
-author: HyperXTalk
+Summary:
+This library provides access to macOS dock features including badge labels,
+dock icon images, and dock context menus via the Cocoa NSDockTile and
+NSApplication APIs. All handlers are safe to call on non-Mac platforms —
+they silently return without error.
+
+Tags: macOS, Dock, Library
 
 version: 1.2.0
+
+author: Emily-Elizabeth Howard
+
+
+Name: SetDockBadgeLabel
+
+Type: handler
+
+Syntax: SetDockBadgeLabel(<pLabel>)
+
+Summary: Sets the badge label on the application's dock icon.
+
+pLabel: The string to display as the badge label. Pass empty to clear the badge.
+
+Description:
+<SetDockBadgeLabel> displays a badge on the application's macOS dock icon.
+The label is typically a short string such as a number representing a count
+or notification state. Passing an empty string removes the badge entirely.
+
+To clear the badge you can also use the convenience handler <ClearDockBadge>.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+SetDockBadgeLabel "99"
+
+Example:
+SetDockBadgeLabel ""
+
+Parameters:
+:
+
+
+
+
+Name: ClearDockBadge
+
+Type: handler
+
+Syntax: ClearDockBadge()
+
+Summary: Removes the badge label from the application's dock icon.
+
+Description:
+<ClearDockBadge> removes any badge label currently displayed on the
+application's macOS dock icon. This is a convenience wrapper around
+<SetDockBadgeLabel> with an empty string.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+ClearDockBadge
+
+Parameters:
+:
+
+
+
+
+Name: SetDockIconImage
+
+Type: handler
+
+Syntax: SetDockIconImage(<pPath>)
+
+Summary: Sets the application's dock icon to an image loaded from a file.
+
+pPath: An absolute file path to an image file (PNG, ICNS, or TIFF).
+
+Description:
+<SetDockIconImage> dynamically changes the application's macOS dock icon
+at runtime, for example to reflect application state or progress.
+
+pPath must be an absolute file path. Relative paths are not supported as
+the underlying Cocoa API (NSImage initWithContentsOfFile:) does not resolve
+them.
+
+To restore the original icon use <ResetDockIconImage>.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+SetDockIconImage "/Users/emily/myapp/icons/alert.png"
+
+Parameters:
+:
+
+
+
+
+Name: ResetDockIconImage
+
+Type: handler
+
+Syntax: ResetDockIconImage()
+
+Summary: Restores the application's dock icon to its default.
+
+Description:
+<ResetDockIconImage> restores the application's macOS dock icon to its
+original default after a previous call to <SetDockIconImage>.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+ResetDockIconImage
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuInstall
+
+Type: handler
+
+Syntax: DockMenuInstall()
+
+Summary: Installs the dock context menu and registers the calling object as the message target.
+
+Description:
+<DockMenuInstall> activates the dock context menu, which appears when the
+user right-clicks or Control-clicks the application's dock icon. The calling
+script object will receive a dockMenuItemClicked message whenever the user
+selects an item, with the item's identifier as the first parameter:
+
+    on dockMenuItemClicked pIdentifier
+       if pIdentifier is "prefs" then
+          -- open preferences
+       end if
+    end dockMenuItemClicked
+
+The menu is rebuilt from the current item registry each time the user opens
+it, so items can be added or removed at any time. Call <DockMenuAddItem>
+to populate the menu before or after installing.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuAddItem "prefs", "Open Preferences"
+DockMenuAddItem "update", "Check for Updates"
+DockMenuInstall
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuUninstall
+
+Type: handler
+
+Syntax: DockMenuUninstall()
+
+Summary: Uninstalls the dock context menu and restores the original app delegate.
+
+Description:
+<DockMenuUninstall> removes the dock context menu and restores the
+application's original NSApplicationDelegate. The dockMenuItemClicked
+message will no longer be sent after this call. Item registrations are
+preserved, so calling <DockMenuInstall> again will restore the same menu.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuUninstall
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuAddItem
+
+Type: handler
+
+Syntax: DockMenuAddItem(<pIdentifier>, <pTitle>)
+
+Summary: Adds an item to the dock context menu.
+
+pIdentifier: A unique string identifier for the item, returned in dockMenuItemClicked when the item is selected.
+
+pTitle: The label displayed for the item in the menu. Unicode is supported.
+
+Description:
+<DockMenuAddItem> registers a menu item in the dock context menu. Items are
+displayed in the order they were added. If an item with the same identifier
+already exists it will be updated in place.
+
+The identifier is also used in calls to <DockMenuRemoveItem> and
+<DockMenuSetItemEnabled>.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuAddItem "prefs", "Open Preferences"
+
+Example:
+DockMenuAddItem "compose", "✉ New Message"
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuAddSeparator
+
+Type: handler
+
+Syntax: DockMenuAddSeparator()
+
+Summary: Adds a separator line to the dock context menu.
+
+Description:
+<DockMenuAddSeparator> inserts a visual separator at the current position
+in the dock context menu. Multiple separators are supported.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuAddItem "prefs", "Open Preferences"
+DockMenuAddSeparator
+DockMenuAddItem "quit", "Quit"
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuRemoveItem
+
+Type: handler
+
+Syntax: DockMenuRemoveItem(<pIdentifier>)
+
+Summary: Removes an item from the dock context menu by identifier.
+
+pIdentifier: The identifier of the item to remove, as passed to <DockMenuAddItem>.
+
+Description:
+<DockMenuRemoveItem> removes a previously added item from the dock context
+menu. If no item with the given identifier exists the call is silently ignored.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuRemoveItem "update"
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuClear
+
+Type: handler
+
+Syntax: DockMenuClear()
+
+Summary: Removes all items and separators from the dock context menu.
+
+Description:
+<DockMenuClear> removes all items and separators from the dock context menu.
+The menu delegate remains installed — call <DockMenuUninstall> if you want
+to remove the dock menu entirely.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuClear
+
+Parameters:
+:
+
+
+
+
+Name: DockMenuSetItemEnabled
+
+Type: handler
+
+Syntax: DockMenuSetItemEnabled(<pIdentifier>, <pEnabled>)
+
+Summary: Enables or disables a dock context menu item.
+
+pIdentifier: The identifier of the item to enable or disable.
+
+pEnabled: True to enable the item, false to disable it.
+
+Description:
+<DockMenuSetItemEnabled> enables or disables a dock context menu item.
+Disabled items are displayed greyed out and do not fire dockMenuItemClicked
+when selected.
+
+This handler has no effect on non-Mac platforms.
+
+Tags: macOS, Dock
+
+Example:
+DockMenuSetItemEnabled "update", false
+
+Example:
+DockMenuSetItemEnabled "update", true
+
+Parameters:
+:
 
 
