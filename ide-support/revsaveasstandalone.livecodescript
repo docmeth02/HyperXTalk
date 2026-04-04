@@ -580,6 +580,18 @@ private command revStandaloneCopyInclusions pStack, pStackFileList, pStackSource
    -- copy database drivers
    revCopyDatabaseDrivers pTarget, pStackSourceFile, pStandalonePath, pEngineSourceFile
    -- copy externals
+   // HXT
+   if (revEnvironmentIsInstalled()) AND (the platform = "macOS") then
+      local tExternalsFolder
+      set the itemDelimiter to "/"
+      put item 1 to -5 of pEngineSourceFile & "/Externals" into tExternalsFolder
+      revCopyModule "MacOSX", "revdb", "revdb.bundle", tExternalsFolder, pDirectory & "/Externals", "", TRUE
+      local tStackExternals
+      put the externals of stack pStack into tStackExternals
+      put LF & "Externals/revdb.bundle" after tStackExternals
+      filter tStackExternals without EMPTY
+      set the externals of stack pStack to tStackExternals
+   end if
    revCopyExternals pTarget, pStackSourceFile, pEngineSourceFile, pStandalonePath
    
    // IM-2015-10-14: [[ BrowserWidget ]] Copy CEF files needed for the browser widget.
@@ -2163,8 +2175,7 @@ private command revCopyDatabaseDrivers pPlatform, pStackFilePath, pStandalonePat
    end if
    
    -- loop over drivers
-   repeat for each line tDriver in sStandaloneSettingsA["databaseDrivers"]
-      
+   repeat for each line tDriver in sStandaloneSettingsA["databaseDrivers"]      
       # OK-2010-01-13 : No Oracle support
       if tPlatform is "Linux" and tDriver is "Oracle" then
          revStandaloneAddWarning "Linux, Oracle is not currently supported on this platform"
@@ -2411,8 +2422,7 @@ private command revCopyExternals pPlatform, pStackFilePath, pEnginePath, pStanda
       put tExtension into tSharedExtension
    end if
    put tDetailsA["platform"] into tPlatform
-   put tDetailsA["architecture"] into tArch
-   
+   put tDetailsA["architecture"] into tArch   
    
    # OK-2010-04-26: Bug 8539 - PDF Printer not included
    if sStandaloneSettingsA["pdfPrinter"] then
