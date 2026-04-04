@@ -863,7 +863,7 @@ on revSBDefaultStandaloneSettings pStack, @xSettingsA
    end if
    // HXT
    put revEnvironmentRuntimePath() & "/Mac OS X/arm64/Support/Sample Icons" into tName
-   if xSettingsA["OSX,iconFile"] = "" then put tName & "/GenericApplication.icns" into xSettingsA["OSX,iconFile"]
+   put tName & "/GenericApplication.icns" into xSettingsA["OSX,iconFile"]
    
    if xSettingsA["answerDialog"] = "" then put kAnswerDialog into xSettingsA["answerDialog"]
    if xSettingsA["cursors"] = "" then put kCursors into xSettingsA["cursors"]
