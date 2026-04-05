@@ -842,6 +842,12 @@ on updateButtonHilite pTargetName, pValue
    
    setButtonHilite tTargetLongID, pValue
    set the label of tTargetLongID to revMenubarButtonText(pTargetName, pValue)
+   local tTargetLabel
+   put the label of tTargetLongID into tTargetLabel
+   if (tTargetLabel ends with "-DM") then
+      replace "-DM" with EMPTY in tTargetLabel
+      set the label of tTargetLongID to tTargetLabel
+   end if
    if pValue then
       set the icon of tTargetLongID to the cHighlightedIcon of tTargetLongID
    else
@@ -878,45 +884,57 @@ on updateButtonState
    local tGroupHilite
    put word 1 of tSelObj is "group" and the number of lines in tSelobj is 1 into tGroupHilite
    updateButtonHilite "Group", tGroupHilite
+   updateButtonHilite "Group-DM", tGroupHilite
    
    -- Group button should be disabled if no controls are selected
    setToolbarButtonState "Group", tControlSelected
+   setToolbarButtonState "Group-DM", tControlSelected
    
    local tEditGroupHilite
    put the editBg of the topStack and word 1 of tSelObj is not "group" into tEditGroupHilite
    updateButtonHilite "Edit Group", tEditGroupHilite
+   updateButtonHilite "Edit Group-DM", tEditGroupHilite
    
    -- If a group is selected, the Edit Group button should be enabled
    -- It should also be enabled (with label 'Stop Editing') if we're currently editing a group
-   setToolbarButtonState "Edit Group", \
-         tGroupHilite or the editBg of the topstack
+   setToolbarButtonState "Edit Group", tGroupHilite or the editBg of the topstack
+   setToolbarButtonState "Edit Group-DM", tGroupHilite or the editBg of the topstack
    
    # Click buttons don't stay hilited
    updateButtonHilite "Message Box", false
+   updateButtonHilite "Message Box-DM", false
    updateButtonHilite "Inspector", false
+   updateButtonHilite "Inspector-DM", false
    updateButtonHilite "Code", false
-//   updateButtonHilite "Test", false
-//   updateButtonHilite "Sample Stacks", false
-//   updateButtonHilite "Tutorials", false
-//   updateButtonHilite "Resources", false
+   updateButtonHilite "Code-DM", false
+   //   updateButtonHilite "Test", false
+   //   updateButtonHilite "Sample Stacks", false
+   //   updateButtonHilite "Tutorials", false
+   //   updateButtonHilite "Resources", false
    updateButtonHilite "Dictionary", false
+   updateButtonHilite "Dictionary-DM", false
    
    # Toggle buttons hilited according to state of property
    global gRevSuppressErrors, gRevSuppressMessages
    updateButtonHilite "Errors", gRevSuppressErrors
    updateButtonHilite "Messages", gRevSuppressMessages
    updateButtonHilite "Select Grouped", the selectGroupedControls
+   updateButtonHilite "Errors-DM", gRevSuppressErrors
+   updateButtonHilite "Messages-DM", gRevSuppressMessages
+   updateButtonHilite "Select Grouped-DM", the selectGroupedControls
    
    # Deal with enabled/disabled of code and inspector
    global gRevDevelopment
    local tCanInspect
    put tControlSelected or tUserStack or gRevDevelopment into tCanInspect
    
-   setToolbarButtonState "Code", tCanInspect
-   setToolbarButtonState "Inspector", tCanInspect
+   setToolbarButtonState "Code", tSelObj is not EMPTY
+   setToolbarButtonState "Inspector", tSelObj is not EMPTY
+   setToolbarButtonState "Code-DM", tSelObj is not EMPTY
+   setToolbarButtonState "Inspector-DM", tSelObj is not EMPTY
    
    # Deal with enabled/disabled of test
-//   setToolbarButtonState "Test", revIDEGetPreference("cDeployPlatforms") is not empty 
+   //   setToolbarButtonState "Test", revIDEGetPreference("cDeployPlatforms") is not empty 
    
    if revIDETutorialInProgress() is not empty then
       disableToolbar
@@ -1693,8 +1711,8 @@ private function revMenubarObjectMenu pContext
    put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
    
    ### Initial sections
-   put enableMenuItem("&Object Inspector", tIsObjectTarget) & return after tObject
-   put enableMenuItem("&Card Inspector", tIsUserTarget) & return after tObject
+   put enableMenuItem("&Object Inspector/SHIFT CMD K", tIsObjectTarget) & return after tObject
+   put enableMenuItem("&Card Inspector/OPT CMD K", tIsUserTarget) & return after tObject
    put enableMenuItem("&Stack Inspector/K", tIsUserTarget) & return after tObject
    put "-" & return after tObject
    put enableMenuItem("Object Script/E", tIsObjectTarget) & return after tObject
