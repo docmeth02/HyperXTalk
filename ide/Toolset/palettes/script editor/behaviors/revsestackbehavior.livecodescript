@@ -2594,17 +2594,6 @@ command revSEInitialize pDontCheckTarget
    end if
 end revSEInitialize
 
-// HXT
-on systemAppearanceChanged pMode, pWindowColor
-   set the backgroundColor of this stack to pWindowColor
-   if pMode is "dark" then
-      set the foreColor of me to "white"
-   else
-      set the foreColor of me to "black"
-   end if
-end systemAppearanceChanged
-
-
 on idePreferenceChanged pPreference, pValue
    switch pPreference
       case "cREVScriptDebugMode"
@@ -3073,3 +3062,17 @@ command revSEAddDefaultHandler pHandler
    put tDefaultScript after tNewScript
    revSESetScript(tNewScript)
 end revSEAddDefaultHandler
+
+
+// HXT
+on systemAppearanceChanged pMode, pWindowColor
+   put pMode, pWindowColor
+   set the backgroundColor of this stack to pWindowColor
+   if pMode is "dark" then
+      set the backColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "black"
+      set the foreColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "white"
+   else
+      set the backColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "white"
+      set the foreColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "black"
+   end if
+end systemAppearanceChanged
