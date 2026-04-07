@@ -116,7 +116,7 @@ package-mac:
 	@# Toolset libraries: IDE support scripts from ide-support/
 	@# ----------------------------------------------------------------
 	@for f in \
-	    revsblibrary revsaveasstandalone; do \
+	    revsblibrary revsaveasstandalone revliburl; do \
 	  [ -f "ide-support/$$f.livecodescript" ] && \
 	    cp "ide-support/$$f.livecodescript" "$(TOOLS_DIR)/Toolset/libraries/" \
 	    || true; \
@@ -158,6 +158,19 @@ package-mac:
 	    >> "$(RUNTIME_ARM64)/Externals/Externals.txt"
 	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
 	    > "$(RUNTIME_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@# ----------------------------------------------------------------
+	@# Externals (Runtime standalone use) — mirror of Tools/Externals
+	@# ----------------------------------------------------------------
+	@for b in revbrowser revxml revspeech revzip revdb; do \
+	  [ -d "$(TOOLS_DIR)/Externals/$$b.bundle" ] && \
+	    cp -R "$(TOOLS_DIR)/Externals/$$b.bundle" \
+	      "$(RUNTIME_ARM64)/Externals/" || true; \
+	done
+	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	  [ -d "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" ] && \
+	    cp -R "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" \
+	      "$(RUNTIME_ARM64)/Externals/Database Drivers/" || true; \
+	done
 	@# ----------------------------------------------------------------
 	@# Runtime: arm64 standalone engine + support libraries
 	@# ----------------------------------------------------------------
@@ -230,6 +243,11 @@ package-mac:
 	@[ -f "ide/Open Source Licenses.txt" ] && \
 	    cp "ide/Open Source Licenses.txt" "$(SUPPORT_DIR)/" || true
 	@# ----------------------------------------------------------------
+	@# Documentation: Dictionary and help files
+	@# ----------------------------------------------------------------
+	@[ -d "ide/Documentation" ] && \
+	    cp -R "ide/Documentation" "$(TOOLS_DIR)/Documentation" || true
+	@# ----------------------------------------------------------------
 	@# Strip extended attributes (resource forks, Finder info, etc.)
 	@# xattr -cr must run before codesign or signing will be rejected.
 	@# ----------------------------------------------------------------
@@ -262,6 +280,12 @@ MACBIN_TOOLS     = $(MACBIN_BUNDLE)/Contents/Tools
 MACBIN_SUPPORT   = $(MACBIN_BUNDLE)/Contents/Support
 MACBIN_RT_ARM64  = $(MACBIN_TOOLS)/Runtime/Mac OS X/arm64
 
+bump-revision:
+	@perl -i -pe 's/(BUILD_REVISION\s*=\s*)(\d+)/$$1.($$2+1)/e' version
+	@REV=$$(perl -ne 'print $$1 if /BUILD_REVISION\s*=\s*(\d+)/' version) && \
+	  PREV=$$REV perl -i -pe 's/(BUILD_LONG_VERSION\s*=\s*\d+\.\d+\.\d+\.)\d+/$$1.$$ENV{PREV}/e' version
+	@echo "Build revision is now $$(perl -ne 'print $$1 if /BUILD_REVISION\s*=\s*(\d+)/' version)"
+
 package-mac-bin:
 	@echo "=== Packaging $(MACBIN_BUNDLE) ==="
 	@# ----------------------------------------------------------------
@@ -270,6 +294,8 @@ package-mac-bin:
 	@mkdir -p "$(MACBIN_TOOLS)/Toolset/libraries"
 	@mkdir -p "$(MACBIN_TOOLS)/Plugins"
 	@mkdir -p "$(MACBIN_TOOLS)/Externals/Database Drivers"
+	@mkdir -p "$(MACBIN_TOOLS)/Documentation"
+	@[ -d "ide/Documentation" ] && cp -R "ide/Documentation/." "$(MACBIN_TOOLS)/Documentation/" || true
 	@mkdir -p "$(MACBIN_RT_ARM64)/Support"
 	@mkdir -p "$(MACBIN_RT_ARM64)/Externals/Database Drivers"
 	@mkdir -p "$(MACBIN_TOOLS)/Extensions"
@@ -307,10 +333,19 @@ package-mac-bin:
 	@# ----------------------------------------------------------------
 	@cp -R ide/Toolset/. "$(MACBIN_TOOLS)/Toolset/"
 	@# ----------------------------------------------------------------
+	@# Runtime: copy ide/Runtime to Tools/Runtime
+	@# ----------------------------------------------------------------
+	@[ -d "ide/Runtime" ] && cp -R "ide/Runtime/." "$(MACBIN_TOOLS)/Runtime/" || true
+	@# Create Sample Icons folder for standalone builder (expects icons in Support/Sample Icons/)
+	@mkdir -p "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/Sample Icons"
+	@[ -f "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/GenericApplication.icns" ] && \
+	  cp "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/GenericApplication.icns" \
+	  "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/Sample Icons/" || true
+	@# ----------------------------------------------------------------
 	@# Toolset libraries: IDE support scripts from ide-support/
 	@# ----------------------------------------------------------------
 	@for f in \
-	    revsblibrary revsaveasstandalone; do \
+	    revsblibrary revsaveasstandalone revliburl; do \
 	  [ -f "ide-support/$$f.livecodescript" ] && \
 	    cp "ide-support/$$f.livecodescript" "$(MACBIN_TOOLS)/Toolset/libraries/" \
 	    || true; \
@@ -344,6 +379,19 @@ package-mac-bin:
 	    >> "$(MACBIN_RT_ARM64)/Externals/Externals.txt"
 	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
 	    > "$(MACBIN_RT_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@# ----------------------------------------------------------------
+	@# Externals (Runtime standalone use) — mirror of Tools/Externals
+	@# ----------------------------------------------------------------
+	@for b in revbrowser revxml revspeech revzip revdb; do \
+	  [ -d "$(MACBIN_TOOLS)/Externals/$$b.bundle" ] && \
+	    cp -R "$(MACBIN_TOOLS)/Externals/$$b.bundle" \
+	      "$(MACBIN_RT_ARM64)/Externals/" || true; \
+	done
+	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	  [ -d "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" ] && \
+	    cp -R "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" \
+	      "$(MACBIN_RT_ARM64)/Externals/Database Drivers/" || true; \
+	done
 	@# ----------------------------------------------------------------
 	@# Runtime: arm64 standalone engine + support libraries
 	@# ----------------------------------------------------------------
@@ -415,6 +463,11 @@ package-mac-bin:
 	    cp "ide/about.txt" "$(MACBIN_SUPPORT)/" || true
 	@[ -f "ide/Open Source Licenses.txt" ] && \
 	    cp "ide/Open Source Licenses.txt" "$(MACBIN_SUPPORT)/" || true
+	@# ----------------------------------------------------------------
+	@# Documentation: Dictionary and help files
+	@# ----------------------------------------------------------------
+	@[ -d "ide/Documentation" ] && \
+	    cp -R "ide/Documentation" "$(MACBIN_TOOLS)/Documentation" || true
 	@# ----------------------------------------------------------------
 	@# Strip extended attributes (resource forks, Finder info, etc.)
 	@# xattr -cr must run before codesign or signing will be rejected.
