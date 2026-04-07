@@ -1266,7 +1266,6 @@ end moveStack
 
 // HXT
 on systemAppearanceChanged pMode, pWindowColor, pTextColor
-   put pMode, pWindowColor, pTextColor
    set the backgroundColor of this stack to pWindowColor
    set the forgroundColor of this stack to pTextColor
 end systemAppearanceChanged
