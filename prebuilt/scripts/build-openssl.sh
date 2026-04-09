@@ -2,28 +2,64 @@
 
 set -e
 
+echo "in build-openssl.sh"
+
 source "${BASEDIR}/scripts/platform.inc"
+echo "platform = ${PLATFORM}"
 source "${BASEDIR}/scripts/lib_versions.inc"
+echo "openssl version=${OpenSSL_VERSION}"
+#echo "Thirdparty_LIBS_linux=${Thirdparty_LIBS_linux}"
+
 source "${BASEDIR}/scripts/util.inc"
 
+
+
 # Grab the source for the library
+#if [ ${OpenSSL_VERSION} == "1.1.1" ] ; then
+    # otherwise use the old version (1.1.1)
+#    OLDV="https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1v/openssl-1.1.1v.tar.gz"
+#else
+    # when we can move from 1.1.1 use this url
+    #https://github.com/openssl/openssl/releases/download/openssl-4.0.0-alpha1/openssl-4.0.0-alpha1.tar.gz
+#    OPENSSL_ROOT="https://github.com/openssl/openssl/releases/download/OpenSSL"
+#fi
+
+#OPENSSL_ROOT="https://github.com/openssl/openssl/releases/download/openssl"
+#OPENSSL_ROOT="https://www.openssl.org/source/openssl-"
 OPENSSL_TGZ="openssl-${OpenSSL_VERSION}.tar.gz"
 OPENSSL_SRC="openssl-${OpenSSL_VERSION}"
+
 cd "${BUILDDIR}"
 
 if [ ! -d "$OPENSSL_SRC" ] ; then
+	echo "local openssl directory not found"
 	if [ ! -e "$OPENSSL_TGZ" ] ; then
-		echo "Fetching OpenSSL source"
-		fetchUrl "https://www.openssl.org/source/openssl-${OpenSSL_VERSION}.tar.gz" "${OPENSSL_TGZ}"
+		echo "no openssl .gz file found"
+#		echo "Fetching OpenSSL source"
+
+        # use this for version 1.1.1
+        if [ ${OpenSSL_VERSION} == "1.1.1v" ] ; then
+            OLDV="https://github.com/openssl/openssl/releases/download/OpenSSL_1_1_1v/openssl-1.1.1v.tar.gz"
+		    echo "Fetching OpenSSL source from ${OLDV}"
+	        fetchUrl "${OLDV}" "${OPENSSL_TGZ}"
+        else
+        # and this one for newer versions
+            OPENSSL_ROOT="https://github.com/openssl/openssl/releases/download/openssl"
+		    echo "Fetching OpenSSL source from ${OPENSSL_ROOT}-${OpenSSL_VERSION}/openssl-${OpenSSL_VERSION}.tar.gz"
+    		fetchUrl "${OPENSSL_ROOT}-${OpenSSL_VERSION}/openssl-${OpenSSL_VERSION}.tar.gz" "${OPENSSL_TGZ}"
+        #		fetchUrl "${OPENSSL_ROOT}-${OpenSSL_VERSION}/openssl-${OpenSSL_VERSION}.tar.gz" "${OPENSSL_TGZ}"
+        #		fetchUrl "${OPENSSL_ROOT}${OpenSSL_VERSION}.tar.gz" "${OPENSSL_TGZ}"
+        fi
+
 		if [ $? != 0 ] ; then
 			echo "    failed"
-			if [ -e "${OPENSSL_TGZ}" ] ; then 
-				rm ${OPENSSL_TGZ} 
+			if [ -e "${OPENSSL_TGZ}" ] ; then
+				rm ${OPENSSL_TGZ}
 			fi
 			exit
 		fi
 	fi
-	
+
 	echo "Unpacking OpenSSL source"
 	tar -xf "${OPENSSL_TGZ}"
 fi
@@ -34,14 +70,14 @@ function buildOpenSSL {
 	local PLATFORM=$1
 	local ARCH=$2
 	local SUBPLATFORM=$3
-	
+
 	# Boolean flag: if non-zero then configure CC/LD/CFLAGS/LDFLAGS etc.
 	local CONFIGURE_CC_FOR_TARGET=1
 
 	# Each target type in OpenSSL is given a name
 	case "${PLATFORM}" in
 		mac)
-			if [ "${ARCH}" == "x86_64" -o "${ARCH}" == "ppc64" -o "${ARCH}" == "arm64" ] ; then
+			if [ "${ARCH}" == "x86_64" -o "${ARCH}" == "ppc64" ] ; then
 				SPEC="darwin64-${ARCH}-cc"
 			else
 				SPEC="darwin-${ARCH}-cc"
@@ -107,7 +143,7 @@ function buildOpenSSL {
 		local NAME="${PLATFORM}/${ARCH}"
 		local PLATFORM_NAME=${PLATFORM}
 	fi
-	
+
 	# The android-* targets derive the arch from the last portion of the target name
 	# so this needs to be a prefix instead of suffix.
 	CUSTOM_SPEC="livecode_${SPEC}"
@@ -148,12 +184,12 @@ EOF
 
 		echo "Configuring OpenSSL for ${NAME}"
 		./Configure ${OPENSSL_ARCH_CONFIG}
-		
+
 		# iOS requires some tweaks to the source when building for devices
 		if [ "${PLATFORM}" == "ios" -a "${ARCH}" != "i386 " ] ; then
 			sed -i "" -e "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
 		fi
-		
+
 		# iOS SDKs don't work with makedepend
 		if [ "${PLATFORM}" == "ios" ] ; then
 			sed -i "" -e "s/MAKEDEPPROG=makedepend/MAKEDEPPROG=$\(CC\) -M/" Makefile
@@ -163,7 +199,7 @@ EOF
 		make clean && make depend && make ${MAKEFLAGS} && make install_sw
 		RESULT=$?
 		cd ..
-		
+
 		# Save the configuration for this build
 		if [ $RESULT == 0 ] ; then
 			echo "${OPENSSL_ARCH_CONFIG}" > "${OPENSSL_ARCH_SRC}/config.cmd"
@@ -179,13 +215,20 @@ EOF
 		CRYPTO_LIBS+="${INSTALL_DIR}/${NAME}/lib/libcrypto.a "
 		SSL_LIBS+="${INSTALL_DIR}/${NAME}/lib/libssl.a "
 	else
-		mkdir -p "${OUTPUT_DIR}/lib/${NAME}"
-		cp "${INSTALL_DIR}/${NAME}/lib/libcrypto.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomcrypto.a"
-		cp "${INSTALL_DIR}/${NAME}/lib/libssl.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomssl.a"
+ 		mkdir -p "${OUTPUT_DIR}/lib/${NAME}"
+#        if [ ${OpenSSL_VERSION} == "1.1.1v" ] ; then
+	    if [ -e "${INSTALL_DIR}/${NAME}/lib/libcrypto.a" ] ; then
+   		    cp "${INSTALL_DIR}/${NAME}/lib/libcrypto.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomcrypto.a"
+    		cp "${INSTALL_DIR}/${NAME}/lib/libssl.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomssl.a"
+        else
+		    cp "${INSTALL_DIR}/${NAME}/lib64/libcrypto.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomcrypto.a"
+		    cp "${INSTALL_DIR}/${NAME}/lib64/libssl.a" "${OUTPUT_DIR}/lib/${NAME}/libcustomssl.a"
+        fi
 	fi
 
 	mkdir -p "${OUTPUT_DIR}/include"
-	cp -R "${INSTALL_DIR}/${NAME}/include/openssl" "${OUTPUT_DIR}/include/openssl"
+#	cp -r "${INSTALL_DIR}/${NAME}/include/openssl" "${OUTPUT_DIR}/include/openssl"
+	cp -r "${INSTALL_DIR}/${NAME}/include/openssl" "${OUTPUT_DIR}/include"
 }
 
 

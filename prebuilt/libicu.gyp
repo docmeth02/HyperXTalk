@@ -3,17 +3,27 @@
 	[
 		'../common.gypi',
 	],
-	
+
 	'target_defaults':
 	{
 		'conditions':
 		[
 			[
+				'1 == 1',
+				{
+					'variables':
+					{
+# change this value if you change the versions/icu file contents
+						'icu_version': '58',
+					},
+				},
+			],
+			[
 				'host_os == "mac"',
 				{
 					'variables':
 					{
-						'prebuilt_icu_bin_dir': 'bin/mac',
+						'prebuilt_icu_bin_dir': 'bin/mac/<(target_arch)',
 						'prebuilt_icu_share_dir': 'share',
 					},
 				},
@@ -55,15 +65,15 @@
 			],
 		],
 	},
-	
+
 	'targets':
 	[
 		{
 			'target_name': 'libicu',
 			'type': 'none',
-			
+
 			'toolsets': ['host', 'target'],
-			
+
 			'dependencies':
 			[
 				'fetch.gyp:fetch',
@@ -116,7 +126,7 @@
 			'toolsets': ['host','target'],
 
 			'link_settings':
-			{	
+			{
 				'target_conditions':
 				[
 					[
@@ -129,19 +139,19 @@
 									{
 										'libraries':
 										[
-											'lib/mac/libicui18n.a',
-											'lib/mac/libicuio.a',
-											'lib/mac/libicutu.a',
-											'lib/mac/libicuuc.a',
-											'lib/mac/libicudata.a',
+											'lib/mac/>(toolset_arch)/libicui18n.a',
+											'lib/mac/>(toolset_arch)/libicuio.a',
+											'lib/mac/>(toolset_arch)/libicutu.a',
+											'lib/mac/>(toolset_arch)/libicuuc.a',
+											'lib/mac/>(toolset_arch)/libicudata.a',
 										],
 									},
 									{
 										'library_dirs':
 										[
-											'lib/mac',
+											'lib/mac/>(toolset_arch)',
 										],
-										
+
 										'libraries':
 										[
 											'-licui18n',
@@ -175,7 +185,7 @@
 							[
 								'lib/linux/>(toolset_arch)',
 							],
-							
+
 							'libraries':
 							[
 								'-licui18n',
@@ -200,7 +210,7 @@
 										[
 											'lib/android/<(target_arch)/<(android_subplatform)',
 										],
-										
+
 										'libraries':
 										[
 											'-licui18n',
@@ -223,7 +233,7 @@
 							[
 								'unpacked/icu/<(uniform_arch)-win32-$(PlatformToolset)_static_$(ConfigurationName)/lib',
 							],
-							
+
 							'libraries':
 							[
 								'-lsicuin',
@@ -231,7 +241,7 @@
 								'-lsicutu',
 								'-lsicuuc',
 								'-lsicudt',
-								
+
 								# ICU dependencies
 								'-ladvapi32',
 							],
@@ -252,6 +262,7 @@
 								'-licutu',
 								'-licuuc',
 								'-licudata',
+								'-ldl',
 							],
 						},
 					],
@@ -262,21 +273,21 @@
 		{
 			'target_name': 'minimal_icu_data',
 			'type': 'none',
-			
+
 			'toolsets': ['host', 'target'],
 
 			'dependencies':
 			[
 				'fetch.gyp:fetch#host',
 			],
-			
+
 			'actions':
 			[
 				{
 					'action_name': 'list_icu_data',
 					'inputs':
 					[
-						'>(prebuilt_icu_share_dir)/icudt58l.dat',
+						'>(prebuilt_icu_share_dir)/icudt>(icu_version)l.dat',
 					],
 					'outputs':
 					[
@@ -286,18 +297,19 @@
 					[
 						'>(prebuilt_icu_bin_dir)/icupkg',
 						'--list',
-						'>(prebuilt_icu_share_dir)/icudt58l.dat',
+						'>(prebuilt_icu_share_dir)/icudt>(icu_version)l.dat',
 						'--auto_toc_prefix',
 						'--outlist',
 						'<(INTERMEDIATE_DIR)/data/icudata-full-list.txt',
 					],
 				},
-				
+
 				{
 					'action_name': 'gen_icu_data_remove_list',
 					'inputs':
 					[
 						'<(INTERMEDIATE_DIR)/data/icudata-full-list.txt',
+#						'<(INTERMEDIATE_DIR)/data/out/tmp/icudata.lst',
 						'rsrc/icudata-minimal-list.txt',
 					],
 					'outputs':
@@ -309,11 +321,12 @@
 						'python',
 						'../util/remove_matching.py',
 						'<(INTERMEDIATE_DIR)/data/icudata-full-list.txt',
+#						'<(INTERMEDIATE_DIR)/data/out/tmp/icudata.lst',
 						'rsrc/icudata-minimal-list.txt',
 						'<(INTERMEDIATE_DIR)/data/icudata-remove-list.txt',
 					],
 				},
-				
+
 				{
 					'action_name': 'minimal_icu_data',
 					'inputs':
@@ -324,14 +337,14 @@
 					[
 						'<(SHARED_INTERMEDIATE_DIR)/data/icudata-minimal.dat',
 					],
-					
+
 					'action':
 					[
 						'>(prebuilt_icu_bin_dir)/icupkg',
 						'--remove',
 						'<(INTERMEDIATE_DIR)/data/icudata-remove-list.txt',
 						'--auto_toc_prefix',
-						'>(prebuilt_icu_share_dir)/icudt58l.dat',
+						'>(prebuilt_icu_share_dir)/icudt>(icu_version)l.dat',
 						'<(SHARED_INTERMEDIATE_DIR)/data/icudata-minimal.dat',
 					],
 				},
@@ -341,14 +354,14 @@
 		{
 			'target_name': 'encode_minimal_icu_data',
 			'type': 'none',
-			
+
 			'toolsets': ['host', 'target'],
 
 			'dependencies':
 			[
 				'minimal_icu_data',
 			],
-			
+
 			'actions':
 			[
 				{
@@ -362,7 +375,7 @@
 					[
 						'<(SHARED_INTERMEDIATE_DIR)/src/icudata-minimal.cpp',
 					],
-					
+
 					'action':
 					[
 						'<@(perl)',
@@ -375,6 +388,6 @@
 				},
 			],
 		},
-		
+
 	],
 }

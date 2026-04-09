@@ -2,10 +2,10 @@
 	'variables':
 	{
 		# Default target architecture if not specified
-		'target_arch': 'x86',
+		'target_arch': 'x86_64',
 		
 		# Uniform arch for output directory naming - default to x86 if not set
-		'uniform_arch%': 'x86',
+		'uniform_arch%': 'x86-64',
 		
 		# Nested variables are a bit of a strange beast in Gyp; they are
 		# evaluated before the containing dictionary and are therefore

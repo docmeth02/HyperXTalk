@@ -3,12 +3,12 @@
 source "${BASEDIR}/scripts/platform.inc"
 source "${BASEDIR}/scripts/lib_versions.inc"
 
-echo $Thirdparty_BUILDREVISION
-echo $Thirdparty_VERSION
+echo "3rdparty buildrevision = ${Thirdparty_BUILDREVISION}"
+echo "3rdparty version = ${Thirdparty_VERSION}"
 
-echo $PLATFORM
-echo $SUBPLATFORM
-echo $ARCH
+echo "platform = ${PLATFORM}"
+echo "subplatform = ${SUBPLATFORM}"
+echo "arch = ${ARCH}"
 
 if [ "$XCODEBUILD" == "" ]; then
 	XCODEBUILD="xcodebuild"
@@ -53,9 +53,11 @@ elif [ "$PLATFORM" == "android" ]; then
 	LIBPATH="lib/android/$ARCH/$SUBPLATFORM"
 elif [ "$PLATFORM" == "win32" ]; then
 	LIBS="${Thirdparty_LIBS_win32}"
-	BUILDPATH=""
-	LIBPATH=""
+	BUILDPATH="../build-win-$ARCH/livecode/out/Release/obj.target/thirdparty"
+	LIBPATH="lib/win/$ARCH"
 fi
+
+export BUILD_THIRDPARTY=1
 
 make -C .. config-$MAKE_TARGET
 
