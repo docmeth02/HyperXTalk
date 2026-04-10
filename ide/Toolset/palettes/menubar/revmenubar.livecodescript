@@ -988,8 +988,10 @@ function revMenubarButtonText pName, pHilited
    
    switch pName
       case "Group"
+      case "Group-DM"
          return "Ungroup"
       case "Edit Group"
+      case "Edit Group-DM"
          return "Stop Editing"
       default
          return pName
