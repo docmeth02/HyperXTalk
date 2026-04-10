@@ -89,7 +89,29 @@ cp "$REPO/_build/mac/Debug/libzip.a"    "$REPO/prebuilt/lib/mac/libzip.a"
 
 ---
 
-### 5. Build the engine
+### 5. Build icupkg (host tool used by the ICU data step)
+
+```bash
+sh prebuilt/scripts/build-icupkg-mac-arm64.sh
+```
+
+---
+
+### 6. Populate the remaining prebuilts (libgif, libjpeg, libpng, libpcre,
+###    libzip, ICU libs, libcustomcrypto/ssl, stub libpq/libmysql)
+
+```bash
+brew install openssl@3     # if not already installed
+sh prebuilt/scripts/build-mac-extras.sh
+```
+
+This script works around several things the upstream fetch-mac step
+was supposed to handle but no longer does (broken prebuilt URL). See
+the comment at the top of `build-mac-extras.sh` for details.
+
+---
+
+### 7. Build the engine
 
 ```bash
 make compile-mac
@@ -101,7 +123,7 @@ make compile-mac
 
 ---
 
-### 6. Code sign mac-bin
+### 8. Code sign mac-bin
 
 ```bash
 REPO=~/Developer/HyperXTalk
@@ -118,7 +140,7 @@ echo "Done signing."
 
 ---
 
-### 7. Build the installer
+### 9. Build the installer
 
 ```bash
 python3 build_installer.py
@@ -131,7 +153,7 @@ _build/final/output/HyperXTalkInstaller-1_0_0-Mac.app
 
 ---
 
-### 8. Install and run
+### 10. Install and run
 
 ```bash
 open ~/Developer/HyperXTalk/_build/final/output/HyperXTalkInstaller-1_0_0-Mac.app

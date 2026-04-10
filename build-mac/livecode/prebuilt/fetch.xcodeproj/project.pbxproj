@@ -506,7 +506,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo note: \"Fetching prebuilt libraries for OSX\"\nexec ./fetch-libraries.sh mac\nexit 1\n";
+			shellScript = "echo note: \"fetch-mac: libraries already present in prebuilt/lib/mac, skipping\"\nexit 0\n";
 			showEnvVarsInLog = 0;
 		};
 		E95509900D5B2271C511BFDD /* Action "fetch" */ = {
