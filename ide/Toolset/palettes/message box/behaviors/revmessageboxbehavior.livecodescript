@@ -492,11 +492,66 @@ private command __UpdateMessageFont
 end __UpdateMessageFont
 
 private command __UpdateMessageColors
-   local tColor
-   put revIDEGetPreference("cScriptEditor,editor,backgroundcolor") into tColor
-   set the backgroundColor of field "auto complete" of card "Single Line" of me to tColor
-   set the backgroundColor of field "script" of card "Multiple Lines" of me to tColor
+   local tBgColor, tFgColor, tCardBgColor
+   // HXT dark mode: the script editor's backgroundcolor preference is a
+   // hardcoded light value, so in dark appearance we override it with the
+   // shared dark row color and a light foreground from revIDEColor. Typed
+   // text gets syntax-colorized on a per-character basis by the editor
+   // library (see issue #42 — script editor theming), so individual tokens
+   // may still look off in dark mode; fixing that is out of scope here.
+   // What we fix here is the chrome + each card's field backgrounds.
+   if the systemAppearance is "dark" then
+      put revIDEColor("dataView_rowColor") into tBgColor
+      put revIDEColor("text_1") into tFgColor
+      put tBgColor into tCardBgColor
+   else
+      put revIDEGetPreference("cScriptEditor,editor,backgroundcolor") into tBgColor
+      put empty into tFgColor
+      put empty into tCardBgColor
+   end if
+
+   // Iterate every card in the stack and paint its background + every
+   // field on the card. The message box has 9 cards (Single Line,
+   // Multiple Lines, Stacks in Use, Front Scripts, Back Scripts, Global
+   // Properties, Global Variables, Pending Messages, templates) — rather
+   // than hardcoding each one by name, loop generically so any new card or
+   // new field picks up dark mode automatically.
+   //
+   // Some cards (Pending Messages, Front Scripts, Stacks in Use, etc.)
+   // use a dataView widget rooted at `group "objectList"`. The dataView
+   // has baked light row colors and a white dvBackground graphic, so the
+   // same direct-paint approach we use in the project browser needs to be
+   // applied here per-card.
+   local tCardCount, tFieldCount, i, j
+   put the number of cards of me into tCardCount
+   repeat with i = 1 to tCardCount
+      set the backgroundColor of card i of me to tCardBgColor
+      put the number of fields of card i of me into tFieldCount
+      repeat with j = 1 to tFieldCount
+         set the backgroundColor of field j of card i of me to tBgColor
+         set the foregroundColor of field j of card i of me to tFgColor
+      end repeat
+      // dataView fixup (same pattern used for the project browser)
+      if there is a group "objectList" of card i of me then
+         set the backgroundColor of group "objectList" of card i of me to tBgColor
+         try
+            set the backgroundColor of graphic "dvBackground" of group "objectList" of card i of me to tBgColor
+         end try
+         set the viewProp["row color"] of group "objectList" of card i of me to tBgColor
+         set the viewProp["alternate row color"] of group "objectList" of card i of me to tBgColor
+         set the viewProp["hilite color"] of group "objectList" of card i of me to revIDEColor("dataView_HiliteColor")
+      end if
+   end repeat
 end __UpdateMessageColors
+
+// HXT dark mode: react to live appearance toggling by re-running the
+// background/font update path. Also nudges the stack chrome so the border
+// picks up the new palette.
+on SystemAppearanceChanged pMode, pWindowColor, pTextColor
+   set the backgroundColor of me to pWindowColor
+   set the foregroundColor of me to pTextColor
+   __UpdateMessageColors
+end SystemAppearanceChanged
 
 command positionOpenStacksButton
    lock screen
