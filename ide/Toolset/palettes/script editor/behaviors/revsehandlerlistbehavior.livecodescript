@@ -228,6 +228,14 @@ command update
    set the textSize of field "Handlers" of me to sePrefGet("editor,fontsize")
    set the textFont of field "Handlers" of me to sePrefGet("editor,font")
    
+   if (the systemAppearance = "dark") then
+      set the backgroundColor of field "Handlers" of me to "black"
+      set the foregroundColor of field "Handlers" of me to "white"
+   else
+      set the backgroundColor of field "Handlers" of me to "white"
+      set the foregroundColor of field "Handlers" of me to "black"
+   end if
+   
    set the htmlText of field "Handlers" of me to tText
    set the cHandlers of field "Handlers" of me to tHandlers
    
