@@ -60,6 +60,22 @@ endif
 	    \( -name "*.bundle" -o -name "*.dylib" \) | while read F; do \
 	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
+	@# Sign loose standalone executables (server-community, lc-compile,
+	@# lc-run, lc-compile-ffi-java, installer-stub) with Hardened Runtime
+	@# + entitlements so they can be invoked directly from _build/ for
+	@# development/debugging.  Without CS_RUNTIME, AMFI ignores the
+	@# allow-jit entitlement and libffi's MAP_JIT path falls back to an
+	@# unsigned /tmp file which syspolicyd kills with SIGKILL.
+	@# package-mac-bin re-signs the copies in mac-bin/ the same way.
+	@echo "Signing loose standalone executables in _build/mac/$(BUILDTYPE)/..."
+	@for f in server-community lc-compile lc-run lc-compile-ffi-java installer-stub; do \
+	  if [ -f "_build/mac/$(BUILDTYPE)/$$f" ]; then \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	        --options runtime \
+	        --entitlements HyperXTalk.entitlements \
+	        "_build/mac/$(BUILDTYPE)/$$f" 2>/dev/null || true; \
+	  fi; \
+	done
 ifneq ($(TRAVIS),undefined)
 	@echo "travis_fold:end:compile"
 endif
