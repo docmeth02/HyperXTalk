@@ -427,7 +427,6 @@ on generateMenubarUI
          set the label of it to revIDELocalizeMenuItem(tItem)
          
          // HXT dark mode
-         --         put "-DM" after tItem
          create invisible image tItem & "-DM" in group "icons" of me
          set the id of it to revIDENewIconID()
          set the filename of image (tItem & "-DM") of me to revMenubarButtonNameToDMIconPath(tItem & "-DM")

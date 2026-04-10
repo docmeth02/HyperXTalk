@@ -21,6 +21,17 @@ SUBPLATFORMS_android=(ndk16r15)
 
 # Fetch settings
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Skip fetch if the output library directory for the requested platform
+# is already populated (e.g. libraries were built from source or extracted
+# manually). Avoids hitting the network on local builds.
+if [ "$#" -ge 1 ]; then
+    _FETCH_PLATFORM=$(basename "$1")
+    _LIB_OUT="${SCRIPT_DIR}/lib/${_FETCH_PLATFORM}"
+    if [ -d "${_LIB_OUT}" ] && [ -n "$(ls -A "${_LIB_OUT}" 2>/dev/null)" ]; then
+        echo "note: prebuilt libraries for ${_FETCH_PLATFORM} already present at ${_LIB_OUT}, skipping fetch"
+        exit 0
+    fi
+fi
 FETCH_DIR="${SCRIPT_DIR}/fetched"
 EXTRACT_DIR="${SCRIPT_DIR}"
 WIN32_EXTRACT_DIR="${SCRIPT_DIR}/unpacked"
