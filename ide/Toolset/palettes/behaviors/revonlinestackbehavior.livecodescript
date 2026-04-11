@@ -711,18 +711,11 @@ end rvoShareThisStack
 
 on updateBannerImage
    local tPath
-   local tMajor
 
-   -- HyperXTalk rebrand safety: only pick the legacy banner when the
-   -- version string clearly starts with a pre-7 numeric major component.
-   -- A non-numeric leading char (e.g. after a brand-version change) falls
-   -- through to the modern banner.
-   put char 1 of the version into tMajor
-   if tMajor is an integer and tMajor < 7 then
-      put ideCoreFolderPath("skin","revOnline-top_legacy.png") into tPath
-   else
-      put ideCoreFolderPath("skin","revOnline-top.png") into tPath
-   end if
+   -- HyperXTalk: the legacy banner path was for LiveCode 6.x and
+   -- earlier, which isn't a concern for this fork — always pick the
+   -- modern asset. (The _legacy.png asset isn't even shipped here.)
+   put ideCoreFolderPath("skin","revOnline-top.png") into tPath
    set the filename of image "topBanner" of group "menubar" to tPath
    set the width of image "topBanner" of group "menubar" to the formattedWidth of image "topBanner"
    set the topLeft of image "topBanner" of group "menubar" to 0,0
