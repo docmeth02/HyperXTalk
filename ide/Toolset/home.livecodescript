@@ -2156,6 +2156,10 @@ function revEnvironmentUserExternalsPath
   return sCustomizationPath & "/Externals"
 end revEnvironmentUserExternalsPath
 
+function revEnvironmentUserColorSchemesPath
+   return sCustomizationPath & "/Schemes"
+end revEnvironmentUserColorSchemesPath
+
 function revEnvironmentUserExtensionsPath
   return sCustomizationPath & "/Extensions"
 end revEnvironmentUserExtensionsPath
