@@ -711,8 +711,14 @@ end rvoShareThisStack
 
 on updateBannerImage
    local tPath
-   
-   if char 1 of the version < 7 then
+   local tMajor
+
+   -- HyperXTalk rebrand safety: only pick the legacy banner when the
+   -- version string clearly starts with a pre-7 numeric major component.
+   -- A non-numeric leading char (e.g. after a brand-version change) falls
+   -- through to the modern banner.
+   put char 1 of the version into tMajor
+   if tMajor is an integer and tMajor < 7 then
       put ideCoreFolderPath("skin","revOnline-top_legacy.png") into tPath
    else
       put ideCoreFolderPath("skin","revOnline-top.png") into tPath

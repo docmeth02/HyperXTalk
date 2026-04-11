@@ -539,8 +539,16 @@ function revInternal__StackFiles
    local tStackFiles, tStackName
    local tStackFilesA, tIDEVersion
    set the itemdel to "."
-   
+
    put item 1 of the version into tIDEVersion
+   -- HyperXTalk rebrand safety: if `the version`'s first dotted component
+   -- is not numeric (e.g. after a brand-version change) the versioned
+   -- library gate below would silently skip every `foo.<N>.livecodescript`
+   -- including revidelibrary. Fall back to a high sentinel so all
+   -- versioned IDE libraries still load.
+   if tIDEVersion is not an integer then
+      put 99 into tIDEVersion
+   end if
    repeat for each line tPath in tFolders
       repeat for each line tFile in files(tPath)
          if the last item of tFile is not among the items of "rev.livecode.livecodescript" then next repeat
