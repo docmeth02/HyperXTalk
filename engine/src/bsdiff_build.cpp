@@ -17,6 +17,12 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #include "foundation.h"
 #include "bsdiff.h"
 
+// off_t is a POSIX type; MSVC doesn't define it when _CRT_NONSTDC_NO_DEPRECATE is set
+#if defined(_WIN32) && !defined(_OFF_T_DEFINED)
+typedef __int64 off_t;
+#define _OFF_T_DEFINED
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static bool bsdiffmain(MCBsDiffInputStream *old_stream, MCBsDiffInputStream *new_stream, MCBsDiffOutputStream *patch_stream);

@@ -277,7 +277,7 @@ Boolean MCScreenDC::open()
 	// MW-2009-12-10: Colorspace support
 	PROFILE t_profile_info;
 	t_profile_info . dwType = PROFILE_FILENAME;
-	t_profile_info . pProfileData = "sRGB Color Space Profile.icm";
+	t_profile_info . pProfileData = (LPVOID)"sRGB Color Space Profile.icm";
 	t_profile_info . cbDataSize = strlen((char *)t_profile_info . pProfileData) + 1;
 	m_srgb_profile = OpenColorProfileA(&t_profile_info, PROFILE_READ, FILE_SHARE_READ, OPEN_EXISTING);
 
@@ -1177,6 +1177,9 @@ void MCScreenDC::hidetaskbar()
 HRGN MCScreenDC::BitmapToRegion(MCImageBitmap *p_bitmap)
 {
 	HRGN hRgn = NULL;
+	uint8_t *t_src_ptr = NULL;
+	HRGN h = NULL;
+	RGNDATA *pData = NULL;
 
 	if (p_bitmap)
 	{
@@ -1187,7 +1190,6 @@ HRGN MCScreenDC::BitmapToRegion(MCImageBitmap *p_bitmap)
 #define ALLOC_UNIT 100
 
 		DWORD maxRects = ALLOC_UNIT;
-		RGNDATA *pData;
 		pData = (RGNDATA *)malloc(sizeof(RGNDATAHEADER) + (sizeof(RECT) * maxRects));
 		if (pData == NULL)
 			goto no_mem_error;
@@ -1198,7 +1200,7 @@ HRGN MCScreenDC::BitmapToRegion(MCImageBitmap *p_bitmap)
 		SetRect(&pData->rdh.rcBound, MAXLONG, MAXLONG, 0, 0);
 
 		// Scan each bitmap row from top to bottom
-		uint8_t *t_src_ptr = (uint8_t*)p_bitmap->data;
+		t_src_ptr = (uint8_t*)p_bitmap->data;
 		for (int y = 0; y < p_bitmap->height; y++)
 		{
 			uint32_t *t_src_row = (uint32_t*)t_src_ptr;
@@ -1246,7 +1248,7 @@ HRGN MCScreenDC::BitmapToRegion(MCImageBitmap *p_bitmap)
 					// multiple steps.
 					if (pData->rdh.nCount == 2000)
 					{
-						HRGN h = ExtCreateRegion(NULL, sizeof(RGNDATAHEADER)
+						h = ExtCreateRegion(NULL, sizeof(RGNDATAHEADER)
 						                         + (sizeof(RECT) * maxRects), pData);
 						if (hRgn)
 						{
@@ -1266,7 +1268,7 @@ HRGN MCScreenDC::BitmapToRegion(MCImageBitmap *p_bitmap)
 		}
 
 		// Create or extend the region with the remaining rectangles
-		HRGN h = ExtCreateRegion(NULL, sizeof(RGNDATAHEADER)
+		h = ExtCreateRegion(NULL, sizeof(RGNDATAHEADER)
 		                         + (sizeof(RECT) * maxRects), pData);
 		if (hRgn)
 		{

@@ -338,7 +338,11 @@ def WriteOnDiff(filename):
           prefix=os.path.split(filename)[1] + '.gyp.',
           dir=os.path.split(filename)[0])
       try:
+<<<<<<< Updated upstream
         self.tmp_file = os.fdopen(tmp_fd, 'wb')
+=======
+        self.tmp_file = os.fdopen(tmp_fd, 'w', newline='')
+>>>>>>> Stashed changes
       except Exception:
         # Don't leave turds behind.
         os.unlink(self.tmp_path)

@@ -1,6 +1,6 @@
 {
 	'variables': {
-		'test_version': "<!(perl -e 'print 42')",
+		'test_version': '<!(perl -e "print 42")',
 	},
 	'targets': [
 		{

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Fast|Win32">
+      <Configuration>Fast</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -15,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2E5785A8-29BD-BF6F-F02F-25B783FF4111}</ProjectGuid>
+    <ProjectGuid>{11C32F72-5AB3-948C-AED8-1079BA22E962}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>thirdparty-prebuilts</RootNamespace>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
@@ -26,7 +38,7 @@
     <ConfigurationType>Utility</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Locals">
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props"/>
@@ -35,17 +47,59 @@
     <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
   </ImportGroup>
   <PropertyGroup Label="UserMacros"/>
+  <!-- Fallback: when building directly (not via livecode.sln), SolutionDir defaults
+       to this project's own directory. Fix it to point at the livecode build root. -->
+  <PropertyGroup Condition="!Exists('$(SolutionDir)livecode.sln')">
+    <SolutionDir>$(MSBuildThisFileDirectory)..\</SolutionDir>
+  </PropertyGroup>
+
   <PropertyGroup>
     <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\bin\;$(MSBuildProjectDirectory)\..\..\bin\</ExecutablePath>
-    <IntDir>$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <IntDir>$(Configuration)\$(Platform)\obj\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Fast|Win32'"></LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Fast|x64'"></LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4800;4244</DisableSpecificWarnings>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_DEBUG;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <Link>
+      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -73,13 +127,47 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Fast|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <DebugInformationFormat></DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4800;4244</DisableSpecificWarnings>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_RELEASE;NDEBUG;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <Link>
+      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+      <EnableCOMDATFolding></EnableCOMDATFolding>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <OptimizeReferences></OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Fast|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <CompileAsWinRT>false</CompileAsWinRT>
       <DebugInformationFormat></DebugInformationFormat>
@@ -107,13 +195,47 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4577;4800;4244</DisableSpecificWarnings>
+      <ExceptionHandling>false</ExceptionHandling>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_RELEASE;NDEBUG;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <Link>
+      <AdditionalDependencies></AdditionalDependencies>
+      <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <OptimizeReferences>true</OptimizeReferences>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <CompileAsWinRT>false</CompileAsWinRT>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -141,7 +263,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win64;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\thirdparty\libffi\include_win32;..\..\thirdparty\libpng\include;..\..\thirdparty\libz\include;..\..\thirdparty\libgif\include;..\..\thirdparty\libjpeg\include;..\..\thirdparty\libpcre\include;..\..\thirdparty\libskia\include\config;..\..\thirdparty\libskia\include\core;..\..\thirdparty\libskia\include\device;..\..\thirdparty\libskia\include\effects;..\..\thirdparty\libskia\include\images;..\..\thirdparty\libskia\include\pathops;..\..\thirdparty\libskia\include\pdf;..\..\thirdparty\libskia\include\pipe;..\..\thirdparty\libskia\include\ports;..\..\thirdparty\libskia\include\svg;..\..\thirdparty\libskia\include\text;..\..\thirdparty\libskia\include\utils;..\..\thirdparty\libskia\src\core;..\..\thirdparty\libskia\src\ports;..\..\thirdparty\libskia\include\private;..\..\thirdparty\libskia\src\utils\win;..\..\thirdparty\libmysql\include;..\..\thirdparty\libsqlite\include;..\..\thirdparty\libxml\include;..\..\thirdparty\libxslt\include;..\..\thirdparty\libzip\include;..\..\thirdparty\libiodbc\include;..\..\thirdparty\libpq\include;..\..\thirdparty\libcairo\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_DISABLE_PERFCRIT_LOCKS;__LITTLE_ENDIAN__;WINVER=0x0601;_WIN32_WINNT=0x0601;SK_RELEASE;SK_SUPPORT_LEGACY_CANVAS_IS_REFCNT;SK_SUPPORT_LEGACY_GETTOPDEVICE;SK_SUPPORT_LEGACY_ACCESSBITMAP;SK_SUPPORT_LEGACY_CLIP_REGIONOPS;SK_SUPPORT_LEGACY_GETDEVICE;SK_SUPPORT_GPU=0;FFI_BUILDING;PCRE_STATIC=1;LIBXML_STATIC=1;CROSS_COMPILE_TARGET;_WINDOWS;WIN32;TARGET_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
@@ -150,95 +272,95 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="thirdparty\libffi\libffi.vcxproj">
-      <Project>{9A4BA89F-63AA-416C-0480-A05C62203301}</Project>
+      <Project>{3ECCB38C-4BF9-2ADD-07F4-519BCDC0277D}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libpng\libpng.vcxproj">
-      <Project>{A6A16334-0AFF-77FA-8E31-88D78A9A58C1}</Project>
+      <Project>{F28C919C-A6FA-0935-727E-AC80F0902705}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libz\libz.vcxproj">
-      <Project>{CCBB8190-59B2-52CF-BEA7-38EE4EE5F731}</Project>
+      <Project>{E32914AB-F9DD-11C2-44A8-872FFE135E2B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libgif\libgif.vcxproj">
-      <Project>{6257E007-2A07-CD07-5C50-E3B7785023E8}</Project>
+      <Project>{8546F0AF-E953-9446-2768-FAE7D0B74525}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libjpeg\libjpeg.vcxproj">
-      <Project>{9DA14575-5630-0802-C9B4-CBD405EA79FD}</Project>
+      <Project>{A1206D43-876A-6DD4-4192-AA6F9FE9470C}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libpcre\libpcre.vcxproj">
-      <Project>{FEDB8729-7C52-43F7-C3C6-7B73089527B8}</Project>
+      <Project>{CBA5BEFC-BD82-BD94-B3D9-4D7B7BC9844F}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia.vcxproj">
-      <Project>{4A49878F-B30A-900F-98CF-A052F81E1B12}</Project>
+      <Project>{EE225EAD-4FB8-706C-B4A5-F2CA63B78DAA}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_none.vcxproj">
-      <Project>{D6115896-EAD2-A2FB-BF3F-14D7DD9822CF}</Project>
+      <Project>{74877F42-A6D4-2A71-DC0C-12E7B7A666A4}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_arm.vcxproj">
-      <Project>{5FBA4BE3-2CD2-A3A7-604F-15FC2E0A40F4}</Project>
+      <Project>{29D0F483-CDFF-0C7C-359F-A95CAFAD5894}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_sse2.vcxproj">
-      <Project>{6556738C-8EB4-E24E-DEA0-DC87100BC4AE}</Project>
+      <Project>{C9EB9C62-4058-EBB5-254C-5E0CF66716C8}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_sse3.vcxproj">
-      <Project>{6694147F-A65E-4614-81CA-A87E0CF121F9}</Project>
+      <Project>{494AE92E-D812-D0B7-8EBF-62ABBE83B2FF}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_sse41.vcxproj">
-      <Project>{206205B9-0A46-0C92-8F72-45CB6D22071D}</Project>
+      <Project>{7357A53C-E215-7089-6BA6-F12F4BEFC82E}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_sse42.vcxproj">
-      <Project>{5499B60F-BDF4-A17D-E1AD-38AE1D298AAA}</Project>
+      <Project>{822FFCF6-365B-2557-A946-B0B341DDB8F3}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_avx.vcxproj">
-      <Project>{8CB43CC2-EC69-F7BF-68A9-4B7216DDF5D8}</Project>
+      <Project>{31F77B25-AD96-1AE3-510E-F7EAF6BCD51C}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libskia\libskia_opt_hsw.vcxproj">
-      <Project>{F0C53BA9-3CE1-2A0E-2469-A62ECBB7BB28}</Project>
+      <Project>{6E468CCC-66EE-1EF4-8E26-E61EF3CA0425}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libmysql\libmysql.vcxproj">
-      <Project>{0B267B0E-C437-A8EE-D659-D2C7AB6986F0}</Project>
+      <Project>{4D4F9DD2-3B75-CCA0-0BDE-18D79DF325A0}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libsqlite\libsqlite.vcxproj">
-      <Project>{447F00B5-F79C-72B7-8286-6AC663D15947}</Project>
+      <Project>{B140BD51-AB85-9ED4-5D01-8F7649DE2443}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libxml\libxml.vcxproj">
-      <Project>{84C54A86-688B-35D8-A01E-E1763AB73BFE}</Project>
+      <Project>{50F51FE6-5702-6C94-5338-EB3409A80C32}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libxslt\libxslt.vcxproj">
-      <Project>{2A887EA3-C7E7-54C2-A14D-0B9AA55E8A61}</Project>
+      <Project>{E9969B2A-7410-36AF-8AFD-0D6548B14A2C}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libzip\libzip.vcxproj">
-      <Project>{A15E1C5A-4DD0-6E47-5ECD-59D88A0914C5}</Project>
+      <Project>{FD5CA4EC-8653-8A17-E7B6-D20358F93B20}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libiodbc\libiodbc.vcxproj">
-      <Project>{510B360B-CD69-FBBA-D056-990619716553}</Project>
+      <Project>{350C861E-4FA8-1411-431C-488CA9CD02DE}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libpq\libpq.vcxproj">
-      <Project>{411540E1-DD02-97CA-0D2C-7D6207AD81FF}</Project>
+      <Project>{CC468DA0-0180-5FB3-6214-AE6945A9C42B}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="thirdparty\libcairo\libcairo.vcxproj">
-      <Project>{E70CB61D-FE78-AECC-38AC-B0DA8077F05D}</Project>
+      <Project>{14EAE39C-2764-6005-959B-A78214C3CCC9}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>

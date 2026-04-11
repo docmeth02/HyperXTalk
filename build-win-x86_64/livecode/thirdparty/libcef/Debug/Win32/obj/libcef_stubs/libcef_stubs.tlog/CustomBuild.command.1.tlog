@@ -1,0 +1,3 @@
+^C:\USERS\USER\DOCUMENTS\GITHUB\HYPERXTALK\UTIL\WEAK_STUB_MAKER.PL
+call call perl.exe "..\..\..\..\util\weak_stub_maker.pl" "..\..\..\..\thirdparty\libcef\libcef.stubs" "Debug\Win32\obj\libcef_stubs\src\libcefstubs.cpp"
+if %errorlevel% neq 0 exit /b %errorlevel%

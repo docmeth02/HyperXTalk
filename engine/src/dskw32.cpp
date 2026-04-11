@@ -3113,8 +3113,33 @@ struct MCWindowsDesktop: public MCSystemInterface, public MCWindowsSystemService
 		// This is true if the slave died at some point during the transaction.
 		// Generally meaning that an error occurred which means it can't launch
 		// the process we want.
-		BOOL t_slave_died = FALSE;
-		BOOL t_slave_deaf = FALSE;
+	BOOL t_slave_died = FALSE;
+	BOOL t_slave_deaf = FALSE;
+
+	// This records the Win32 error code if one of the API calls fails.
+	DWORD t_error = ERROR_SUCCESS;
+	// This is the handle of the slave process used to launch the requested process.
+	HANDLE t_slave_process = NULL;
+	// This is the thread id of the main thread in the slave process.
+	DWORD t_slave_thread_id = 0;
+	// This is the slave's security descriptor containing it's sid.
+	PSECURITY_DESCRIPTOR t_slave_security_descriptor = NULL;
+	PSID t_slave_sid = NULL;
+	// This is our security descriptor containing our original DACL.
+	PSECURITY_DESCRIPTOR t_master_security_descriptor = NULL;
+	PACL t_master_dacl = NULL;
+	// This is our augmented DACL.
+	PACL t_augmented_master_dacl = NULL;
+	// These are the pipes used to communicate first with the slave, and then
+	// with the requested process.
+	HANDLE t_output_pipe = NULL;
+	HANDLE t_input_pipe = NULL;
+	// These are our environment strings.
+	LPWCH t_env_strings = NULL;
+	size_t t_env_length = 0;
+	// These are the requested process handle and id.
+	HANDLE t_process_handle = NULL;
+	DWORD t_process_id = 0;
 
 		// The slave (mediating) process we run has a specific command-line
 		// which encodes the current thread id of this process.
@@ -3131,31 +3156,6 @@ struct MCWindowsDesktop: public MCSystemInterface, public MCWindowsSystemService
 			t_slave_died = TRUE;
 			goto cleanup;
 		}
-
-		// This records the Win32 error code if one of the API calls fails.
-		DWORD t_error = ERROR_SUCCESS;
-		// This is the handle of the slave process used to launch the requested process.
-		HANDLE t_slave_process = NULL;
-		// This is the thread id of the main thread in the slave process.
-		DWORD t_slave_thread_id = 0;
-		// This is the slave's security descriptor containing it's sid.
-		PSECURITY_DESCRIPTOR t_slave_security_descriptor = NULL;
-		PSID t_slave_sid = NULL;
-		// This is our security descriptor containing our original DACL.
-		PSECURITY_DESCRIPTOR t_master_security_descriptor = NULL;
-		PACL t_master_dacl = NULL;
-		// This is our augmented DACL.
-		PACL t_augmented_master_dacl = NULL;
-		// These are the pipes used to communicate first with the slave, and then
-		// with the requested process.
-		HANDLE t_output_pipe = NULL;
-		HANDLE t_input_pipe = NULL;
-		// These are our environment strings.
-		LPWCH t_env_strings = NULL;
-		size_t t_env_length = 0;
-		// These are the requested process handle and id.
-		HANDLE t_process_handle = NULL;
-		DWORD t_process_id = 0;
 
 		// First we run the engine itself as administrator, passing to it our
 		// thread-id as part of the command-line arguments.

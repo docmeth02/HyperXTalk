@@ -736,8 +736,8 @@ def _EscapeVCProjCommandLineArgListItem(s):
     # the VCProj but cause the same problem on the final command-line. Moving
     # the item to the end of the list does works, but that's only possible if
     # there's only one such item. Let's just warn the user.
-    print >> sys.stderr, ('Warning: MSVS may misinterpret the odd number of ' +
-                          'quotes in ' + s)
+    print('Warning: MSVS may misinterpret the odd number of ' +
+          'quotes in ' + s, file=sys.stderr)
   return s
 
 
@@ -1716,8 +1716,9 @@ def _DictsToFolders(base_path, bucket, flat):
       if flat:
         children += folder_children
       else:
+        folder_path = os.path.join(base_path, folder).replace('\\', '/')
         folder_children = MSVSNew.MSVSFolder(os.path.join(base_path, folder),
-                                             name='(' + folder + ')',
+                                             name='(' + folder_path + ')',
                                              entries=folder_children)
         children.append(folder_children)
     else:
@@ -2012,7 +2013,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     if generator_flags.get('msvs_error_on_missing_sources', False):
       raise GypError(error_message)
     else:
-      print >> sys.stdout, "Warning: " + error_message
+      print("Warning: " + error_message, file=sys.stdout)
 
 
 def _GenerateMSBuildFiltersFile(filters_path, source_files,

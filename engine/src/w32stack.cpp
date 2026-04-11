@@ -93,7 +93,7 @@ static bool MCWin32GetBitmapSize(HBITMAP p_bitmap, uint32_t &r_width, uint32_t &
 	GetObjectA(p_bitmap, sizeof(BITMAP), &t_bitmap_struct);
 
 	r_width = t_bitmap_struct.bmWidth;
-	r_height = MCAbs(t_bitmap_struct.bmHeight);
+	r_height = MCAbs((int32_t)t_bitmap_struct.bmHeight);
 
 	return true;
 }

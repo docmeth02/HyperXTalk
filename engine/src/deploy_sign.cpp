@@ -408,6 +408,46 @@ template<typename T> static bool i2d(int (*p_i2d)(T *, unsigned char **), T *p_o
 	return t_success;
 }
 
+// OpenSSL 3 declares i2d_* functions with a const-qualified first argument.
+// This overload allows the template to be used with such function pointers.
+template<typename T> static bool i2d(int (*p_i2d)(const T *, unsigned char **), T *p_object, uint8_t*& r_data, uint32_t& r_length)
+{
+	bool t_success;
+	t_success = true;
+
+	uint32_t t_length;
+	t_length = 0;
+	if (t_success)
+	{
+		t_length = p_i2d(p_object, nil);
+		if (t_length == 0)
+			t_success = MCDeployThrowOpenSSL(kMCDeployErrorBadSignature);
+	}
+
+	uint8_t *t_data;
+	t_data = nil;
+	if (t_success)
+	{
+		t_data = (uint8_t *)OPENSSL_malloc(t_length);
+		if (t_data == nil)
+			t_success = MCDeployThrowOpenSSL(kMCDeployErrorNoMemory);
+	}
+
+	if (t_success)
+	{
+		p_i2d(p_object, &t_data);
+		r_data = t_data - t_length;
+		r_length = t_length;
+	}
+	else
+	{
+		if (t_data != nil)
+			OPENSSL_free(t_data);
+	}
+
+	return t_success;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Authenticode code-signing uses a PKCS#7 SignedData structure as the digital

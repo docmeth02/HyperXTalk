@@ -619,7 +619,7 @@ void MCWindowsActiveScriptEnvironment::Run(MCStringRef p_script, MCStringRef& r_
 
 		DISPID t_var_id;
 		LPOLESTR t_ole_var;
-		t_ole_var = OLESTR("result");
+		t_ole_var = (LPOLESTR)L"result";
 		t_var_result = t_lang_dispatch -> GetIDsOfNames(IID_NULL, &t_ole_var, 1, LOCALE_NEUTRAL, &t_var_id);
 
 		if (t_var_result == S_OK)

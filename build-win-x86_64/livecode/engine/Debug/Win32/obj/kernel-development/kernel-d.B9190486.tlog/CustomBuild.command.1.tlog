@@ -1,0 +1,6 @@
+^C:\USERS\USER\DOCUMENTS\GITHUB\HYPERXTALK\UTIL\ENCODE_ERRORS.PL
+call call perl.exe "..\..\..\util\encode_errors.pl" "..\..\..\engine\src" "Debug\Win32\obj\kernel-development\src\encodederrors.cpp"
+if %errorlevel% neq 0 exit /b %errorlevel%
+^C:\USERS\USER\DOCUMENTS\GITHUB\HYPERXTALK\UTIL\HASH_STRINGS.PL
+call call perl.exe "..\..\..\util\hash_strings.pl" "..\..\..\engine\src\lextable.cpp" "Debug\Win32\obj\kernel-development\src\hashedstrings.cpp" "C:\Users\user\Documents\GitHub\HyperXTalk\build-win-x86_64\livecode\Debug\perfect-target"
+if %errorlevel% neq 0 exit /b %errorlevel%

@@ -1,0 +1,3 @@
+LIBRARY icuio58
+EXPORTS
+    ; Empty - ICU I/O not used by HyperXTalk engine
