@@ -539,8 +539,17 @@ function revInternal__StackFiles
    local tStackFiles, tStackName
    local tStackFilesA, tIDEVersion
    set the itemdel to "."
-   
-   put item 1 of the version into tIDEVersion
+
+   -- HyperXTalk: this fork ships its own versioned IDE files (revCore.8,
+   -- revmessagebox.8, revscripteditor.8, revstandalonesettings.8 and
+   -- revidelibrary.8) and doesn't track upstream LiveCode library
+   -- versions anymore. The original gate below parsed `item 1 of the
+   -- version` as the IDE major version to skip `foo.<N>.livecodescript`
+   -- where N > that major — which silently dropped every core palette
+   -- whenever the brand version's first dotted component was below 8
+   -- (e.g. "0.9.8" or "1.2.3"). Use a high sentinel instead so every
+   -- versioned file in tree loads regardless of the brand version.
+   put 99 into tIDEVersion
    repeat for each line tPath in tFolders
       repeat for each line tFile in files(tPath)
          if the last item of tFile is not among the items of "rev.livecode.livecodescript" then next repeat
