@@ -34,7 +34,6 @@ crypto ./revsecurity ./revsecurity ./revsecurity
 	EVP_PKEY_new: () -> (pointer)
 	EVP_PKEY_assign: (pointer, integer, pointer) -> (pointer)
 	
-<<<<<<< Updated upstream
 	EVP_CIPHER_key_length: (pointer) -> (integer)
 	EVP_CIPHER_get_key_length: (pointer) -> (integer)
 	EVP_CIPHER_CTX_new: () -> (pointer)
@@ -43,16 +42,6 @@ crypto ./revsecurity ./revsecurity ./revsecurity
 	EVP_CIPHER_CTX_get_key_length: (pointer) -> (integer)
 	EVP_CIPHER_CTX_block_size: (pointer) -> (integer)
 	EVP_CIPHER_CTX_get_block_size: (pointer) -> (integer)
-=======
-	# EVP_CIPHER_get_key_length: OpenSSL 3.0 only - not in 1.x prebuilt libeay32.lib
-	# EVP_CIPHER_get_key_length: (pointer) -> (integer)
-	EVP_CIPHER_CTX_new: () -> (pointer)
-	EVP_CIPHER_CTX_free: (pointer) -> ()
-	# EVP_CIPHER_CTX_get_key_length: OpenSSL 3.0 only - not in 1.x prebuilt libeay32.lib
-	# EVP_CIPHER_CTX_get_key_length: (pointer) -> (integer)
-	# EVP_CIPHER_CTX_get_block_size: OpenSSL 3.0 only - not in 1.x prebuilt libeay32.lib
-	# EVP_CIPHER_CTX_get_block_size: (pointer) -> (integer)
->>>>>>> Stashed changes
 	EVP_CIPHER_CTX_reset: (pointer) -> ()
 
 	EVP_MD_CTX_new: () -> (pointer)
@@ -243,13 +232,8 @@ ssl ./revsecurity ./revsecurity ./revsecurity
 	SSL_shutdown: (pointer) -> (integer)
 	SSL_set_connect_state: (pointer) -> ()
 	SSL_set_accept_state: (pointer) -> ()
-<<<<<<< Updated upstream
 	SSL_get_peer_certificate: (pointer) -> (pointer)
 	SSL_get1_peer_certificate: (pointer) -> (pointer)
-=======
-	# SSL_get1_peer_certificate: OpenSSL 3.0 only - not in 1.x prebuilt ssleay32.lib
-	# SSL_get1_peer_certificate: (pointer) -> (pointer)
->>>>>>> Stashed changes
 	SSL_get_verify_result: (pointer) -> (integer)
 	SSL_get_peer_cert_chain: (pointer) -> (pointer)
 	SSL_get_current_cipher: (pointer) -> (pointer)

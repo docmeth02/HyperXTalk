@@ -1,3 +1,9 @@
-Files in this folder are based on mysql-connector-c-6.0.0
+Files in this folder use MySQL C API (libmysqlclient) from Homebrew.
 
-Original source archives are available from <http://www.mysql.com/>
+  Formula : mysql-client
+  Version : MySQL 9.6.0
+  Prefix  : /opt/homebrew/opt/mysql-client
+
+To rebuild prebuilt/lib/mac/libmysql.a:
+  brew install mysql-client
+  sh prebuilt/scripts/build-libmysql-mac-arm64.sh

@@ -16,16 +16,54 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 #include "dbmysql.h"
 
+#if !defined(_WINDOWS) && !defined(_SERVER) && !defined(HXT_MYSQL_STATIC)
+#  include <dlfcn.h>
+#endif
+
 extern bool load_ssl_library();
 
 #if defined(_WINDOWS)
 #define strcasecmp stricmp
 #endif
 
+// HXT: Check whether the MySQL client library is available at runtime.
+//
+// When HXT_MYSQL_STATIC is defined, MySQL Connector/C is compiled directly
+// into dbmysql.bundle via prebuilt/lib/mac/libmysql.a — always available.
+//
+// Without that define, dbmysql.bundle uses -undefined dynamic_lookup, making
+// mysql_init a weak import that is NULL when MySQL is not installed.  The
+// dlsym probe catches this before the first MySQL call to avoid a silent crash.
+static bool mysql_client_available()
+{
+#if defined(HXT_MYSQL_STATIC) || defined(_WINDOWS) || defined(_SERVER)
+    return true;  // statically linked or guaranteed available at build time
+#else
+    static int s_checked = 0;   // -1 = no, 0 = unchecked, 1 = yes
+    if (s_checked == 0)
+    {
+        void *sym = dlsym(RTLD_DEFAULT, "mysql_init");
+        s_checked = (sym != NULL) ? 1 : -1;
+    }
+    return s_checked == 1;
+#endif
+}
+
 Bool DBConnection_MYSQL::connect(char **args, int numargs)
 {
 	if (isConnected)
 		return True;
+
+    // HXT: Detect missing MySQL client library before making any MySQL call.
+    // Without this check, the first mysql_* call crashes the engine silently
+    // because dbmysql.bundle uses -undefined dynamic_lookup.
+    if (!mysql_client_available())
+    {
+        errorMessageSet("HXT: MySQL client library not found. "
+                        "Install MySQL or MySQL Connector/C, "
+                        "or run: brew install mysql-client");
+        return False;
+    }
 
 	if (numargs < 4)
     	return False;
