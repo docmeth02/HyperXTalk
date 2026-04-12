@@ -23,7 +23,12 @@ on preOpenCard
    focus field "script"
    select the text of field "script"
    dispatch "scriptFormat" to the owner of field "script" with "script"
-   
+   // HXT dark mode: scriptFormat bakes 0,0,0 per-char colors via _internal script replace;
+   // clear them so the field's foregroundColor (set by __UpdateMessageColors) shows instead.
+   if the systemAppearance is "dark" and the number of chars of field "script" of me > 0 then
+      set the foregroundColor of char 1 to -1 of field "script" of me to empty
+   end if
+
    put revIDEGetPreference("IDEActiveStack") into tActiveStack
    revUpdateActiveStack tActiveStack, tActiveStack
    set the label of button "Open Stacks" to tActiveStack

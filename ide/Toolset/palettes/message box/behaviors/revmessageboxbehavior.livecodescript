@@ -530,6 +530,13 @@ private command __UpdateMessageColors
       repeat with j = 1 to tFieldCount
          set the backgroundColor of field j of card i of me to tBgColor
          set the foregroundColor of field j of card i of me to tFgColor
+         // HXT dark mode: per-character foreground colors set by the syntax colorizer
+         // (which always uses light-mode values like 0,0,0) override the field-level
+         // foregroundColor. Clearing them lets the field-level color take effect.
+         if the systemAppearance is "dark" and \
+               the number of chars of field j of card i of me > 0 then
+            set the foregroundColor of char 1 to -1 of field j of card i of me to empty
+         end if
       end repeat
       // dataView fixup (same pattern used for the project browser)
       if there is a group "objectList" of card i of me then

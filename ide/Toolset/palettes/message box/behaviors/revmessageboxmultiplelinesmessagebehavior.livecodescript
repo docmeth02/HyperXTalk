@@ -1,4 +1,4 @@
-﻿script "revMessageBoxMultipleLinesMessageBehavior"
+script "revMessageBoxMultipleLinesMessageBehavior"
 local lHistory, lHistoryIndex, lNumInHistory, lMatchingHistory, lNumMatching, lMatchingIndex
 
 on enterInField
@@ -15,7 +15,7 @@ on enterInField
 end enterInField
 
 on returnInField
-   if (the controlKey is down) then 
+   if (the controlKey is down) then
       enterInField
    else
       pass returnInField
@@ -23,13 +23,18 @@ on returnInField
 end returnInField
 
 on commandKeyDown pKey
-   if pKey is "U" then 
+   if pKey is "U" then
       put empty into me
       exit commandKeyDown
    end if
-   if pKey is "V" then 
+   if pKey is "V" then
       put clipboardData["text"] into the selectedChunk
       scriptFormat "script"
+      // HXT dark mode: scriptFormat bakes 0,0,0 per-char colors; clear them
+      // so the field's foregroundColor (set by __UpdateMessageColors) shows.
+      if the systemAppearance is "dark" and the number of chars of me > 0 then
+         set the foregroundColor of char 1 to -1 of me to empty
+      end if
    else
       pass commandKeyDown
    end if
@@ -45,17 +50,17 @@ end arrowKey
 
 command revInitialise
    textInitialize
-   
+
    local tInHistory, tLine
-   
+
    put revIDEGetPreference("IDEMultipleLinesMessageHistory") into lHistory
    put number of lines of lHistory into lNumInHistory
    if the text of me is not empty then
       repeat for each line tLine in lHistory
-         if tLine is the text of me then 
+         if tLine is the text of me then
             put "yes" into tInHistory
             exit repeat
-         end if 
+         end if
       end repeat
       if tInHistory is "yes"
       then put 1 into lHistoryIndex
@@ -64,6 +69,11 @@ command revInitialise
       put 0 into lHistoryIndex
    end if
    scriptFormat "script"
+   // HXT dark mode: scriptFormat bakes 0,0,0 per-char colors; clear them
+   // so the field's foregroundColor (set by __UpdateMessageColors) shows.
+   if the systemAppearance is "dark" and the number of chars of me > 0 then
+      set the foregroundColor of char 1 to -1 of me to empty
+   end if
 end revInitialise
 
 command revNextLine
@@ -74,6 +84,10 @@ command revNextLine
    replace "\n" with return in tMessage
    set the text of me to tMessage
    scriptFormat "script"
+   // HXT dark mode: clear per-char colors baked by scriptFormat
+   if the systemAppearance is "dark" and the number of chars of me > 0 then
+      set the foregroundColor of char 1 to -1 of me to empty
+   end if
 end revNextLine
 
 command revPrevLine
@@ -84,4 +98,8 @@ command revPrevLine
    replace "\n" with return in tMessage
    set the text of me to tMessage
    scriptFormat "script"
+   // HXT dark mode: clear per-char colors baked by scriptFormat
+   if the systemAppearance is "dark" and the number of chars of me > 0 then
+      set the foregroundColor of char 1 to -1 of me to empty
+   end if
 end revPrevLine

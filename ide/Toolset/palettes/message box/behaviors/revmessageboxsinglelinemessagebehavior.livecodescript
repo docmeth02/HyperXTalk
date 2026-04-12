@@ -6,6 +6,10 @@ on returnInField
    if the result is not empty then
       put the result into me
       dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of me
+      // HXT dark mode: clear per-char colors left by colorizer
+      if the systemAppearance is "dark" and the number of chars of me > 0 then
+         set the foregroundColor of char 1 to -1 of me to empty
+      end if
       revIDEConsoleHistoryAdd(the text of me)
    end if
    revInitialise
@@ -26,11 +30,19 @@ local sColorizeMsg
 
 on textChanged
    cancel sColorizeMsg
-   get the long id of me
-   send "revSEColorizeField it" to stack "revSEUtilities" in 100 milliseconds
+   // HXT dark mode: use __msgBoxColorize which does colorize then clears the
+   // light-mode per-char colors so the field's dark foregroundColor shows.
+   send "__msgBoxColorize" to me in 100 milliseconds
    put the result into sColorizeMsg
    revDisplayAutoComplete(the text of me)
 end textChanged
+
+on __msgBoxColorize
+   dispatch "revSEColorizeField" to stack "revSEUtilities" with the long id of me
+   if the systemAppearance is "dark" and the number of chars of me > 0 then
+      set the foregroundColor of char 1 to -1 of me to empty
+   end if
+end __msgBoxColorize
 
 on arrowKey pKey
    if pKey is "up" then 
@@ -127,8 +139,10 @@ command revNextLine
       if lMatchingIndex > lNumMatching then put 1 into lMatchingIndex
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
-   select after field "message" 
-    _internal script colorize char 1 to (the number of chars of me) of me
+   select after field "message"
+   if the systemAppearance is not "dark" then
+      _internal script colorize char 1 to (the number of chars of me) of me
+   end if
    unlock messages
 end revNextLine
 
@@ -143,8 +157,10 @@ command revPrevLine
       if lMatchingIndex < 1 then put lNumMatching into lMatchingIndex
       put field "message" & char (the number of chars of field "message" + 1) to (the number of chars of line lMatchingIndex of lMatchingHistory) of line lMatchingIndex of lMatchingHistory into field "auto complete"
    end if
-   select after field "message" 
-    _internal script colorize char 1 to (the number of chars of me) of me
+   select after field "message"
+   if the systemAppearance is not "dark" then
+      _internal script colorize char 1 to (the number of chars of me) of me
+   end if
    unlock messages
 end revPrevLine
 
