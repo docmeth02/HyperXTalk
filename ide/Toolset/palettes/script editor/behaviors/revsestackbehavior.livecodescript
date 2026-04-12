@@ -3072,7 +3072,7 @@ end revSEAddDefaultHandler
 
 
 // HXT
-on systemAppearanceChanged pMode, pWindowColor
+on SystemAppearanceChanged pMode, pWindowColor
    set the backgroundColor of this stack to pWindowColor
    if pMode is "dark" then
       set the backColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "black"
@@ -3081,4 +3081,4 @@ on systemAppearanceChanged pMode, pWindowColor
       set the backColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "white"
       set the foreColor of field "Handlers" of group "Left Handler List" of group "Left Bar" of card "Main" of this stack to "black"
    end if
-end systemAppearanceChanged
+end SystemAppearanceChanged
