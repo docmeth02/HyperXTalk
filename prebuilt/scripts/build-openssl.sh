@@ -153,11 +153,23 @@ function buildOpenSSL {
 	# OpenSSL 3.0 dropped the `no-hw` and `no-rc5` Configure options (hw
 	# engine support was deleted outright, and RC5 moved into the legacy
 	# provider). Pass them only for 1.1.x builds.
+	#
+	# `no-module` (3.x only) compiles providers (default, legacy) as
+	# builtins directly into libcrypto.a rather than as separate loadable
+	# .so modules. Without this, the legacy provider lives in
+	# ${prefix}/lib/ossl-modules/legacy.so — a path that only exists on
+	# the build machine and isn't shipped with the engine. revsecurity
+	# whole-archives libcrypto.a, so baking providers in means
+	# OSSL_PROVIDER_load(NULL, "legacy") finds them at runtime without
+	# needing any external module files.
 	OPENSSL_LEGACY_DISABLE=""
+	OPENSSL_3X_OPTS=""
 	if [[ "${OpenSSL_VERSION}" == 1.* ]] ; then
 		OPENSSL_LEGACY_DISABLE="no-rc5 no-hw"
+	else
+		OPENSSL_3X_OPTS="no-module"
 	fi
-	OPENSSL_ARCH_CONFIG="${OPENSSL_LEGACY_DISABLE} no-threads shared -DOPENSSL_NO_ASYNC=1 --prefix=${INSTALL_DIR}/${NAME} ${CUSTOM_SPEC} ${EXTRA_OPTIONS}"
+	OPENSSL_ARCH_CONFIG="${OPENSSL_LEGACY_DISABLE} ${OPENSSL_3X_OPTS} no-threads shared -DOPENSSL_NO_ASYNC=1 --prefix=${INSTALL_DIR}/${NAME} ${CUSTOM_SPEC} ${EXTRA_OPTIONS}"
 
 	# Copy the source to a target-specific directory
 	if [ ! -d "${OPENSSL_ARCH_SRC}" ] ; then
