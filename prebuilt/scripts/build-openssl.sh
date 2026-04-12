@@ -31,8 +31,8 @@ OPENSSL_SRC="openssl-${OpenSSL_VERSION}"
 
 cd "${BUILDDIR}"
 
-if [ ! -d "$OPENSSL_SRC" ] ; then
-	echo "local openssl directory not found"
+if [ ! -d "${INSTALL_DIR}/../$OPENSSL_SRC" ] ; then
+	echo "local openssl directory (${INSTALL_DIR}/../$OPENSSL_SRC) not found"
 	if [ ! -e "$OPENSSL_TGZ" ] ; then
 		echo "no openssl .gz file found"
 #		echo "Fetching OpenSSL source"
