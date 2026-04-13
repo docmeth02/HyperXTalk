@@ -1060,6 +1060,15 @@ bool MCWKWebViewBrowser::GoToURL(const char *p_url)
 	{
 		t_url = [NSURL URLWithString: [NSString stringWithUTF8String: p_url]];
 
+		// If the URL has no scheme (e.g. "www.google.com"), treat it as https://
+		// so that WKWebView receives a well-formed URL and the scheme check in
+		// decidePolicyForNavigationAction can classify it correctly.
+		if (t_url != nil && (t_url.scheme == nil || t_url.scheme.length == 0))
+		{
+			NSString *t_url_with_https = [NSString stringWithFormat:@"https://%@", [NSString stringWithUTF8String:p_url]];
+			t_url = [NSURL URLWithString:t_url_with_https];
+		}
+
 		// reject file urls with empty path components
 		if (t_url.fileURL && t_url.path.length == 0)
 			return false;
@@ -1621,7 +1630,16 @@ void MCWKWebViewBrowserNavigationRequest::Cancel()
 	MCWKWebViewBrowserNavigationRequest *t_request;
 	t_request = new MCWKWebViewBrowserNavigationRequest(navigationAction, t_quiet, [decisionHandler copy], self);
 	
-	if (t_quiet || [NSURLConnection canHandleRequest: [navigationAction request]])
+	// NSURLConnection is deprecated and removed on macOS 26+; replace with a
+	// direct URL-scheme check.  WKWebView handles http/https/file/about/data/
+	// blob/javascript natively.  Anything else (tel:, mailto:, custom schemes)
+	// is forwarded to the script via browserUnhandledLoadRequest.
+	NSString *t_scheme = [[[[navigationAction request] URL] scheme] lowercaseString];
+	bool t_can_handle = t_scheme != nil &&
+		([@[@"http", @"https", @"file", @"about", @"data", @"blob", @"javascript"]
+		   containsObject:t_scheme]);
+
+	if (t_quiet || t_can_handle)
 	{
 		if (!t_quiet && m_delay_requests)
 		{
@@ -1631,18 +1649,28 @@ void MCWKWebViewBrowserNavigationRequest::Cancel()
 				return;
 			}
 		}
-		
+
 		t_request->Continue();
 		t_request->Release();
 	}
 	else
 	{
 		m_instance->OnNavigationRequestUnhandled(t_request->IsFrame(), [t_url_string UTF8String]);
-		
+
 		t_request->Release();
 		decisionHandler(WKNavigationActionPolicyCancel);
+
+		// Reset the state machine so subsequent loads are not permanently blocked.
+		// Mirrors what cancelRequest:withDecisionHandler: does for the cancel path.
+		if (m_pending_request != nil)
+		{
+			[m_pending_request release];
+			m_pending_request = nil;
+		}
+		m_can_start_load = true;
+		[self checkQueuedRequest];
 	}
-	
+
 }
 
 - (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation
