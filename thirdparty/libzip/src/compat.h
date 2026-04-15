@@ -41,8 +41,10 @@
 /* to have *_MAX definitions for all types when compiling with g++ */
 #define __STDC_LIMIT_MACROS
 
-/* to have ISO C secure library functions */
+/* to have ISO C secure library functions (not needed on MSVC - it provides _s functions natively) */
+#ifndef _MSC_VER
 #define __STDC_WANT_LIB_EXT1__ 1
+#endif
 
 #ifdef _WIN32
 #ifndef ZIP_EXTERN
@@ -57,9 +59,11 @@
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #else
+#ifndef __cplusplus
 typedef char bool;
 #define true 1
 #define false 0
+#endif
 #endif
 
 #include <errno.h>

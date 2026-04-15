@@ -161,6 +161,7 @@ err:
 int initialise_weak_link_jvm(void)
 {
 #if defined(_LINUX)
+  if(!initialise_weak_link_jvm_with_path(""))
 #else
   if (!initialise_weak_link_jvm_with_path(MODULE_JVM_NAME))
 #endif

@@ -120,8 +120,8 @@
       <AdditionalOptions>/FORCE:UNRESOLVED /MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>libcef.lib;oleaut32.lib;sicuin.lib;sicutu.lib;sicuuc.lib;sicudt.lib;advapi32.lib;libz.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\cef\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib\CEF;..\..\..\prebuilt\unpacked\icu\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcef_library_wrapper.lib;libcef.lib;oleaut32.lib;sicuin.lib;sicutu.lib;sicuuc.lib;sicudt.lib;advapi32.lib;libz.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\thirdparty\libcef\$(Configuration)\lib;$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\cef\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib\CEF;..\..\..\prebuilt\unpacked\icu\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/FORCE:UNRESOLVED /MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>

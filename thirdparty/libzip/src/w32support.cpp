@@ -1,5 +1,11 @@
 // SN-2015-03-10: [[ Bug 14413 ]] We need few types (WCHAR)
 // and function from the Windows API
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+#include <stdlib.h>
+#include <string.h>
 #include "zip.h"
 #include "zipint.h"
 

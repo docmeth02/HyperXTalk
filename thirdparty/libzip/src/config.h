@@ -3,68 +3,69 @@
 #ifndef _HAD_ZIPCONF_H
 #include "zipconf.h"
 #endif
-/* BEGIN DEFINES */
+/* BEGIN DEFINES - Windows MSVC configuration */
 #define ENABLE_FDOPEN
 /* #undef HAVE___PROGNAME */
-/* #undef HAVE__CLOSE */
-/* #undef HAVE__DUP */
-/* #undef HAVE__FDOPEN */
-/* #undef HAVE__FILENO */
-/* #undef HAVE__SETMODE */
+#define HAVE__CLOSE
+#define HAVE__DUP
+#define HAVE__FDOPEN
+#define HAVE__FILENO
+#define HAVE__SETMODE
 /* #undef HAVE__SNPRINTF */
-/* #undef HAVE__SNPRINTF_S */
-/* #undef HAVE__SNWPRINTF_S */
-/* #undef HAVE__STRDUP */
-/* #undef HAVE__STRICMP */
-/* #undef HAVE__STRTOI64 */
-/* #undef HAVE__STRTOUI64 */
-/* #undef HAVE__UNLINK */
-#define HAVE_ARC4RANDOM
+#define HAVE__SNPRINTF_S
+#define HAVE__SNWPRINTF_S
+#define HAVE__STRDUP
+#define HAVE__STRICMP
+#define HAVE__STRTOI64
+#define HAVE__STRTOUI64
+#define HAVE__UNLINK
+/* #undef HAVE_ARC4RANDOM */
 /* #undef HAVE_CLONEFILE */
 /* #undef HAVE_COMMONCRYPTO */
-#define HAVE_CRYPTO
-#define HAVE_FICLONERANGE
-#define HAVE_FILENO
-#define HAVE_FCHMOD
-#define HAVE_FSEEKO
-#define HAVE_FTELLO
+/* #undef HAVE_CRYPTO */
+/* #undef HAVE_FICLONERANGE */
+/* #undef HAVE_FILENO */
+/* #undef HAVE_FCHMOD */
+/* #undef HAVE_FSEEKO */
+/* #undef HAVE_FTELLO */
 /* #undef HAVE_GETPROGNAME */
 /* #undef HAVE_GNUTLS */
-#define HAVE_LIBBZ2
-#define HAVE_LIBLZMA
-#define HAVE_LIBZSTD
-#define HAVE_LOCALTIME_R
-/* #undef HAVE_LOCALTIME_S */
-/* #undef HAVE_MEMCPY_S */
+/* #undef HAVE_LIBBZ2 */
+/* #undef HAVE_LIBLZMA */
+/* #undef HAVE_LIBZSTD */
+/* #undef HAVE_LOCALTIME_R */
+#define HAVE_LOCALTIME_S
+#define HAVE_MEMCPY_S
 /* #undef HAVE_MBEDTLS */
 /* #undef HAVE_MKSTEMP */
 /* #undef HAVE_NULLABLE */
-#define HAVE_OPENSSL
-/* #undef HAVE_SETMODE */
+/* #undef HAVE_OPENSSL */
+#define HAVE_SETMODE
 #define HAVE_SNPRINTF
-/* #undef HAVE_SNPRINTF_S */
-#define HAVE_STRCASECMP
-#define HAVE_STRDUP
-/* #undef HAVE_STRERROR_S */
-/* #undef HAVE_STRERRORLEN_S */
-/* #undef HAVE_STRICMP */
-/* #undef HAVE_STRNCPY_S */
-#define HAVE_STRTOLL
-#define HAVE_STRTOULL
+#define HAVE__SNPRINTF
+#define HAVE_SNPRINTF_S
+/* #undef HAVE_STRCASECMP */
+/* #undef HAVE_STRDUP */
+#define HAVE_STRERROR_S
+#define HAVE_STRERRORLEN_S
+#define HAVE_STRICMP
+#define HAVE_STRNCPY_S
+/* #undef HAVE_STRTOLL */
+/* #undef HAVE_STRTOULL */
 /* #undef HAVE_STRUCT_TM_TM_ZONE */
-#define HAVE_STDBOOL_H
-#define HAVE_STRINGS_H
-#define HAVE_UNISTD_H
+/* #undef HAVE_STDBOOL_H */
+/* #undef HAVE_STRINGS_H */
+/* #undef HAVE_UNISTD_H */
 /* #undef HAVE_WINDOWS_CRYPTO */
-#define SIZEOF_OFF_T 8
+#define SIZEOF_OFF_T 4
 #define SIZEOF_SIZE_T 8
 /* #undef HAVE_DIRENT_H */
-#define HAVE_FTS_H
+/* #undef HAVE_FTS_H */
 /* #undef HAVE_NDIR_H */
 /* #undef HAVE_SYS_DIR_H */
 /* #undef HAVE_SYS_NDIR_H */
 /* #undef WORDS_BIGENDIAN */
-#define HAVE_SHARED
+/* #undef HAVE_SHARED */
 /* END DEFINES */
 #define PACKAGE "libzip"
 #define VERSION "1.10.1"

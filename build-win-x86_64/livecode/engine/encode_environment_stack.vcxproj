@@ -56,6 +56,7 @@
   <PropertyGroup>
     <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\..\engine\bin\;$(MSBuildProjectDirectory)\..\..\..\engine\bin\</ExecutablePath>
     <IntDir>$(Configuration)\$(Platform)\obj\$(ProjectName)\</IntDir>
+    <obj>$(IntDir)</obj>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Fast|Win32'"></LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Fast|x64'"></LinkIncremental>

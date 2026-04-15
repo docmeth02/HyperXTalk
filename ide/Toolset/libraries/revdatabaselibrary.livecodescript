@@ -3,7 +3,7 @@ script "revdatabaselibrary"
 on extensionInitialize
    if the target is not me then
       pass "extensionInitialize"
-   end if	
+   end if
    insert the script of me into front
 
    -- If we are running in development mode, we must set the driver path
@@ -11,7 +11,26 @@ on extensionInitialize
       if revEnvironmentIsInstalled() then
          revSetDatabaseDriverPath revEnvironmentExternalsPath() & slash & "Database Drivers"
       else
-         revSetDatabaseDriverPath revEnvironmentBinariesPath()
+         local tDriverPath
+         put revEnvironmentBinariesPath() into tDriverPath
+         revSetDatabaseDriverPath tDriverPath
+         -- HTX diagnostic: verify dbsqlite.dll exists and can be loaded
+         local tTestConn, tExpectedDLL
+         put tDriverPath & slash & "dbsqlite.dll" into tExpectedDLL
+         if there is not a file tExpectedDLL then
+            put return & "HTX-DBDIAG: dbsqlite.dll NOT FOUND at: " & tExpectedDLL after msg
+         else
+            -- try an in-memory SQLite open to verify the driver loads at all
+            put revOpenDatabase("sqlite", ":memory:", "", "", "") into tTestConn
+            if tTestConn is a number then
+               revCloseDatabase tTestConn
+               -- driver loaded OK; the startup error must be coming from the docs DB open
+            else
+               put return & "HTX-DBDIAG: sqlite driver load FAILED: " & tTestConn after msg
+               put return & "  driverpath=" & tDriverPath after msg
+               put return & "  dll exists=" & (there is a file tExpectedDLL) after msg
+            end if
+         end if
       end if
    end if
 end extensionInitialize

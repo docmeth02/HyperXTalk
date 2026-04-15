@@ -116,16 +116,22 @@ typedef void *(*EVP_PKEY_new_t)(void);
 EVP_PKEY_new_t EVP_PKEY_new_ptr = NULL;
 typedef void *(*EVP_PKEY_assign_t)(void *pArg0, int pArg1, void *pArg2);
 EVP_PKEY_assign_t EVP_PKEY_assign_ptr = NULL;
+typedef int (*EVP_CIPHER_key_length_t)(void *pArg0);
+EVP_CIPHER_key_length_t EVP_CIPHER_key_length_ptr = NULL;
+typedef int (*EVP_CIPHER_get_key_length_t)(void *pArg0);
+EVP_CIPHER_get_key_length_t EVP_CIPHER_get_key_length_ptr = NULL;
 typedef void *(*EVP_CIPHER_CTX_new_t)(void);
 EVP_CIPHER_CTX_new_t EVP_CIPHER_CTX_new_ptr = NULL;
 typedef void (*EVP_CIPHER_CTX_free_t)(void *pArg0);
 EVP_CIPHER_CTX_free_t EVP_CIPHER_CTX_free_ptr = NULL;
-typedef int (*EVP_CIPHER_key_length_t)(void *pArg0);
-EVP_CIPHER_key_length_t EVP_CIPHER_key_length_ptr = NULL;
 typedef int (*EVP_CIPHER_CTX_key_length_t)(void *pArg0);
 EVP_CIPHER_CTX_key_length_t EVP_CIPHER_CTX_key_length_ptr = NULL;
+typedef int (*EVP_CIPHER_CTX_get_key_length_t)(void *pArg0);
+EVP_CIPHER_CTX_get_key_length_t EVP_CIPHER_CTX_get_key_length_ptr = NULL;
 typedef int (*EVP_CIPHER_CTX_block_size_t)(void *pArg0);
 EVP_CIPHER_CTX_block_size_t EVP_CIPHER_CTX_block_size_ptr = NULL;
+typedef int (*EVP_CIPHER_CTX_get_block_size_t)(void *pArg0);
+EVP_CIPHER_CTX_get_block_size_t EVP_CIPHER_CTX_get_block_size_ptr = NULL;
 typedef void (*EVP_CIPHER_CTX_reset_t)(void *pArg0);
 EVP_CIPHER_CTX_reset_t EVP_CIPHER_CTX_reset_ptr = NULL;
 typedef void *(*EVP_MD_CTX_new_t)(void);
@@ -581,6 +587,20 @@ MCLog( "Unable to load: EVP_PKEY_assign\n");
 #endif
 goto err; 
 }
+  if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_key_length", (handler_t *)&EVP_CIPHER_key_length_ptr))
+{
+#ifdef _DEBUG
+MCLog( "Unable to load: EVP_CIPHER_key_length\n");
+#endif
+goto err; 
+}
+  if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_get_key_length", (handler_t *)&EVP_CIPHER_get_key_length_ptr))
+{
+#ifdef _DEBUG
+MCLog( "Unable to load: EVP_CIPHER_get_key_length\n");
+#endif
+goto err; 
+}
   if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_CTX_new", (handler_t *)&EVP_CIPHER_CTX_new_ptr))
 {
 #ifdef _DEBUG
@@ -595,13 +615,6 @@ MCLog( "Unable to load: EVP_CIPHER_CTX_free\n");
 #endif
 goto err; 
 }
-  if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_key_length", (handler_t *)&EVP_CIPHER_key_length_ptr))
-{
-#ifdef _DEBUG
-MCLog( "Unable to load: EVP_CIPHER_key_length\n");
-#endif
-goto err; 
-}
   if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_CTX_key_length", (handler_t *)&EVP_CIPHER_CTX_key_length_ptr))
 {
 #ifdef _DEBUG
@@ -609,10 +622,24 @@ MCLog( "Unable to load: EVP_CIPHER_CTX_key_length\n");
 #endif
 goto err; 
 }
+  if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_CTX_get_key_length", (handler_t *)&EVP_CIPHER_CTX_get_key_length_ptr))
+{
+#ifdef _DEBUG
+MCLog( "Unable to load: EVP_CIPHER_CTX_get_key_length\n");
+#endif
+goto err; 
+}
   if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_CTX_block_size", (handler_t *)&EVP_CIPHER_CTX_block_size_ptr))
 {
 #ifdef _DEBUG
 MCLog( "Unable to load: EVP_CIPHER_CTX_block_size\n");
+#endif
+goto err; 
+}
+  if (!module_resolve(module_crypto, SYMBOL_PREFIX "EVP_CIPHER_CTX_get_block_size", (handler_t *)&EVP_CIPHER_CTX_get_block_size_ptr))
+{
+#ifdef _DEBUG
+MCLog( "Unable to load: EVP_CIPHER_CTX_get_block_size\n");
 #endif
 goto err; 
 }
@@ -1669,6 +1696,16 @@ void *EVP_PKEY_assign(void *pArg0, int pArg1, void *pArg2)
   return EVP_PKEY_assign_ptr(pArg0, pArg1, pArg2);
 }
 
+int EVP_CIPHER_key_length(void *pArg0)
+{
+  return EVP_CIPHER_key_length_ptr(pArg0);
+}
+
+int EVP_CIPHER_get_key_length(void *pArg0)
+{
+  return EVP_CIPHER_get_key_length_ptr(pArg0);
+}
+
 void *EVP_CIPHER_CTX_new(void)
 {
   return EVP_CIPHER_CTX_new_ptr();
@@ -1679,19 +1716,24 @@ void EVP_CIPHER_CTX_free(void *pArg0)
   EVP_CIPHER_CTX_free_ptr(pArg0);
 }
 
-int EVP_CIPHER_key_length(void *pArg0)
-{
-  return EVP_CIPHER_key_length_ptr(pArg0);
-}
-
 int EVP_CIPHER_CTX_key_length(void *pArg0)
 {
   return EVP_CIPHER_CTX_key_length_ptr(pArg0);
 }
 
+int EVP_CIPHER_CTX_get_key_length(void *pArg0)
+{
+  return EVP_CIPHER_CTX_get_key_length_ptr(pArg0);
+}
+
 int EVP_CIPHER_CTX_block_size(void *pArg0)
 {
   return EVP_CIPHER_CTX_block_size_ptr(pArg0);
+}
+
+int EVP_CIPHER_CTX_get_block_size(void *pArg0)
+{
+  return EVP_CIPHER_CTX_get_block_size_ptr(pArg0);
 }
 
 void EVP_CIPHER_CTX_reset(void *pArg0)
@@ -2367,6 +2409,8 @@ typedef void (*SSL_set_accept_state_t)(void *pArg0);
 SSL_set_accept_state_t SSL_set_accept_state_ptr = NULL;
 typedef void *(*SSL_get_peer_certificate_t)(void *pArg0);
 SSL_get_peer_certificate_t SSL_get_peer_certificate_ptr = NULL;
+typedef void *(*SSL_get1_peer_certificate_t)(void *pArg0);
+SSL_get1_peer_certificate_t SSL_get1_peer_certificate_ptr = NULL;
 typedef int (*SSL_get_verify_result_t)(void *pArg0);
 SSL_get_verify_result_t SSL_get_verify_result_ptr = NULL;
 typedef void *(*SSL_get_peer_cert_chain_t)(void *pArg0);
@@ -2563,6 +2607,13 @@ goto err;
 {
 #ifdef _DEBUG
 MCLog( "Unable to load: SSL_get_peer_certificate\n");
+#endif
+goto err; 
+}
+  if (!module_resolve(module_ssl, SYMBOL_PREFIX "SSL_get1_peer_certificate", (handler_t *)&SSL_get1_peer_certificate_ptr))
+{
+#ifdef _DEBUG
+MCLog( "Unable to load: SSL_get1_peer_certificate\n");
 #endif
 goto err; 
 }
@@ -2922,6 +2973,11 @@ void SSL_set_accept_state(void *pArg0)
 void *SSL_get_peer_certificate(void *pArg0)
 {
   return SSL_get_peer_certificate_ptr(pArg0);
+}
+
+void *SSL_get1_peer_certificate(void *pArg0)
+{
+  return SSL_get1_peer_certificate_ptr(pArg0);
 }
 
 int SSL_get_verify_result(void *pArg0)

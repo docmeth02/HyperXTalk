@@ -530,36 +530,54 @@ constant kOpenStateFailed is -1
 variable mOpenState as Number
 
 private unsafe handler InitBrowserView()
+	// All variable declarations must be at top of handler in LCB
 	variable tParent as Pointer
+	variable tFactory as optional MCBrowserFactoryRef
+	variable tDisplay as optional Pointer
+	variable tBrowserView as Pointer
+
+	log "HTX: InitBrowserView entered"
 
 	// put my native window into tParent
 	MCWidgetGetMyStackNativeView(tParent)
-
-	variable tFactory as MCBrowserFactoryRef
-	if not MCBrowserFactoryGet(the empty string, tFactory) then
-		put kOpenStateFailed into mOpenState
-		throw "error getting browser factory"
+	if tParent is nothing then
+		log "HTX: tParent is nothing"
+	else
+		log "HTX: tParent is not nothing"
 	end if
 
-	variable tDisplay as optional Pointer
+	if not MCBrowserFactoryGet(the empty string, tFactory) then
+		put kOpenStateFailed into mOpenState
+		log "HTX: MCBrowserFactoryGet FAILED"
+		throw "error getting browser factory"
+	end if
+	log "HTX: MCBrowserFactoryGet succeeded"
+
 	MCWidgetGetMyStackNativeDisplay(tDisplay)
 
 	if not MCBrowserFactoryCreateBrowser(tFactory, tDisplay, tParent, mBrowser) then
 		put kOpenStateFailed into mOpenState
+		log "HTX: MCBrowserFactoryCreateBrowser FAILED"
 		throw "error creating browser"
 	end if
+	log "HTX: MCBrowserFactoryCreateBrowser succeeded"
 	put kOpenStateOpen into mOpenState
-	
-	variable tBrowserView as Pointer
+
 	put MCBrowserGetNativeLayer(mBrowser) into tBrowserView
+	if tBrowserView is nothing then
+		log "HTX: tBrowserView is nothing"
+	else
+		log "HTX: tBrowserView is not nothing"
+	end if
 	set my native layer to tBrowserView
-	
+	log "HTX: native layer set"
+
 	// tell native layer that we can't render a snapshot of the browser view.
 	MCWidgetSetMyNativeLayerCanRenderToContext(false)
 
-	MCBrowserSetNavigationHandler(mBrowser, OnNavigationCallback, nothing)
-	MCBrowserSetJavaScriptHandler(mBrowser, OnJavaScriptCallback, nothing)
-	MCBrowserSetProgressHandler(mBrowser, OnProgressCallback, nothing)
+	// Note: MCBrowserSet*Handler calls fail with "unexpected libffi failure" on Windows
+	// because this LCB version cannot create FFI closures for callbacks with foreign enum
+	// parameters. Skipping for now — browser renders without navigation/progress events.
 
 	applyProperties(mProperties)
 end handler
@@ -569,10 +587,6 @@ private unsafe handler FinalizeBrowserView()
 		set my native layer to nothing
 
         if mBrowser is not nothing then
-            MCBrowserSetNavigationHandler(mBrowser, nothing, nothing)
-            MCBrowserSetJavaScriptHandler(mBrowser, nothing, nothing)
-            MCBrowserSetProgressHandler(mBrowser, nothing, nothing)
-
 			MCBrowserRelease(mBrowser)
 			put nothing into mBrowser
 		end if
@@ -592,6 +606,7 @@ end handler
 --
 
 public handler OnOpen()
+	log "HTX: browser OnOpen called"
 	// Keep a reference to this widget's script object so we can post to it from
 	//   the callbacks (which don't have a target widget when called).
 	put my script object into mScriptObject
@@ -601,6 +616,7 @@ public handler OnOpen()
 	unsafe
 		InitBrowserView()
 	end unsafe
+	log "HTX: browser OnOpen done"
 end handler
 
 public handler OnClose()

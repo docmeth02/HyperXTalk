@@ -530,7 +530,7 @@
     <ClInclude Include="..\..\..\engine\src\native-layer-android.h"/>
     <ClInclude Include="..\..\..\engine\src\native-layer-ios.h"/>
     <ClInclude Include="..\..\..\engine\src\native-layer-mac.h"/>
-    <ClInclude Include="..\..\..\engine\src\native-layer-win32.h"/>
+    <ClInclude Include="..\..\..\engine\src\native-layer-win32-wv2.h"/>
     <ClInclude Include="..\..\..\engine\src\native-layer-x11.h"/>
     <ClInclude Include="..\..\..\engine\src\lnxans.h"/>
     <ClInclude Include="..\..\..\engine\src\lnxaudio.h"/>
@@ -793,7 +793,7 @@
     <ClCompile Include="..\..\..\engine\src\legacy_spec.cpp"/>
     <ClCompile Include="..\..\..\engine\src\platform.cpp"/>
     <ClCompile Include="..\..\..\engine\src\platform-player.cpp"/>
-    <ClCompile Include="..\..\..\engine\src\native-layer-win32.cpp"/>
+    <ClCompile Include="..\..\..\engine\src\native-layer-win32-wv2.cpp"/>
     <ClCompile Include="..\..\..\engine\src\w32ans.cpp"/>
     <ClCompile Include="..\..\..\engine\src\w32color.cpp"/>
     <ClCompile Include="..\..\..\engine\src\w32compat.cpp"/>

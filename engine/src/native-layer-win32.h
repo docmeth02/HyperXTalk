@@ -37,19 +37,41 @@ private:
 
 	HWND m_viewport_hwnd;
 	MCRectangle m_intersect_rect;
-    
+
+	// Target physical-pixel size for Chrome_WidgetWin_0.  Kept in sync by
+	// updateViewGeometry() and read by MCCefWidgetWndProc (a file-static free
+	// function) to block Chromium's DPI-scaled resize back-correction.
+	int m_cef_target_width;
+	int m_cef_target_height;
+	bool m_cef_subclassed;
+	// v16: true = browse mode (render widget on-screen at (0,0));
+	//       false = edit mode (render widget moved to -32000,0 so DComp is off-screen).
+	// WS_VISIBLE is kept 1 in both modes so the CEF compositor keeps running
+	// and OnLoadEnd fires normally.
+	bool m_render_visible;
+
+public:
+	// Accessors for MCCefWidgetWndProc (free function, cannot access private members).
+	int getCefTargetWidth()  const { return m_cef_target_width; }
+	int getCefTargetHeight() const { return m_cef_target_height; }
+	bool isRenderVisible()   const { return m_render_visible; }
+private:
+
+	// (WndProc replacement MCCefWidgetWndProc is a file-static free function
+	//  in native-layer-win32.cpp — no longer a class member.)
+
     // Returns the HWND for the stack containing this widget
     HWND getStackWindow();
-    
+
     // Performs the attach/detach operations
 	virtual void doAttach();
 	virtual void doDetach();
-	
+
 	virtual bool doPaint(MCGContextRef p_context);
 	virtual void doSetGeometry(const MCRectangle &p_rect);
 	virtual void doSetViewportGeometry(const MCRectangle &p_rect);
 	virtual void doSetVisible(bool p_visible);
-	
+
 	void updateViewGeometry();
 
 	// Performs a relayering operation

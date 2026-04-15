@@ -18,13 +18,13 @@
 
 #include "libbrowser_internal.h"
 
-extern bool MCCefBrowserFactoryCreate(MCBrowserFactoryRef &r_factory);
+extern bool MCWebView2BrowserFactoryCreate(MCBrowserFactoryRef &r_factory);
 
 
 // Overcome the tautological error if s_factory_list is a static pointer
 MCBrowserFactoryMap kMCBrowserFactoryMap[] =
 {
-    { "CEF", nil, MCCefBrowserFactoryCreate },
+    { "WebView2", nil, MCWebView2BrowserFactoryCreate },
     { nil, nil, nil },
 };
 

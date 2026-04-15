@@ -73,7 +73,8 @@ public:
         
         if (m_handle == NULL)
         {
-            /* TODO: Use GetLastError() */
+            DWORD t_error = GetLastError();
+            MCLog("LoadLibraryExW failed for %@ with error %u", p_native_path, (unsigned)t_error);
             return __MCSLibraryThrowCreateWithNativePathFailed(p_native_path);
         }
 

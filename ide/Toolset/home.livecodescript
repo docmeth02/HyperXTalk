@@ -381,7 +381,7 @@ private command revInternal__SetupPaths
          -- MW-2013-06-13: Adjust the engine path for Mac
          put item 1 to -5 of tEnginePath into tEnginePath
          break
-      case "Windows"
+      case "Win32"
          // HXT
          --         -- We put prefereces into the 'Roaming' AppData folder.
          --         put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Enterprise/Preferences" into sOldPreferencesPath
@@ -391,13 +391,13 @@ private command revInternal__SetupPaths
          --         if there is no folder sOldPreferencesPath then
          --            put specialFolderPath(0x001a) & "/Runtime Revolution/Revolution Media/Preferences" into sOldPreferencesPath
          --         end if
-         
+
          put specialFolderPath(0x001a) & "/HyperXTalk/Preferences" into sPreferencesPath
          -- We put everything else in the 'Local' AppData folder.
          put specialFolderPath(0x001c) & "/HyperXTalk/Cache" into sCachePath
          put specialFolderPath(0x001c) & "/HyperXTalk/Crash Logs" into sCrashLogPath
          put specialFolderPath(0x001c) & "/HyperXTalk/Documentation Cache" into sUserDocsPath
-         
+
          -- MW-2013-06-13: Adjust the engine path for Windows
          put item 1 to -2 of tEnginePath into tEnginePath
          break

@@ -69,6 +69,86 @@ const char* kErrUnknownAccessMode = "ziperr,unknown access mode";
 const char* kErrFileAccessNotPermitted = "ziperr,file access not permitted";
 const char* kErrNoCurrentOperation = "ziperr,no current operation";
 
+/* -----------------------------------------------------------------------
+ * zip_stat_index_compat: ABI bridge between old and new libzip.
+ *
+ * revzip.cpp is compiled against the NEW zip.h (2021), but links against a
+ * pre-built libzip.lib built from the OLD API.  The OLD and NEW zip_stat
+ * structs have completely different layouts:
+ *
+ * OLD (x64 Windows, off_t=4, time_t=8, ptr=8):
+ *   offset  0: const char *name       (8)
+ *   offset  8: int index              (4)
+ *   offset 12: unsigned int crc       (4)
+ *   offset 16: time_t mtime           (8)
+ *   offset 24: int32 size             (4)  [off_t = 4 on Windows]
+ *   offset 28: int32 comp_size        (4)
+ *   offset 32: uint16 comp_method     (2)
+ *   offset 34: uint16 bitflags        (2)
+ *   total: 36 bytes
+ *
+ * NEW zip_stat_t:
+ *   offset  0: zip_uint64_t valid     (8)
+ *   offset  8: const char *name       (8)
+ *   offset 16: zip_uint64_t index     (8)
+ *   offset 24: zip_uint64_t size      (8)
+ *   offset 32: zip_uint64_t comp_size (8)
+ *   offset 40: time_t mtime           (8)
+ *   offset 48: zip_uint32_t crc       (4)
+ *   offset 52: zip_uint16_t comp_method (2)
+ *   offset 54: zip_uint16_t encryption_method (2)
+ *   offset 56: zip_uint32_t flags     (4)
+ *   total: 60 bytes
+ *
+ * We call zip_stat_index with a raw 64-byte buffer so old libzip writes
+ * the OLD layout, then we manually copy fields into the new struct.
+ * ----------------------------------------------------------------------- */
+static int zip_stat_index_compat(struct zip *za, zip_int64_t index,
+                                  zip_flags_t flags, zip_stat_t *new_stat)
+{
+    unsigned char buf[64];
+    memset(buf, 0, sizeof(buf));
+
+    /* Pass buf as zip_stat_t* – old libzip fills it with OLD layout */
+    int result = zip_stat_index(za, (zip_uint64_t)index, flags,
+                                (zip_stat_t *)(void *)buf);
+    if (result == 0)
+    {
+        memset(new_stat, 0, sizeof(*new_stat));
+        /* Read fields at their OLD offsets */
+        memcpy(&new_stat->name,        buf +  0, sizeof(new_stat->name));
+        {
+            int idx;
+            memcpy(&idx, buf + 8, 4);
+            new_stat->index = (zip_uint64_t)(unsigned int)idx;
+        }
+        {
+            unsigned int crc;
+            memcpy(&crc, buf + 12, 4);
+            new_stat->crc = crc;
+        }
+        memcpy(&new_stat->mtime, buf + 16, sizeof(new_stat->mtime));
+        {
+            unsigned int sz, csz;
+            memcpy(&sz,  buf + 24, 4);
+            memcpy(&csz, buf + 28, 4);
+            new_stat->size      = (zip_uint64_t)sz;
+            new_stat->comp_size = (zip_uint64_t)csz;
+        }
+        {
+            unsigned short cm;
+            memcpy(&cm, buf + 32, 2);
+            new_stat->comp_method = cm;
+        }
+        new_stat->encryption_method = 0;
+        new_stat->flags = 0;
+        new_stat->valid = ZIP_STAT_NAME | ZIP_STAT_INDEX | ZIP_STAT_SIZE |
+                          ZIP_STAT_COMP_SIZE | ZIP_STAT_MTIME | ZIP_STAT_CRC |
+                          ZIP_STAT_COMP_METHOD;
+    }
+    return result;
+}
+
 static bool wrongNumberOfArguments(unsigned int pNumArguments, unsigned int pNumber)
 {
 	return (pNumArguments != pNumber);
@@ -560,7 +640,7 @@ void revZipExtractItemToVariable(char *p_arguments[], int p_argument_count, char
 	struct zip_stat t_stat;
 	if (NULL == t_result)
 	{
-		if (0 != zip_stat_index(t_archive, t_index, 0, &t_stat))
+		if (0 != zip_stat_index_compat(t_archive, t_index, 0, &t_stat))
 		{
 			std::string t_outerr = "ziperr extract item to variable," + std::string(zip_strerror(t_archive));
 			t_result = strdup(t_outerr . c_str());
@@ -594,14 +674,14 @@ void revZipExtractItemToVariable(char *p_arguments[], int p_argument_count, char
 
 	if (NULL == t_result)
 	{
-		ssize_t t_read;
+		zip_int64_t t_read;
 		t_read = 0;
-		
+
 		s_operation_in_progress = true;
 		s_operation_cancelled = false;
 		do
 		{
-			ssize_t t_bytes_read;
+			zip_int64_t t_bytes_read;
 			t_bytes_read = zip_fread(t_file, t_data + t_read, REVZIP_READ_BUFFER_SIZE);
 			if (t_bytes_read <= 0)
 				break;
@@ -1291,7 +1371,7 @@ void revZipEnumerateItems(char *p_arguments[], int p_argument_count, char **r_re
 
 			// SN-2015-03-11: [[ Bug 14413 ]] We want to get the bitflags
 			//  alongside the name: zip_stat_index provides this.
-			if (zip_stat_index(t_archive, i, 0, &t_stat) != 0)
+			if (zip_stat_index_compat(t_archive, i, 0, &t_stat) != 0)
 			{
 				std::string t_outerr = "ziperr enumerate items," + std::string((zip_strerror(t_archive)));
 				t_result = strdup(t_outerr.c_str());
@@ -1398,7 +1478,7 @@ void revZipDescribeItem(char *p_arguments[], int p_argument_count, char **r_resu
 		else
 		{
 			struct zip_stat* t_stat = (struct zip_stat*) malloc(sizeof(struct zip_stat));
-			if((t_stat) && (zip_stat_index(t_archive, t_index, 0, t_stat) == 0))
+			if((t_stat) && (zip_stat_index_compat(t_archive, t_index, 0, t_stat) == 0))
 			{
 				std::stringstream t_strstream;
 				t_strstream << t_stat->index << "," << t_stat->crc << "," << t_stat->size << ",";

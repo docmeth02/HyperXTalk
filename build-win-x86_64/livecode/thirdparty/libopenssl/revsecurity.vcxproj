@@ -291,6 +291,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\thirdparty\libopenssl\src\dummy.cpp"/>
+    <ClCompile Include="..\..\..\..\thirdparty\libopenssl\src\revsecurity_compat.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\prebuilt\libopenssl.vcxproj">

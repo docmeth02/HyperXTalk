@@ -85,8 +85,8 @@
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,8 +121,8 @@
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -157,8 +157,8 @@
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding></EnableCOMDATFolding>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -193,8 +193,8 @@
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding></EnableCOMDATFolding>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -229,8 +229,8 @@
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x86 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -265,8 +265,8 @@
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oleaut32.lib;advapi32.lib;secur32.lib;shell32.lib;wldap32.lib;ws2_32.lib;wsock32.lib;libpq.lib;libopenssl_stubs.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib;..\..\..\prebuilt\unpacked\Thirdparty\x86_64-win32-$(PlatformToolset)_static_$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
 <asmv3:application>
-	<asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
-		<dpiAware>true</dpiAware>
+	<asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings"
+	                       xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+		<!-- Legacy flag for Windows 8.1 and earlier -->
+		<dpiAware>true/PM</dpiAware>
+		<!-- Per-Monitor v2: required for WebView2 DirectComposition positioning.
+		     Without this, the WebView2 DComp visual tree is misaligned on
+		     high-DPI displays, producing a ghost render at (0,0) of the window. -->
+		<ws2:dpiAwareness>PerMonitorV2</ws2:dpiAwareness>
 	</asmv3:windowsSettings>
 </asmv3:application>
 <dependency>
