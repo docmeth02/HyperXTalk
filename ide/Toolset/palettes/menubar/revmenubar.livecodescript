@@ -241,19 +241,19 @@ on setMenuProperties
    set the height of me to 47
    set the resizable of me to false
    
-   local tTitle
-   set the itemDelimiter to "-"
-   put "LiveCode" && revEnvironmentEditionProperty("name") into tTitle
-   if item 1 of the version ends with ".0" then
-      put space & char 1 to -3 of item 1 of the version after tTitle
-   else
-      put space & item 1 of the version after tTitle
-   end if
-   if item 2 of the version is not empty then
-      put space & "(" & item 2 of the version && item 3 of the version & ")" after tTitle
-   end if
+   --   local tTitle
+   --   set the itemDelimiter to "-"
+   --   put "LiveCode" && revEnvironmentEditionProperty("name") into tTitle
+   --   if item 1 of the version ends with ".0" then
+   --      put space & char 1 to -3 of item 1 of the version after tTitle
+   --   else
+   --      put space & item 1 of the version after tTitle
+   --   end if
+   --   if item 2 of the version is not empty then
+   --      put space & "(" & item 2 of the version && item 3 of the version & ")" after tTitle
+   --   end if
    set the itemDelimiter to comma
-   set the title of me to tTitle
+   set the title of me to "HyperXTalk" && "(" & the version & ")"
    
    local tScreenRect
    put revIDEStackScreenRect(the short name of this stack, true) into tScreenRect
