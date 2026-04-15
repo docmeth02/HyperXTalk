@@ -155,26 +155,3 @@ find "$MACBIN" -name "*.app" -exec codesign --force --options runtime \
 echo "Done signing."
 ```
 
----
-
-### 10. Build the installer
-
-```bash
-python3 build_installer.py
-```
-
-This produces:
-```
-_build/final/output/HyperXTalkInstaller-1_0_0-Mac.app
-```
-
----
-
-### 11. Install and run
-
-```bash
-open ~/Developer/HyperXTalk/_build/final/output/HyperXTalkInstaller-1_0_0-Mac.app
-```
-
-Follow the installer prompts. The default installation location is `/Applications`.  
-Once installed, launch **HyperXTalk** from `/Applications` as normal.
