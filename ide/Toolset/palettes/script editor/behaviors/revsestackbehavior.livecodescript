@@ -2606,6 +2606,13 @@ on idePreferenceChanged pPreference, pValue
       case "cREVScriptDebugMode"
          revSEUpdate true
          break
+      case "cScriptEditor,colorization,scheme"
+      case "cScriptEditor,colorization,config"
+         -- Colorization preferences changed externally (e.g. via Preferences dialog).
+         -- Re-initialise sPrefs so the new scheme is picked up immediately and is not
+         -- overwritten when sePrefSave runs on suspendStack / seFinalize.
+         revSEUpdate true
+         break
    end switch
 end idePreferenceChanged
 
