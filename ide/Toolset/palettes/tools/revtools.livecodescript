@@ -607,26 +607,40 @@ on mouseDown pButton
    reset the templatestack
    set the name of the templateStack to "revDragControl"
    set the visible of the templateStack to false
-   set the backGroundColor of the templateStack to the hiliteColor
+   -- Use a system-appearance-aware background so the drag overlay is
+   -- visible in both light and dark mode.  The hiliteColor is the
+   -- selection highlight, which in dark mode is very light / near-white.
+   if the systemAppearance is "dark" then
+      set the backGroundColor of the templateStack to "45,45,45"
+   else
+      set the backGroundColor of the templateStack to the hiliteColor
+   end if
    set the decorations of the templateStack to "noShadow"
    set the blendLevel of the templateStack to 25
    set the loc of the templatestack to -500,-500
-   
+
    create invisible stack
    reset the templatestack
    set the defaultStack to "revDragControl"
-   
+
    # Create a control and Generate a drag image
-   
+
    revIDECreateObject tObjectTypeID, the long ID of card 1 of this stack, "0,0"
    if the result is false then exit mouseDown
-   
+
    local tControlLongID
    put the result into tControlLongID
-   
+
    set the width of this stack to the width of tControlLongID
    set the height of this stack to the height of tControlLongID
    set the topleft of tControlLongID to 0,0
+
+   -- Newly created widget controls don't inherit the palette's foreground
+   -- colour.  Apply the correct icon colour for the current appearance so
+   -- the drag image is visible in both light and dark mode.
+   if word 1 of tControlLongID is "widget" then
+      set the foregroundColor of tControlLongID to toolIconColor(the systemAppearance)
+   end if
    
    # AL-2015-09-25: [[ Bug 16025 ]] Use the actual created dg rather than snapshot
    if tObjectTypeID is not "com.livecode.interface.classic.datagrid" then
