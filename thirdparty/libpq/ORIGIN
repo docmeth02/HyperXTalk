@@ -1,3 +1,9 @@
-Files in this folder are based on postgresql-8.1.8
+Files in this folder use the PostgreSQL C client library (libpq) from Homebrew.
 
-Original source archives are available from <http://www.postgresql.org>
+  Formula : libpq
+  Version : PostgreSQL 18.3
+  Prefix  : /opt/homebrew/opt/libpq
+
+To rebuild prebuilt/lib/mac/libpq.a:
+  brew install libpq
+  sh prebuilt/scripts/build-libpq-mac-arm64.sh

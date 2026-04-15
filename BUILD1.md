@@ -111,7 +111,24 @@ the comment at the top of `build-mac-extras.sh` for details.
 
 ---
 
-### 7. Build the engine
+### 7. Bake in database client libraries (optional but recommended)
+
+Skipping this step is safe — the database driver bundles will still build and
+load, but end-users will need a PostgreSQL or MySQL client installed on their
+own machine to make connections. Running it bakes the libraries in statically
+so no user-side installation is required.
+
+```bash
+brew install libpq mysql-client
+sh prebuilt/scripts/build-libpq-mac-arm64.sh
+sh prebuilt/scripts/build-libmysql-mac-arm64.sh
+sh rebuild-dbpostgresql.sh
+sh rebuild-dbmysql.sh
+```
+
+---
+
+### 8. Build the engine
 
 ```bash
 make compile-mac
@@ -123,7 +140,7 @@ make compile-mac
 
 ---
 
-### 8. Code sign mac-bin
+### 9. Code sign mac-bin
 
 ```bash
 REPO=~/Developer/HyperXTalk
@@ -140,7 +157,7 @@ echo "Done signing."
 
 ---
 
-### 9. Build the installer
+### 10. Build the installer
 
 ```bash
 python3 build_installer.py
@@ -153,7 +170,7 @@ _build/final/output/HyperXTalkInstaller-1_0_0-Mac.app
 
 ---
 
-### 10. Install and run
+### 11. Install and run
 
 ```bash
 open ~/Developer/HyperXTalk/_build/final/output/HyperXTalkInstaller-1_0_0-Mac.app
