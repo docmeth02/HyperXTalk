@@ -52,6 +52,7 @@
 							'include/libxslt/security.h',
 							'include/libxslt/templates.h',
 							'include/libxslt/transform.h',
+							'include/libxslt/transformInternals.h',
 							'include/libxslt/trio.h',
 							'include/libxslt/triodef.h',
 							'include/libxslt/variables.h',

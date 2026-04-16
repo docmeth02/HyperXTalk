@@ -1,28 +1,16 @@
 #define IN_LIBEXSLT
 #include "libexslt/libexslt.h"
 
-#if defined(WIN32) && !defined (__CYGWIN__) && (!__MINGW32__)
-#include <win32config.h>
-#else
-#include "config.h"
-#endif
-
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include <libxslt/xsltconfig.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/xsltInternals.h>
 #include <libxslt/extensions.h>
 
-#ifdef HAVE_MATH_H
 #include <math.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #include "exslt.h"
 
@@ -34,7 +22,7 @@
  *    number math:min (node-set)
  *
  * Returns the minimum value of the nodes passed as the argument, or
- *         xmlXPathNAN if @ns is NULL or empty or if one of the nodes
+ *         NAN if @ns is NULL or empty or if one of the nodes
  *         turns into NaN.
  */
 static double
@@ -43,14 +31,14 @@ exsltMathMin (xmlNodeSetPtr ns) {
     int i;
 
     if ((ns == NULL) || (ns->nodeNr == 0))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = xmlXPathCastNodeToNumber(ns->nodeTab[0]);
     if (xmlXPathIsNaN(ret))
-	return(xmlXPathNAN);
+	return(NAN);
     for (i = 1; i < ns->nodeNr; i++) {
 	cur = xmlXPathCastNodeToNumber(ns->nodeTab[i]);
 	if (xmlXPathIsNaN(cur))
-	    return(xmlXPathNAN);
+	    return(NAN);
 	if (cur < ret)
 	    ret = cur;
     }
@@ -103,7 +91,7 @@ exsltMathMinFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  *    number math:max (node-set)
  *
  * Returns the maximum value of the nodes passed as arguments, or
- *         xmlXPathNAN if @ns is NULL or empty or if one of the nodes
+ *         NAN if @ns is NULL or empty or if one of the nodes
  *         turns into NaN.
  */
 static double
@@ -112,14 +100,14 @@ exsltMathMax (xmlNodeSetPtr ns) {
     int i;
 
     if ((ns == NULL) || (ns->nodeNr == 0))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = xmlXPathCastNodeToNumber(ns->nodeTab[0]);
     if (xmlXPathIsNaN(ret))
-	return(xmlXPathNAN);
+	return(NAN);
     for (i = 1; i < ns->nodeNr; i++) {
 	cur = xmlXPathCastNodeToNumber(ns->nodeTab[i]);
 	if (xmlXPathIsNaN(cur))
-	    return(xmlXPathNAN);
+	    return(NAN);
 	if (cur > ret)
 	    ret = cur;
     }
@@ -351,7 +339,7 @@ exsltMathLowestFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  *     number math:constant(string, number)
  *
  * Returns a number value of the given constant with the given precision or
- * xmlXPathNAN if name is unknown.
+ * NAN if name is unknown.
  * The constants are PI, E, SQRRT2, LN2, LN10, LOG2E, and SQRT1_2
  */
 static double
@@ -360,7 +348,7 @@ exsltMathConstant (xmlChar *name, double precision) {
     double ret;
 
     if ((name == NULL) || (xmlXPathIsNaN(precision)) || (precision < 1.0)) {
-        return xmlXPathNAN;
+        return NAN;
     }
 
     if (xmlStrEqual(name, BAD_CAST "PI")) {
@@ -423,7 +411,7 @@ exsltMathConstant (xmlChar *name, double precision) {
 	str = NULL;
     }
     if (str == NULL)
-        return xmlXPathNAN;
+        return NAN;
     ret = xmlXPathCastStringToNumber(str);
     xmlFree(str);
     return ret;
@@ -459,8 +447,6 @@ exsltMathConstantFunction (xmlXPathParserContextPtr ctxt, int nargs) {
 
     xmlXPathReturnNumber(ctxt, ret);
 }
-
-#if defined(HAVE_STDLIB_H) && defined(RAND_MAX)
 
 /**
  * exsltMathRandom:
@@ -501,10 +487,6 @@ exsltMathRandomFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     xmlXPathReturnNumber(ctxt, ret);
 }
 
-#endif /* defined(HAVE_STDLIB_H) && defined(RAND_MAX) */
-
-#if HAVE_MATH_H
-
 /**
  * exsltMathAbs:
  * @num:  a double
@@ -512,14 +494,14 @@ exsltMathRandomFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math abs() function:
  *    number math:abs (number)
  *
- * Returns the absolute value of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the absolute value of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathAbs (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = fabs(num);
     return(ret);
 }
@@ -555,14 +537,14 @@ exsltMathAbsFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math sqrt() function:
  *    number math:sqrt (number)
  *
- * Returns the square root of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the square root of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathSqrt (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = sqrt(num);
     return(ret);
 }
@@ -599,7 +581,7 @@ exsltMathSqrtFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math power() function:
  *    number math:power (number, number)
  *
- * Returns the power base and power arguments, or xmlXPathNAN
+ * Returns the power base and power arguments, or NAN
  * if either @base or @power is Nan.
  */
 static double
@@ -607,7 +589,7 @@ exsltMathPower (double base, double power) {
     double ret;
 
     if ((xmlXPathIsNaN(base) || xmlXPathIsNaN(power)))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = pow(base, power);
     return(ret);
 }
@@ -648,14 +630,14 @@ exsltMathPowerFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math log() function:
  *    number math:log (number)
  *
- * Returns the natural log of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the natural log of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathLog (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = log(num);
     return(ret);
 }
@@ -691,14 +673,14 @@ exsltMathLogFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math sin() function:
  *    number math:sin (number)
  *
- * Returns the sine of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the sine of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathSin (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = sin(num);
     return(ret);
 }
@@ -734,14 +716,14 @@ exsltMathSinFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math cos() function:
  *    number math:cos (number)
  *
- * Returns the cosine of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the cosine of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathCos (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = cos(num);
     return(ret);
 }
@@ -777,14 +759,14 @@ exsltMathCosFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math tan() function:
  *    number math:tan (number)
  *
- * Returns the tangent of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the tangent of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathTan (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = tan(num);
     return(ret);
 }
@@ -820,14 +802,14 @@ exsltMathTanFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math asin() function:
  *    number math:asin (number)
  *
- * Returns the arc sine of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the arc sine of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathAsin (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = asin(num);
     return(ret);
 }
@@ -863,14 +845,14 @@ exsltMathAsinFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math acos() function:
  *    number math:acos (number)
  *
- * Returns the arc cosine of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the arc cosine of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathAcos (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = acos(num);
     return(ret);
 }
@@ -906,14 +888,14 @@ exsltMathAcosFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math atan() function:
  *    number math:atan (number)
  *
- * Returns the arc tangent of the argument, or xmlXPathNAN if @num is Nan.
+ * Returns the arc tangent of the argument, or NAN if @num is Nan.
  */
 static double
 exsltMathAtan (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = atan(num);
     return(ret);
 }
@@ -950,7 +932,7 @@ exsltMathAtanFunction (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math atan2() function:
  *    number math:atan2 (number, number)
  *
- * Returns the arc tangent function of the y/x arguments, or xmlXPathNAN
+ * Returns the arc tangent function of the y/x arguments, or NAN
  * if either @y or @x is Nan.
  */
 static double
@@ -958,7 +940,7 @@ exsltMathAtan2 (double y, double x) {
     double ret;
 
     if ((xmlXPathIsNaN(y) || xmlXPathIsNaN(x)))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = atan2(y, x);
     return(ret);
 }
@@ -999,7 +981,7 @@ exsltMathAtan2Function (xmlXPathParserContextPtr ctxt, int nargs) {
  * Implements the EXSLT - Math exp() function:
  *    number math:exp (number)
  *
- * Returns the exponential function of the argument, or xmlXPathNAN if
+ * Returns the exponential function of the argument, or NAN if
  * @num is Nan.
  */
 static double
@@ -1007,7 +989,7 @@ exsltMathExp (double num) {
     double ret;
 
     if (xmlXPathIsNaN(num))
-	return(xmlXPathNAN);
+	return(NAN);
     ret = exp(num);
     return(ret);
 }
@@ -1036,8 +1018,6 @@ exsltMathExpFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     xmlXPathReturnNumber(ctxt, ret);
 }
 
-#endif /* HAVE_MATH_H */
-
 /**
  * exsltMathRegister:
  *
@@ -1058,16 +1038,12 @@ exsltMathRegister (void) {
     xsltRegisterExtModuleFunction ((const xmlChar *) "lowest",
 				   EXSLT_MATH_NAMESPACE,
 				   exsltMathLowestFunction);
-    /* register other math functions */
     xsltRegisterExtModuleFunction ((const xmlChar *) "constant",
 				   EXSLT_MATH_NAMESPACE,
 				   exsltMathConstantFunction);
-#ifdef HAVE_STDLIB_H
     xsltRegisterExtModuleFunction ((const xmlChar *) "random",
 				   EXSLT_MATH_NAMESPACE,
 				   exsltMathRandomFunction);
-#endif
-#if HAVE_MATH_H
     xsltRegisterExtModuleFunction ((const xmlChar *) "abs",
 				   EXSLT_MATH_NAMESPACE,
 				   exsltMathAbsFunction);
@@ -1104,7 +1080,6 @@ exsltMathRegister (void) {
     xsltRegisterExtModuleFunction ((const xmlChar *) "exp",
 				   EXSLT_MATH_NAMESPACE,
 				   exsltMathExpFunction);
-#endif
 }
 
 /**
@@ -1136,13 +1111,10 @@ exsltMathXpathCtxtRegister (xmlXPathContextPtr ctxt, const xmlChar *prefix)
                                    (const xmlChar *) "lowest",
                                    (const xmlChar *) EXSLT_MATH_NAMESPACE,
                                    exsltMathLowestFunction)
-#ifdef HAVE_STDLIB_H
         && !xmlXPathRegisterFuncNS(ctxt,
                                    (const xmlChar *) "random",
                                    (const xmlChar *) EXSLT_MATH_NAMESPACE,
                                    exsltMathRandomFunction)
-#endif
-#if HAVE_MATH_H
         && !xmlXPathRegisterFuncNS(ctxt,
                                    (const xmlChar *) "abs",
                                    (const xmlChar *) EXSLT_MATH_NAMESPACE,
@@ -1191,7 +1163,6 @@ exsltMathXpathCtxtRegister (xmlXPathContextPtr ctxt, const xmlChar *prefix)
                                    (const xmlChar *) "exp",
                                    (const xmlChar *) EXSLT_MATH_NAMESPACE,
                                    exsltMathExpFunction)
-#endif
         && !xmlXPathRegisterFuncNS(ctxt,
                                    (const xmlChar *) "constant",
                                    (const xmlChar *) EXSLT_MATH_NAMESPACE,

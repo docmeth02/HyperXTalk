@@ -1,12 +1,6 @@
 #define IN_LIBEXSLT
 #include "libexslt/libexslt.h"
 
-#if defined(WIN32) && !defined (__CYGWIN__) && (!__MINGW32__)
-#include <win32config.h>
-#else
-#include "config.h"
-#endif
-
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
@@ -34,14 +28,12 @@ exsltSetsDifferenceFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     }
 
     arg2 = xmlXPathPopNodeSet(ctxt);
-    if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+    if (xmlXPathCheckError(ctxt))
 	return;
-    }
 
     arg1 = xmlXPathPopNodeSet(ctxt);
     if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+        xmlXPathFreeNodeSet(arg2);
 	return;
     }
 
@@ -71,14 +63,12 @@ exsltSetsIntersectionFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     }
 
     arg2 = xmlXPathPopNodeSet(ctxt);
-    if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+    if (xmlXPathCheckError(ctxt))
 	return;
-    }
 
     arg1 = xmlXPathPopNodeSet(ctxt);
     if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+        xmlXPathFreeNodeSet(arg2);
 	return;
     }
 
@@ -122,13 +112,15 @@ exsltSetsDistinctFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     /* !!! must be sorted !!! */
     ret = xmlXPathDistinctSorted(ns);
 
-	if (ret != ns)
-		xmlXPathFreeNodeSet(ns);
+    if (ret != ns)
+	xmlXPathFreeNodeSet(ns);
 
     obj = xmlXPathWrapNodeSet(ret);
-    obj->user = user;
-    obj->boolval = boolval;
-    valuePush((ctxt), obj);
+    if (obj != NULL) {
+        obj->user = user;
+        obj->boolval = boolval;
+    }
+    valuePush(ctxt, obj);
 }
 
 /**
@@ -150,14 +142,12 @@ exsltSetsHasSameNodesFunction (xmlXPathParserContextPtr ctxt,
     }
 
     arg2 = xmlXPathPopNodeSet(ctxt);
-    if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+    if (xmlXPathCheckError(ctxt))
 	return;
-    }
 
     arg1 = xmlXPathPopNodeSet(ctxt);
     if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+        xmlXPathFreeNodeSet(arg2);
 	return;
     }
 
@@ -186,14 +176,12 @@ exsltSetsLeadingFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     }
 
     arg2 = xmlXPathPopNodeSet(ctxt);
-    if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+    if (xmlXPathCheckError(ctxt))
 	return;
-    }
 
     arg1 = xmlXPathPopNodeSet(ctxt);
     if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+	xmlXPathFreeNodeSet(arg2);
 	return;
     }
 
@@ -233,14 +221,12 @@ exsltSetsTrailingFunction (xmlXPathParserContextPtr ctxt, int nargs) {
     }
 
     arg2 = xmlXPathPopNodeSet(ctxt);
-    if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+    if (xmlXPathCheckError(ctxt))
 	return;
-    }
 
     arg1 = xmlXPathPopNodeSet(ctxt);
     if (xmlXPathCheckError(ctxt)) {
-	xmlXPathSetTypeError(ctxt);
+	xmlXPathFreeNodeSet(arg2);
 	return;
     }
 

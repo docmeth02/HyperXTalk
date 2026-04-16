@@ -85,6 +85,7 @@
 		DE0DD2570B3CF5D7E098F394 /* templates.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = templates.h; sourceTree = "<group>"; };
 		E12CB0325EE7094E59B6B7C3 /* imports.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imports.h; sourceTree = "<group>"; };
 		E4BE01C8BB8A3CB27C9B93BE /* transform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transform.h; sourceTree = "<group>"; };
+		AC5C242977234D43BF765B3A /* transformInternals.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transformInternals.h; sourceTree = "<group>"; };
 		E8B59485A1F2C1B5EA088BB6 /* win32.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = win32.gypi; path = ../../config/win32.gypi; sourceTree = "<group>"; };
 		ED9884E876BCBEF8B2A7EBFF /* xsltlocale.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = xsltlocale.h; sourceTree = "<group>"; };
 		F41F2EC870D735C07F59EEE4 /* keys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = keys.h; sourceTree = "<group>"; };
@@ -169,6 +170,7 @@
 				BA6F4C2AE974167782298F17 /* security.h */,
 				DE0DD2570B3CF5D7E098F394 /* templates.h */,
 				E4BE01C8BB8A3CB27C9B93BE /* transform.h */,
+				AC5C242977234D43BF765B3A /* transformInternals.h */,
 				1154944954AE1D11903423B4 /* trio.h */,
 				FDA0266287AC8EAAE8412E80 /* triodef.h */,
 				74FF8CD3CD7FF95E62BF3C15 /* variables.h */,
