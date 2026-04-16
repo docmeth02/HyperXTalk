@@ -12,7 +12,7 @@
  */
 
 #define PACKAGE "libzip"
-#define VERSION "1.10.1"
+#define VERSION "1.11.4"
 
 #define ENABLE_FDOPEN
 
