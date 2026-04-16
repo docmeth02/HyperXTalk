@@ -89,21 +89,16 @@ cp "$REPO/_build/mac/Debug/libzip.a"    "$REPO/prebuilt/lib/mac/libzip.a"
 
 ---
 
-### 5. Build ICU for arm64 macOS (icupkg host tool + five static libs)
+### 5. Build icupkg (host tool used by the ICU data step)
 
 ```bash
-sh prebuilt/scripts/build-icu-mac-arm64.sh
+sh prebuilt/scripts/build-icupkg-mac-arm64.sh
 ```
-
-Produces `prebuilt/bin/mac/icupkg` and `prebuilt/lib/mac/libicu*.a` in one
-pass. Source is fetched to `prebuilt/build/icu-58-mac-arm64/` (gitignored).
 
 ---
 
-### 6. Populate the remaining prebuilts
-
-libgif, libjpeg, libpng, libpcre, libzip, libcustomcrypto/ssl, and the
-stub libpq/libmysql archives.
+### 6. Populate the remaining prebuilts (libgif, libjpeg, libpng, libpcre,
+###    ICU libs, libcustomcrypto/ssl, stub libpq/libmysql)
 
 ```bash
 brew install openssl@3     # if not already installed
