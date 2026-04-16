@@ -30,6 +30,28 @@ if not exist "%DEBUG_MYSQL_LIB%" (
 )
 
 :: ----------------------------------------------------------
+:: PostgreSQL 18 prerequisite check
+:: The engine links against libpq.lib (PostgreSQL 18).
+:: Run setup-pgsql-win.bat once after: scoop install postgresql
+:: ----------------------------------------------------------
+set "DEBUG_PG_LIB=build-win-x86_64\livecode\Debug\lib\libpq.lib"
+if not exist "%DEBUG_PG_LIB%" (
+    echo.
+    echo NOTE: %DEBUG_PG_LIB% not found.
+    echo Running setup-pgsql-win.bat to copy PostgreSQL 18 libs from Scoop...
+    echo.
+    call setup-pgsql-win.bat
+    if errorlevel 1 (
+        echo.
+        echo PostgreSQL setup failed. Install PostgreSQL via Scoop first:
+        echo   scoop install postgresql
+        echo Then re-run this script.
+        exit /b 1
+    )
+    echo.
+)
+
+:: ----------------------------------------------------------
 :: Locate MSBuild via a temp PS1 file (avoids cmd mishandling of
 :: parentheses inside %ProgramFiles(x86)% in inline commands)
 :: ----------------------------------------------------------

@@ -398,18 +398,6 @@
       <Project>{1C6790C4-D026-3A36-83A4-F3643401EEA1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\prebuilt\libcef.vcxproj">
-      <Project>{0525BA25-863A-D337-9039-8F4A44C346C1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\thirdparty\libcef\libcef_library_wrapper.vcxproj">
-      <Project>{FBDCFAA5-430C-C805-C30E-C60EADC911C3}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\thirdparty\libcef\libcef_stubs.vcxproj">
-      <Project>{4BF90F90-FCE1-3483-6D59-2798502DDBD1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\thirdparty\libopenssl\libopenssl_stubs.vcxproj">
       <Project>{1B33B6B5-A617-CD05-7434-2E50DEAD202C}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
