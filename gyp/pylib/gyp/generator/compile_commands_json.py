@@ -43,7 +43,7 @@ def CalculateVariables(default_variables, params):
 
 def AddCommandsForTarget(cwd, target, params, per_config_commands):
     output_dir = params["generator_flags"].get("output_dir", "out")
-    for configuration_name, configuration in target["configurations"].items():
+    for configuration_name, configuration in list(target["configurations"].items()):
         if IsMac(params):
             xcode_settings = gyp.xcode_emulation.XcodeSettings(target)
             cflags = xcode_settings.GetCflags(configuration_name)
@@ -98,7 +98,7 @@ def AddCommandsForTarget(cwd, target, params, per_config_commands):
 
 def GenerateOutput(target_list, target_dicts, data, params):
     per_config_commands = {}
-    for qualified_target, target in target_dicts.items():
+    for qualified_target, target in list(target_dicts.items()):
         build_file, target_name, toolset = gyp.common.ParseQualifiedTarget(
             qualified_target
         )
@@ -116,7 +116,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     except AttributeError:
         pass
     output_dir = output_dir or params["generator_flags"].get("output_dir", "out")
-    for configuration_name, commands in per_config_commands.items():
+    for configuration_name, commands in list(per_config_commands.items()):
         filename = os.path.join(output_dir, configuration_name, "compile_commands.json")
         gyp.common.EnsureDirExists(filename)
         fp = open(filename, "w")

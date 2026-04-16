@@ -9,6 +9,10 @@ import random
 
 import gyp.common
 
+
+def cmp(a, b):
+  return (a > b) - (a < b)
+
 # hashlib is supplied as of Python 2.5 as the replacement interface for md5
 # and other secure hashes.  In 2.6, md5 is deprecated.  Import hashlib if
 # available, avoiding a deprecation warning under 2.6.  Import md5 otherwise,
