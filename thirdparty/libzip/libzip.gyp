@@ -48,17 +48,14 @@
 							
 							'src/zipconf.h',
 							'src/zip_crypto.h',
-							'src/zip_commoncrypto.h',
+							'src/zip_crypto_commoncrypto.h',
 							'src/zip_crypto_gnutls.h',
 							'src/zip_crypto_openssl.h',
 							'src/zipint.h',
 							
 							'src/mkstemp.c',
 							'src/zip_add_entry.c',
-							'src/zip_algorithm_bzip2.c',
 							'src/zip_algorithm_deflate.c',
-							'src/zip_algorithm_xz.c',
-							'src/zip_algorithm_zstd.c',
 							'src/zip_buffer.c',
 							'src/zip_close.c',
 
@@ -157,10 +154,6 @@
 							'src/zip_source_tell_write.c',
 							'src/zip_source_window.c',
 
-							'src/zip_source_winzip_aes_decode.c',
-							'src/zip_source_winzip_aes_encode.c',
-							'src/zip_winzip_aes.c',
-
 							'src/zip_source_write.c',
 							'src/zip_source_zip.c',
 							'src/zip_source_zip_new.c',
@@ -175,7 +168,6 @@
 							'src/zip_unchange_data.c',
 							'src/zip_utf-8.c',
 
-							'src/nonrandomopen.c',
 # DEPRECATED but revzip uses them
 							'src/zip_add_dir.c',
 							'src/zip_rename.c',
