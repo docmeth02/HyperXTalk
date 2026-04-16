@@ -99,55 +99,53 @@ char CXMLDocument::errorbuf[256] = "";
 
 //lists of callbacks - used to establish custom callbacks for parse errors, other callbacks in future
 xmlSAXHandler CXMLDocument::SAXHandlerTable = {
-    internalSubset,
-    isStandalone,
-    hasInternalSubset,
-    hasExternalSubset,
-    resolveEntity,
-    getEntity,
-    entityDecl,
-    notationDecl,
-    attributeDecl,
-    elementDecl,
-    unparsedEntityDecl,
-    NULL, // setDocumentLocator — deprecated in libxml2 2.12+; it is a no-op
-          // in all libxml2 versions and calling it via the SAXv1 path triggers
-          // a deprecation warning and potential crash on macOS Sequoia's
-          // system libxml2 (2.12+). Safe to omit.
-    startDocumentCallback,//startDocument
-    endDocumentCallback,//endDocument
-    startElementCallback,//startElement
-    endElementCallback,//endElement
-    reference,
-	elementDataCallback, //characters,
-    ignorableWhitespace,
-    processingInstruction,
-    comment,
+    xmlSAX2InternalSubset,
+    xmlSAX2IsStandalone,
+    xmlSAX2HasInternalSubset,
+    xmlSAX2HasExternalSubset,
+    xmlSAX2ResolveEntity,
+    xmlSAX2GetEntity,
+    xmlSAX2EntityDecl,
+    xmlSAX2NotationDecl,
+    xmlSAX2AttributeDecl,
+    xmlSAX2ElementDecl,
+    xmlSAX2UnparsedEntityDecl,
+    NULL, // setDocumentLocator — always NULL; the field exists in the struct
+          // but is unused in all libxml2 versions.
+    startDocumentCallback,  // startDocument
+    endDocumentCallback,    // endDocument
+    startElementCallback,   // startElement  (SAX1; requires initialized == 1)
+    endElementCallback,     // endElement
+    xmlSAX2Reference,
+    elementDataCallback,    // characters
+    xmlSAX2IgnorableWhitespace,
+    xmlSAX2ProcessingInstruction,
+    xmlSAX2Comment,
     warningCallback,
     errorCallback,
     fatalCallback,
-    getParameterEntity,
-    elementCDataCallback,//cdataBlock,
-    externalSubset,
-	1,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    xmlSAX2GetParameterEntity,
+    elementCDataCallback,   // cdataBlock
+    xmlSAX2ExternalSubset,
+    1,                      // initialized == 1 selects SAX1 path (startElement/endElement)
+    NULL,                   // _private
+    NULL,                   // startElementNs
+    NULL,                   // endElementNs
+    NULL,                   // serror
 };
 
 void CXMLDocument::startDocumentCallback(void *ctx)
 {
 	if (allowcallbacks)
 		CB_startDocument();
-	startDocument(ctx);
+	xmlSAX2StartDocument(ctx);
 }
 
 void CXMLDocument::endDocumentCallback(void *ctx)
 {
 	if (allowcallbacks)
 		CB_endDocument();
-	endDocument(ctx);
+	xmlSAX2EndDocument(ctx);
 }
 
 void CXMLDocument::startElementCallback(void *ctx,
@@ -162,11 +160,12 @@ void CXMLDocument::startElementCallback(void *ctx,
         //HS-2010-10-11: [[ Bug 7586 ]] Reinstate libxml2 to create name spaces. Implement new liveCode commands to suppress name space creation.
         if (XML_ProcessNameSpaces)
         {
-		    startElement(ctx,fullname,atts);
+		    xmlSAX2StartElement(ctx,fullname,atts);
         }
         else
         {
-            xmlSAX2StartElementNoNS(ctx,fullname,atts);
+            /* XML_ProcessNameSpaces==false: pass full name as-is, no NS split */
+            xmlSAX2StartElement(ctx,fullname,atts);
         }
     }
 }
@@ -177,7 +176,7 @@ void CXMLDocument::endElementCallback(void *ctx,
 	if (allowcallbacks)
 		CB_endElement((const char *)name);
 	if (buildtree)
-		endElement(ctx,name);
+		xmlSAX2EndElement(ctx,name);
 }
 
 
@@ -186,7 +185,7 @@ void CXMLDocument::elementCDataCallback(void *ctx,const xmlChar *ch,int len)
 	if (allowcallbacks)
 		CB_elementData((const char *)ch,len);
 	if (buildtree)
-		cdataBlock(ctx,ch,len);
+		xmlSAX2CDataBlock(ctx,ch,len);
 }
 
 
@@ -195,7 +194,7 @@ void CXMLDocument::elementDataCallback(void *ctx,const xmlChar *ch,int len)
 	if (allowcallbacks)
 		CB_elementData((const char *)ch,len);
 	if (buildtree)
-		characters(ctx,ch,len);
+		xmlSAX2Characters(ctx,ch,len);
 }
  
 

@@ -1,3 +1,36 @@
-Files in this folder are based on libxml2-2.9.4
+Files in this folder are based on libxml2-2.15.3
 
-Original source archives are available from <http://www.xmlsoft.org/>
+Upstream: https://gitlab.gnome.org/GNOME/libxml2
+Tag:      v2.15.3
+
+Layout
+------
+  src/            — library .c source files + internal headers (libxml.h,
+                    timsort.h, config.h)
+  include/libxml/ — public API headers + generated xmlversion.h
+  include/private/ — private internal headers (new in libxml2 2.12+,
+                     referenced as #include "private/foo.h" from source files)
+
+config.h
+--------
+  Pre-configured for macOS ARM64 from config.h.cmake.in.
+  Do not regenerate with cmake or autoconf; edit directly if platform
+  feature flags need to change.
+
+xmlversion.h
+------------
+  Generated from include/libxml/xmlversion.h.in with the following flags:
+    WITH_THREADS=1, WITH_OUTPUT=1, WITH_PUSH=1, WITH_READER=1,
+    WITH_PATTERN=1, WITH_WRITER=1, WITH_SAX1=1, WITH_HTTP=0 (stubs only),
+    WITH_VALID=1, WITH_HTML=1, WITH_C14N=1, WITH_CATALOG=1,
+    WITH_XPATH=1, WITH_XPTR=1, WITH_XINCLUDE=1,
+    WITH_ICONV=0, WITH_ICU=0, WITH_ISO8859X=1, WITH_DEBUG=1,
+    WITH_REGEXPS=1, WITH_RELAXNG=1, WITH_SCHEMAS=1, WITH_SCHEMATRON=1,
+    WITH_MODULES=1, WITH_ZLIB=1
+
+Notable changes from 2.9.4
+---------------------------
+  Removed: DOCBparser.c/h, SAX.c, legacy.c, nanoftp.c, xmlunicode.c,
+           trio.c/h files, elfgcchack.h, win32config.h, wsockcompat.h,
+           acconfig.h
+  Added:   include/private/ directory with private internal headers
