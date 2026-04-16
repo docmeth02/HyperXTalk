@@ -52,7 +52,7 @@ generator_default_variables['SHARED_INTERMEDIATE_DIR'] = \
 
 def CalculateVariables(default_variables, params):
   generator_flags = params.get('generator_flags', {})
-  for key, val in generator_flags.items():
+  for key, val in list(generator_flags.items()):
     default_variables.setdefault(key, val)
   flavor = gyp.common.GetFlavor(params)
   default_variables.setdefault('OS', flavor)
@@ -141,7 +141,7 @@ def GetAllIncludeDirectories(target_list, target_dicts,
             compiler_includes_list.append(include_dir)
 
       # Find standard gyp include dirs.
-      if config.has_key('include_dirs'):
+      if 'include_dirs' in config:
         include_dirs = config['include_dirs']
         for shared_intermediate_dir in shared_intermediate_dirs:
           for include_dir in include_dirs:
@@ -156,8 +156,7 @@ def GetAllIncludeDirectories(target_list, target_dicts,
             gyp_includes_set.add(include_dir)
 
   # Generate a list that has all the include dirs.
-  all_includes_list = list(gyp_includes_set)
-  all_includes_list.sort()
+  all_includes_list = sorted(gyp_includes_set)
   for compiler_include in compiler_includes_list:
     if not compiler_include in gyp_includes_set:
       all_includes_list.append(compiler_include)
@@ -272,7 +271,7 @@ def WriteMacros(out, eclipse_langs, defines):
   out.write('    <language name="holder for library settings"></language>\n')
   for lang in eclipse_langs:
     out.write('    <language name="%s">\n' % lang)
-    for key in sorted(defines.iterkeys()):
+    for key in sorted(defines.keys()):
       out.write('      <macro><name>%s</name><value>%s</value></macro>\n' %
                 (escape(key), escape(defines[key])))
     out.write('    </language>\n')
@@ -418,7 +417,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
     GenerateOutputForConfig(target_list, target_dicts, data, params,
                             user_config)
   else:
-    config_names = target_dicts[target_list[0]]['configurations'].keys()
+    config_names = list(target_dicts[target_list[0]]['configurations'].keys())
     for config_name in config_names:
       GenerateOutputForConfig(target_list, target_dicts, data, params,
                               config_name)

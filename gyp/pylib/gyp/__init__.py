@@ -206,7 +206,7 @@ def RegenerateFlags(options):
   # We always want to ignore the environment when regenerating, to avoid
   # duplicate or changed flags in the environment at the time of regeneration.
   flags = ['--ignore-environment']
-  for name, metadata in options._regeneration_metadata.iteritems():
+  for name, metadata in options._regeneration_metadata.items():
     opt = metadata['opt']
     value = getattr(options, name)
     value_predicate = metadata['type'] == 'path' and FixPath or Noop
@@ -399,7 +399,7 @@ def gyp_main(args):
     for option, value in sorted(options.__dict__.items()):
       if option[0] == '_':
         continue
-      if isinstance(value, basestring):
+      if isinstance(value, str):
         DebugOutput(DEBUG_GENERAL, "  %s: '%s'", option, value)
       else:
         DebugOutput(DEBUG_GENERAL, "  %s: %s", option, value)
@@ -421,7 +421,7 @@ def gyp_main(args):
       build_file_dir = os.path.abspath(os.path.dirname(build_file))
       build_file_dir_components = build_file_dir.split(os.path.sep)
       components_len = len(build_file_dir_components)
-      for index in xrange(components_len - 1, -1, -1):
+      for index in range(components_len - 1, -1, -1):
         if build_file_dir_components[index] == 'src':
           options.depth = os.path.sep.join(build_file_dir_components)
           break
