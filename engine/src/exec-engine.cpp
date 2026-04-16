@@ -1954,16 +1954,6 @@ void MCEngineEvalSHA1Uuid(MCExecContext& ctxt, MCStringRef p_namespace_id, MCStr
     MCEngineDoEvalUuid(ctxt, p_namespace_id, p_name, false, r_uuid);
 }
 
-void MCEngineGetEditionType(MCExecContext& ctxt, MCStringRef& r_edition)
-{
-    if (!MCStringFromLicenseClass(MClicenseparameters.license_class,
-                                     true,
-                                     r_edition))
-    {
-        ctxt . Throw();
-    }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 void MCEngineEvalIsStrictlyNothing(MCExecContext& ctxt, MCValueRef value, bool& r_result)

@@ -3135,8 +3135,6 @@ void MCEngineEvalRandomUuid(MCExecContext& ctxt, MCStringRef& r_uuid);
 void MCEngineEvalMD5Uuid(MCExecContext& ctxt, MCStringRef p_namespace_id, MCStringRef p_name, MCStringRef& r_uuid);
 void MCEngineEvalSHA1Uuid(MCExecContext& ctxt, MCStringRef p_namespace_id, MCStringRef p_name, MCStringRef& r_uuid);
 
-void MCEngineGetEditionType(MCExecContext& ctxt, MCStringRef& r_edition);
-
 void MCEngineGetLoadedExtensions(MCExecContext& ctxt, MCProperListRef& r_extensions);
 
 void MCEngineEvalIsStrictlyNothing(MCExecContext& ctxt, MCValueRef value, bool& r_result);

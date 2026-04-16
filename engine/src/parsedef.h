@@ -1577,7 +1577,6 @@ enum Properties {
 	P_REV_CRASH_REPORT_SETTINGS, // DEVELOPMENT only
 	P_REV_AVAILABLE_HANDLERS, // DEVELOPMENT only
 	P_MESSAGE_BOX_LAST_OBJECT,
-	P_REV_LICENSE_INFO,
 
 	P_REV_RUNTIME_BEHAVIOUR,
 	
@@ -1639,9 +1638,6 @@ enum Properties {
     // MERG-2013-08-12: [[ ClipsToRect ]] If true group clips to the set rect rather than the rect of children
     P_CLIPS_TO_RECT,
 
-    // MW-2014-08-12: [[ EditionType ]] Returns whether the engine is commercial or community
-    P_EDITION_TYPE,
-    
     // MERG-2015-10-11: [[ DocumentFilename ]] Property tag for documentFilename
     P_DOCUMENT_FILENAME,
     

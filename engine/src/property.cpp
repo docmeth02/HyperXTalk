@@ -122,8 +122,6 @@ static MCPropertyInfo kMCPropertyInfoTable[] =
 	DEFINE_RO_PROPERTY(P_SCRIPT_PARSING_ERRORS, String, Engine, ScriptParsingErrors)
 	
     DEFINE_RW_ARRAY_PROPERTY(P_REV_LIBRARY_MAPPING, String, Engine, RevLibraryMappingByKey)
-    DEFINE_RO_ARRAY_PROPERTY(P_REV_LICENSE_INFO, Array, License, RevLicenseInfoByKey)
-	DEFINE_RO_PROPERTY(P_REV_LICENSE_INFO, String, License, RevLicenseInfo)
 	DEFINE_RW_PROPERTY(P_REV_LICENSE_LIMITS, Array, License, RevLicenseLimits)
 	DEFINE_RW_PROPERTY(P_REV_RUNTIME_BEHAVIOUR, UInt16, Legacy, RevRuntimeBehaviour)
 	DEFINE_RW_PROPERTY(P_HC_IMPORT_STAT, String, Legacy, HcImportStat)
@@ -397,9 +395,6 @@ static MCPropertyInfo kMCPropertyInfoTable[] =
     // IM-2014-01-27: [[ HiDPI ]] Global property screenPixelScales returns a return-delimited
     // list of the pixel scales of all connected screens
     DEFINE_RO_PROPERTY(P_SCREEN_PIXEL_SCALES, LinesOfLooseDouble, Interface, ScreenPixelScales)
-    
-    // MW-2014-08-12: [[ EditionType ]] Return whether the engine is community or commercial.
-    DEFINE_RO_PROPERTY(P_EDITION_TYPE, String, Engine, EditionType)
     
     // MW-2014-12-10: [[ Extensions ]] Returns a list of loaded extensions.
     DEFINE_RO_PROPERTY(P_LOADED_EXTENSIONS, ProperLinesOfString, Engine, LoadedExtensions)
@@ -939,9 +934,6 @@ Parse_stat MCProperty::parse(MCScriptPoint &sp, Boolean the)
 	case P_SCREEN_PIXEL_SCALE:
     case P_SCREEN_PIXEL_SCALES:
             
-    // MW-2014-08-12: [[ EditionType ]] Add support for global editionType property.
-    case P_EDITION_TYPE:
-            
     // MW-2014-12-10: [[ Extensions ]] Add support for global loadedExtensions property.
     case P_LOADED_EXTENSIONS:
 	case P_SYSTEM_APPEARANCE:
@@ -951,7 +943,6 @@ Parse_stat MCProperty::parse(MCScriptPoint &sp, Boolean the)
     
     case P_REV_LIBRARY_MAPPING:
 	case P_REV_CRASH_REPORT_SETTINGS: // DEVELOPMENT only
-	case P_REV_LICENSE_INFO:
 	case P_DRAG_DATA:
 	case P_CLIPBOARD_DATA:
     case P_RAW_CLIPBOARD_DATA:

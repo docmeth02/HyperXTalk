@@ -82,9 +82,6 @@ extern Boolean MCenvironmentactive;
 
 void MCLicenseSetRevLicenseLimits(MCExecContext& ctxt, MCArrayRef p_settings);
 void MCLicenseGetRevLicenseLimits(MCExecContext& ctxt, MCArrayRef& r_limits);
-void MCLicenseGetRevLicenseInfo(MCExecContext& ctxt, MCStringRef& r_info);
-void MCLicenseGetRevLicenseInfoByKey(MCExecContext& ctxt, MCNameRef p_key, MCArrayRef& r_info);
-
 static const struct { MCLicenseClass license_class; const char *class_string; const char *edition_string; } s_class_map[] =
 {
     { kMCLicenseClassCommunity, "community", "community" },
@@ -104,28 +101,6 @@ inline bool MCStringToLicenseClass(MCStringRef p_class, MCLicenseClass &r_class)
         {
             r_class = s_class_map[t_index].license_class;
             return true;
-        }
-    }
-    
-    return false;
-}
-
-inline bool MCStringFromLicenseClass(MCLicenseClass p_class, bool p_simplified, MCStringRef &r_class)
-{
-    if (p_simplified && p_class == kMCLicenseClassEvaluation)
-    {
-        p_class = kMCLicenseClassCommercial;
-    }
-    else if (p_simplified && p_class == kMCLicenseClassProfessionalEvaluation)
-    {
-        p_class = kMCLicenseClassProfessional;
-    }
-    
-    for(uindex_t t_index = 0; t_index < sizeof(s_class_map) / sizeof(s_class_map[0]); ++t_index)
-    {
-        if (s_class_map[t_index].license_class == p_class)
-        {
-            return MCStringCreateWithCString(s_class_map[t_index].class_string, r_class);
         }
     }
     

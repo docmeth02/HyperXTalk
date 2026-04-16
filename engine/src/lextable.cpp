@@ -879,8 +879,6 @@ const LT factor_table[] =
         {"editbackground", TT_PROPERTY, P_EDIT_BACKGROUND},
         {"editbg", TT_PROPERTY, P_EDIT_BACKGROUND},
         {"editbkgnd", TT_PROPERTY, P_EDIT_BACKGROUND},
-        // MW-2014-08-12: [[ EditionType ]] New read-only property describing the engine's edition.
-        {"editiontype", TT_PROPERTY, P_EDITION_TYPE},
         {"editmenus", TT_PROPERTY, P_EDIT_MENUS},
 		{"editmode", TT_PROPERTY, P_EDIT_MODE},
         {"editscripts", TT_PROPERTY, P_EDIT_SCRIPTS},
@@ -1495,7 +1493,6 @@ const LT factor_table[] =
 		{"revcrashreportsettings", TT_PROPERTY, P_REV_CRASH_REPORT_SETTINGS},
 #endif
         {"revlibrarymapping", TT_PROPERTY, P_REV_LIBRARY_MAPPING},
-        {"revlicenseinfo", TT_PROPERTY, P_REV_LICENSE_INFO},
         {"revlicenselimits",TT_PROPERTY,P_REV_LICENSE_LIMITS},
 #if defined(MODE_DEVELOPMENT)
 #ifdef FEATURE_PROPERTY_LISTENER
