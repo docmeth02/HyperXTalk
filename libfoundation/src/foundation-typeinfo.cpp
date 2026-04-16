@@ -993,7 +993,7 @@ bool MCHandlerTypeInfoGetLayoutType(MCTypeInfoRef unresolved_self, int p_abi, vo
     if (ffi_prep_cif((ffi_cif *)&t_layout -> cif, (ffi_abi)p_abi, self -> handler . field_count, self -> handler . layout_args[0], self -> handler . layout_args + 1) != FFI_OK)
     {
         MCMemoryDeallocate(t_layout);
-        return MCErrorThrowGeneric(MCSTR("unexpected libffi failure"));
+        return MCErrorThrowGeneric(MCSTR("libffi failure: ffi_prep_cif failed (bad abi or typedef)"));
     }
     
     t_layout -> next = self -> handler . layouts;

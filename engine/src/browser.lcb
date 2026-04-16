@@ -126,7 +126,10 @@ public foreign handler MCBrowserDictionaryGetList(in pDictionary as MCBrowserDic
 public foreign handler MCBrowserDictionaryGetDictionary(in pDictionary as MCBrowserDictionaryRef, in pKey as ZStringUTF8, out rValue as optional MCBrowserDictionaryRef) returns CBool binds to "<builtin>"
 
 public foreign handler type MCBrowserNavigationRequestCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pRequest as MCBrowserNavigationRequestRef) returns CBool
-public foreign handler type MCBrowserNavigationCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pType as MCBrowserNavigationEventType, in pState as MCBrowserNavigationState, in pFrame as CBool, in pUrl as ZStringUTF8, in pError as optional ZStringUTF8) returns nothing
+-- Use raw CInt here (not MCBrowserNavigationEventType/MCBrowserNavigationState aliases) so that
+-- the LCB libffi closure generator on Windows can resolve the parameter types correctly.
+-- Type aliases of CInt caused "unexpected libffi failure" when registering the navigation callback.
+public foreign handler type MCBrowserNavigationCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pType as CInt, in pState as CInt, in pFrame as CBool, in pUrl as ZStringUTF8, in pError as optional ZStringUTF8) returns nothing
 public foreign handler type MCBrowserJavaScriptCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pHandler as ZStringUTF8, in pParams as MCBrowserListRef) returns nothing
 public foreign handler type MCBrowserProgressCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pUrl as ZStringUTF8, in pProgress as UInt32) returns nothing
 

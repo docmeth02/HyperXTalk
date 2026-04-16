@@ -559,10 +559,10 @@ private unsafe handler InitBrowserView()
 	MCWidgetSetMyNativeLayerCanRenderToContext(false)
 
 	// Register navigation/JS/progress callbacks via LCB→C FFI closures.
-	// Requires executable memory (allow-jit + allow-unsigned-executable-memory
-	// entitlements). These are present in HyperXTalk.entitlements so this works
-	// on macOS. If a future platform lacks JIT support, this block can be guarded
-	// by checking MCHandlerGetFunctionPtr return value first.
+	// OnNavigationCallback uses raw CInt for the type/state parameters (not the
+	// MCBrowserNavigationEventType/MCBrowserNavigationState type aliases) so that
+	// the LCB libffi closure generator on Windows can resolve them correctly.
+	// See matching change in MCBrowserNavigationCallback in engine/src/browser.lcb.
 	unsafe
 		MCBrowserSetNavigationHandler(mBrowser, OnNavigationCallback, nothing)
 		MCBrowserSetJavaScriptHandler(mBrowser, OnJavaScriptCallback, nothing)
@@ -638,9 +638,11 @@ private handler Capitalize(in pString as String) returns String
 	return pString
 end handler
 
-/* WORKAROUND - Need to retain foreign types in handler as conversion to those in the foreign handler type signature not yet implemented */
-//private handler OnNavigationCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pType as MCBrowserNavigationEventType, in pState as MCBrowserNavigationState, in pFrame as Boolean, in pUrl as String, in pError as optional String) returns nothing
-private handler OnNavigationCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pType as MCBrowserNavigationEventType, in pState as MCBrowserNavigationState, in pFrame as CBool, in pUrl as ZStringUTF8, in pError as optional ZStringUTF8) returns nothing
+// Use raw CInt for pType/pState (not MCBrowserNavigationEventType/MCBrowserNavigationState) so
+// that the LCB libffi closure generator on Windows can resolve the parameter types.  The
+// MCBrowserNavigationCallback foreign handler type in engine/src/browser.lcb was updated to
+// match, so lc-compile will accept this handler as a compatible callback.
+private handler OnNavigationCallback(in pContext as optional Pointer, in pBrowser as MCBrowserRef, in pType as CInt, in pState as CInt, in pFrame as CBool, in pUrl as ZStringUTF8, in pError as optional ZStringUTF8) returns nothing
 	variable tType as String
 	put element (pType + 1) of kMCBrowserNavigationEventTypeMap into tType
 

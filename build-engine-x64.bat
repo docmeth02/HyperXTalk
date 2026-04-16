@@ -6,6 +6,10 @@ set LOGFILE=%~dp0build-engine-x64.log
 set VCXPROJ_ENGINE=build-win-x86_64\livecode\engine\development.vcxproj
 set VCXPROJ_BROWSER=build-win-x86_64\livecode\libbrowser\libbrowser.vcxproj
 set VCXPROJ_DBMYSQL=build-win-x86_64\livecode\revdb\dbmysql.vcxproj
+set VCXPROJ_LCB_MODULES=build-win-x86_64\livecode\engine\engine_lcb_modules.vcxproj
+set VCXPROJ_LIBFFI=build-win-x86_64\livecode\thirdparty\libffi\libffi.vcxproj
+set VCXPROJ_LIBFOUNDATION=build-win-x86_64\livecode\libfoundation\libFoundation.vcxproj
+set VCXPROJ_LIBSCRIPT=build-win-x86_64\livecode\libscript\libScript.vcxproj
 
 :: ----------------------------------------------------------
 :: MySQL 9.6.0 prerequisite check
@@ -97,6 +101,64 @@ if errorlevel 1 (
 echo dbmysql OK.
 
 echo.
+:: ----------------------------------------------------------
+:: Build libffi (x64 must use include_win64 so FFI_DEFAULT_ABI = FFI_WIN64 = 1,
+:: matching what libffi.lib expects; using include_win32 gave FFI_MS_CDECL = 5
+:: which caused ffi_prep_cif to return FFI_BAD_ABI and throw "unexpected libffi failure").
+:: ----------------------------------------------------------
+echo Building libffi ...
+echo Building libffi ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_LIBFFI% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 (
+    echo.
+    echo LIBFFI BUILD FAILED. See %LOGFILE% for details.
+    exit /b 1
+)
+echo libffi OK.
+
+echo.
+:: /t:Rebuild is required here — MSBuild does not detect include-path changes
+:: in incremental builds, so foundation-handler.obj and foundation-typeinfo.obj
+:: would keep the stale FFI_DEFAULT_ABI=5 value (from include_win32) baked in.
+:: Rebuild guarantees they are compiled with include_win64 → FFI_DEFAULT_ABI=1.
+echo Building libFoundation (FFI closure fix: x64 now uses include_win64 headers) ...
+echo Building libFoundation ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_LIBFOUNDATION% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 (
+    echo.
+    echo LIBFOUNDATION BUILD FAILED. See %LOGFILE% for details.
+    exit /b 1
+)
+echo libFoundation OK.
+
+echo.
+echo Building libScript ...
+echo Building libScript ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_LIBSCRIPT% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 (
+    echo.
+    echo LIBSCRIPT BUILD FAILED. See %LOGFILE% for details.
+    exit /b 1
+)
+echo libScript OK.
+
+echo.
+:: ----------------------------------------------------------
+:: Build LCB engine modules (compiles engine/src/browser.lcb et al.
+:: via lc-compile; produces engine_lcb_modules.cpp and .lci files).
+:: Must run before the engine so any .lcb changes are picked up.
+:: ----------------------------------------------------------
+echo Building LCB engine modules ...
+echo Building LCB engine modules ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_LCB_MODULES% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 (
+    echo.
+    echo LCB MODULES BUILD FAILED. See %LOGFILE% for details.
+    exit /b 1
+)
+echo LCB modules OK.
+
+echo.
 echo Building engine ...
 
 set "EXE=build-win-x86_64\livecode\Debug\HyperXTalk.exe"
@@ -127,4 +189,56 @@ if %BUILD_ERR% NEQ 0 (
 
 if not exist "%EXE%" (
     echo.
-    echo ENGINE BUILD FAILED - Hyper
+    echo ENGINE BUILD FAILED - HyperXTalk.exe was not produced.
+    exit /b 1
+)
+
+echo Engine built: %EXE%
+
+:: ----------------------------------------------------------
+:: Recompile browser widget (browser.lcb → module.lcm).
+:: We invoke lc-compile.exe directly rather than going through
+:: server-community.exe + extension-utils.livecodescript, which
+:: is unreliable in a plain cmd environment.
+:: Only the browser widget is compiled here — it is the only LCB
+:: file changed for the navigation-event fix.
+:: ----------------------------------------------------------
+echo.
+echo Compiling browser widget (browser.lcb) ...
+echo Compiling browser widget ... >> "%LOGFILE%"
+set "LC_COMPILE=build-win-x86_64\livecode\Debug\lc-compile.exe"
+set "LCI_DIR=build-win-x86_64\livecode\Debug\modules\lci"
+set "BROWSER_PKG=build-win-x86_64\livecode\Debug\packaged_extensions\com.livecode.widget.browser"
+set "BROWSER_LCB=extensions\widgets\browser\browser.lcb"
+
+if not exist "%LC_COMPILE%" (
+    echo ERROR: lc-compile.exe not found. Build the engine first.
+    exit /b 1
+)
+
+:: Delete the old module to force a clean output.
+if exist "%BROWSER_PKG%\module.lcm" del /F /Q "%BROWSER_PKG%\module.lcm"
+
+set "LCOMPILE_LOG=%~dp0build-browser-widget.log"
+"%LC_COMPILE%" --modulepath "%BROWSER_PKG%" --modulepath "%LCI_DIR%" --manifest "%BROWSER_PKG%\manifest.xml" --output "%BROWSER_PKG%\module.lcm" "%BROWSER_LCB%" > "%LCOMPILE_LOG%" 2>&1
+set LC_ERR=%ERRORLEVEL%
+type "%LCOMPILE_LOG%"
+type "%LCOMPILE_LOG%" >> "%LOGFILE%"
+if %LC_ERR% NEQ 0 (
+    echo.
+    echo BROWSER WIDGET COMPILE FAILED. Full output above / in %LCOMPILE_LOG%
+    exit /b 1
+)
+if not exist "%BROWSER_PKG%\module.lcm" (
+    echo.
+    echo BROWSER WIDGET COMPILE FAILED - module.lcm was not produced.
+    exit /b 1
+)
+:: Sync the updated source into the packaged extension folder.
+copy /Y "%BROWSER_LCB%" "%BROWSER_PKG%\browser.lcb" > nul
+echo Browser widget OK.
+
+echo.
+echo Build completed: %DATE% %TIME%
+echo Build completed: %DATE% %TIME% >> "%LOGFILE%"
+echo Full log: %LOGFILE%

@@ -415,7 +415,7 @@ bool MCHandlerGetFunctionPtrWithAbi(MCHandlerRef self, MCHandlerAbiKind p_abi_ki
 	if (ffi_prep_closure_loc((ffi_closure *)t_closure, t_cif, __exec_closure, self, t_function_ptr) != FFI_OK)
 	{
 		ffi_closure_free(t_closure);
-		return MCErrorThrowGeneric(MCSTR("unexpected libffi failure"));
+		return MCErrorThrowGeneric(MCSTR("libffi failure: ffi_prep_closure_loc failed"));
 	}
 
 	/* Change the protection flags of the page range to read/write/exec. */
