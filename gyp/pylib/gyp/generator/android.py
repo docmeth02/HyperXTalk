@@ -250,8 +250,8 @@ class AndroidMkWriter(object):
       dirs = set()
       for out in outputs:
         if not out.startswith('$'):
-          print ('WARNING: Action for target "%s" writes output to local path '
-                 '"%s".' % (self.target, out))
+          print(('WARNING: Action for target "%s" writes output to local path '
+                 '"%s".' % (self.target, out)))
         dir = os.path.split(out)[0]
         if dir:
           dirs.add(dir)
@@ -355,8 +355,8 @@ class AndroidMkWriter(object):
         dirs = set()
         for out in outputs:
           if not out.startswith('$'):
-            print ('WARNING: Rule for target %s writes output to local path %s'
-                   % (self.target, out))
+            print(('WARNING: Rule for target %s writes output to local path %s'
+                   % (self.target, out)))
           dir = os.path.dirname(out)
           if dir:
             dirs.add(dir)
@@ -429,8 +429,8 @@ class AndroidMkWriter(object):
         # $(gyp_shared_intermediate_dir). Note that we can't use an assertion
         # because some of the gyp tests depend on this.
         if not copy['destination'].startswith('$'):
-          print ('WARNING: Copy rule for target %s writes output to '
-                 'local path %s' % (self.target, copy['destination']))
+          print(('WARNING: Copy rule for target %s writes output to '
+                 'local path %s' % (self.target, copy['destination'])))
 
         # LocalPathify() calls normpath, stripping trailing slashes.
         path = Sourceify(self.LocalPathify(path))
@@ -458,7 +458,7 @@ class AndroidMkWriter(object):
     Args:
       spec, configs: input from gyp.
     """
-    for configname, config in sorted(configs.iteritems()):
+    for configname, config in sorted(configs.items()):
       extracted_includes = []
 
       self.WriteLn('\n# Flags passed to both C and C++ files.')
@@ -636,8 +636,8 @@ class AndroidMkWriter(object):
     elif self.type == 'none':
       target_ext = '.stamp'
     elif self.type != 'executable':
-      print ("ERROR: What output file should be generated?",
-             "type", self.type, "target", target)
+      print(("ERROR: What output file should be generated?",
+             "type", self.type, "target", target))
 
     if self.type != 'static_library' and self.type != 'shared_library':
       target_prefix = spec.get('product_prefix', target_prefix)
@@ -788,7 +788,7 @@ class AndroidMkWriter(object):
     static_libs, dynamic_libs, ldflags_libs = self.FilterLibraries(libraries)
 
     if self.type != 'static_library':
-      for configname, config in sorted(configs.iteritems()):
+      for configname, config in sorted(configs.items()):
         ldflags = list(config.get('ldflags', []))
         self.WriteLn('')
         self.WriteList(ldflags, 'LOCAL_LDFLAGS_%s' % configname)
@@ -837,7 +837,7 @@ class AndroidMkWriter(object):
     settings = spec.get('aosp_build_settings', {})
     if settings:
       self.WriteLn('### Set directly by aosp_build_settings.')
-      for k, v in settings.iteritems():
+      for k, v in settings.items():
         if isinstance(v, list):
           self.WriteList(v, k)
         else:
@@ -955,7 +955,7 @@ def PerformBuild(data, configurations, params):
   env = dict(os.environ)
   env['ONE_SHOT_MAKEFILE'] = makefile
   arguments = ['make', '-C', os.environ['ANDROID_BUILD_TOP'], 'gyp_all_modules']
-  print 'Building: %s' % arguments
+  print('Building: %s' % arguments)
   subprocess.check_call(arguments, env=env)
 
 
@@ -1064,10 +1064,10 @@ def GenerateOutput(target_list, target_dicts, data, params):
                                   write_alias_target=write_alias_targets,
                                   sdk_version=sdk_version)
     if android_module in android_modules:
-      print ('ERROR: Android module names must be unique. The following '
+      print(('ERROR: Android module names must be unique. The following '
              'targets both generate Android module name %s.\n  %s\n  %s' %
              (android_module, android_modules[android_module],
-              qualified_target))
+              qualified_target)))
       return
     android_modules[android_module] = qualified_target
 
