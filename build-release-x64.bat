@@ -850,6 +850,37 @@ if exist "%OUTDIR%\packaged_extensions" (
 
 echo Staging complete: %STAGE%
 
+:: ----------------------------------------------------------
+:: Also update the IDE Runtime directory so macOS standalone
+:: builder picks up fresh Release binaries immediately.
+:: The macOS app reads:  ide\Runtime\Windows\x86-64\Standalone
+::                       ide\Runtime\Windows\x86-64\Support\revsecurity.dll
+::                       ide\Runtime\Windows\x86-64\icuXX.dll
+::                       ide\Runtime\Windows\x86-64\WebView2Loader.dll
+:: ----------------------------------------------------------
+set "RUNTIME=%~dp0ide\Runtime\Windows\x86-64"
+echo.
+echo Updating ide\Runtime\Windows\x86-64\ ...
+
+copy /Y "%OUTDIR%\standalone-community.exe" "%RUNTIME%\Standalone"           > nul
+copy /Y "%OUTDIR%\revsecurity.dll"          "%RUNTIME%\Support\revsecurity.dll" > nul
+copy /Y "%OUTDIR%\revpdfprinter.dll"        "%RUNTIME%\Support\revpdfprinter.dll" > nul 2>nul
+copy /Y "%OUTDIR%\revbrowser.dll"           "%RUNTIME%\Externals\revbrowser.dll"  > nul 2>nul
+copy /Y "%OUTDIR%\revdb.dll"               "%RUNTIME%\Externals\revdb.dll"        > nul 2>nul
+copy /Y "%OUTDIR%\revxml.dll"              "%RUNTIME%\Externals\revxml.dll"       > nul 2>nul
+copy /Y "%OUTDIR%\revzip.dll"              "%RUNTIME%\Externals\revzip.dll"       > nul 2>nul
+copy /Y "%OUTDIR%\revspeech.dll"           "%RUNTIME%\Externals\revspeech.dll"    > nul 2>nul
+copy /Y "%OUTDIR%\dbmysql.dll"             "%RUNTIME%\Externals\Database Drivers\dbmysql.dll"    > nul 2>nul
+copy /Y "%OUTDIR%\dbodbc.dll"              "%RUNTIME%\Externals\Database Drivers\dbodbc.dll"     > nul 2>nul
+copy /Y "%OUTDIR%\dbpostgresql.dll"        "%RUNTIME%\Externals\Database Drivers\dbpostgresql.dll" > nul 2>nul
+copy /Y "%OUTDIR%\dbsqlite.dll"            "%RUNTIME%\Externals\Database Drivers\dbsqlite.dll"   > nul 2>nul
+copy /Y "%OUTDIR%\icudt58.dll"             "%RUNTIME%\icudt58.dll"               > nul
+copy /Y "%OUTDIR%\icuin58.dll"             "%RUNTIME%\icuin58.dll"               > nul
+copy /Y "%OUTDIR%\icutu58.dll"             "%RUNTIME%\icutu58.dll"               > nul
+copy /Y "%OUTDIR%\icuuc58.dll"             "%RUNTIME%\icuuc58.dll"               > nul
+if exist "%WV2_DLL%" copy /Y "%WV2_DLL%"  "%RUNTIME%\WebView2Loader.dll"        > nul
+echo ide\Runtime update complete.
+
 echo.
 echo ============================================================
 echo  Release build complete: %DATE% %TIME%
