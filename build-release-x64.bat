@@ -10,6 +10,7 @@ set VCXPROJ_DBODBC=build-win-x86_64\livecode\revdb\dbodbc.vcxproj
 set VCXPROJ_DBPOSTGRESQL=build-win-x86_64\livecode\revdb\dbpostgresql.vcxproj
 set VCXPROJ_DBSQLITE=build-win-x86_64\livecode\revdb\dbsqlite.vcxproj
 set VCXPROJ_OPENSSL_STUBS=build-win-x86_64\livecode\thirdparty\libopenssl\libopenssl_stubs.vcxproj
+set VCXPROJ_LIBSQLITE=build-win-x86_64\livecode\thirdparty\libsqlite\libsqlite.vcxproj
 set VCXPROJ_LCB_MODULES=build-win-x86_64\livecode\engine\engine_lcb_modules.vcxproj
 set VCXPROJ_LIBFFI=build-win-x86_64\livecode\thirdparty\libffi\libffi.vcxproj
 set VCXPROJ_LIBFOUNDATION=build-win-x86_64\livecode\libfoundation\libFoundation.vcxproj
@@ -195,6 +196,23 @@ echo Building dbpostgresql ... >> "%LOGFILE%"
 "%MSBUILD%" %VCXPROJ_DBPOSTGRESQL% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
 if errorlevel 1 ( echo DBPOSTGRESQL BUILD FAILED. See %LOGFILE% & exit /b 1 )
 echo dbpostgresql OK.
+
+echo.
+:: ----------------------------------------------------------
+:: Build libsqlite.lib for x64 Release.
+::
+:: The bootstrapped Debug copy in Release\lib was compiled with
+:: /MTd and _ITERATOR_DEBUG_LEVEL=2 (debug STL), which causes
+:: LNK2038 ABI-mismatch errors and an unresolved _CrtDbgReport
+:: when linking the Release dbsqlite.dll.  Building the Release
+:: version here overwrites that copy before dbsqlite links.
+:: ----------------------------------------------------------
+echo Building libsqlite (Release x64) ...
+echo Building libsqlite ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_LIBSQLITE% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false "/p:SolutionDir=%~dp0build-win-x86_64\livecode\\" /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 ( echo LIBSQLITE BUILD FAILED. See %LOGFILE% & exit /b 1 )
+if not exist "%RELEASE_LIB_DIR%\libsqlite.lib" ( echo ERROR: libsqlite.lib not found in %RELEASE_LIB_DIR% & exit /b 1 )
+echo libsqlite OK.
 
 echo.
 echo Building dbsqlite (Release) ...
