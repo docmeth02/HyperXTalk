@@ -4094,14 +4094,20 @@ function revIDESpecialFolderPath pKey, pParam
          return item 1 to -3 of the filename of stack "home" & "/Toolset/resources/supporting_files/images"
          break
       case "extensions"
-         -- In an installed build revEnvironmentExtensionsPath() returns
-         -- sToolsPath & "/Extensions" (set up for dev/repo layout), but
-         -- the actual bundled extensions ship in packaged_extensions.
-         -- Redirect to that folder so that extension-utils and all LCB
-         -- widgets load correctly from the installed location.
+         -- HXT: On macOS, packaged_extensions lives outside the .app
+         -- bundle (mac-bin/packaged_extensions/) and is absent when the
+         -- app is copied to /Applications. Use Contents/Tools/Extensions
+         -- instead, which is inside the bundle. On Windows/Linux the flat
+         -- install layout keeps packaged_extensions alongside the exe, so
+         -- fall back to that when Extensions is not present.
          if revEnvironmentIsInstalled() then
-            put item 1 to -3 of (the filename of stack "home") & \
-                  "/packaged_extensions" into tPath
+            local tBase
+            put item 1 to -3 of (the filename of stack "home") into tBase
+            if there is a folder (tBase & "/Extensions") then
+               put tBase & "/Extensions" into tPath
+            else
+               put tBase & "/packaged_extensions" into tPath
+            end if
          else
             put revEnvironmentExtensionsPath() into tPath
          end if
