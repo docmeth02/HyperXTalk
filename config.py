@@ -279,8 +279,10 @@ def host_platform(opts):
 def guess_xcode_arch(target_sdk):
     sdk, ver = re.match('^([^\\d]*)(\\d*)', target_sdk).groups()
     if sdk == 'macosx':
-        # ARM: return arm64 for Apple Silicon builds.
-        # Previously this was hardcoded to 'x86_64'.
+        # Return arm64 for Apple Silicon (M-series) Macs.
+        import platform as _platform
+        if _platform.machine() == 'arm64':
+            return 'arm64'
         return 'x86_64'
     if sdk == 'iphoneos':
         if int(ver) < 8:
@@ -352,7 +354,7 @@ def guess_java_home(platform):
         try:
             javac_str = '/bin/javac'
             javac_path = subprocess.check_output(['/usr/bin/env',
-                         'readlink', '-f', '/usr' + javac_str]).strip()
+                         'readlink', '-f', '/usr' + javac_str]).strip().decode('utf-8')
             if (os.path.isfile(javac_path) and
                 javac_path.endswith(javac_str)):
                 return javac_path[:-len(javac_str)]
@@ -363,7 +365,7 @@ def guess_java_home(platform):
     # More guesses
     try:
         if os.path.isfile('/usr/libexec/java_home'):
-            return subprocess.check_output('/usr/libexec/java_home').strip()
+            return subprocess.check_output('/usr/libexec/java_home').strip().decode('utf-8')
     except subprocess.CalledProcessError as e:
         print(e)
         pass
@@ -729,8 +731,8 @@ def core_gyp_args(opts):
 
     args.append('-Duniform_arch=' + opts['UNIFORM_ARCH'])
 
-    if opts['BUILD_THIRDPARTY'] is not None:
-        args.append('-Duse_prebuilt_thirdparty=0')
+    if opts['BUILD_THIRDPARTY'] is None:
+        args.append('-Duse_prebuilt_thirdparty=1')
 
     return args
 
@@ -820,7 +822,7 @@ def configure_mac(opts):
     args = core_gyp_args(opts) + ['-Dtarget_sdk=' + opts['XCODE_TARGET_SDK'],
                                   '-Dhost_sdk=' + opts['XCODE_HOST_SDK'],
                                   '-Dtarget_arch=' + opts['TARGET_ARCH'],
-                                  '-Djavahome=' + opts['JAVA_HOME']]
+                                  '-Djavahome=' + opts['JAVA_SDK']]
     exec_gyp(args + opts['GYP_OPTIONS'])
 
 def configure_ios(opts):
