@@ -859,12 +859,20 @@ command revSaveAsWindowsStandalone pStack, pRestoreFileName, pFolder, @xStandalo
    put the effective filename of stack pStack into tOriginalFileName
    put item 1 to -2 of tOriginalFileName into tStackPath
    
-   put revEnvironmentRuntimePath() & "/Windows/x86-32/Support/Sample Icons" into tName
-   if sStandaloneSettingsA["Windows,iconFile"] = "" then 
+   -- In installed mode the generic icons live in Resources/Sample Icons (which is
+   -- always present on all platforms).  In dev/repo mode they are expected under
+   -- Runtime/Windows/x86-32/Support/Sample Icons; a separate guard below
+   -- substitutes engine/rsrc/standalone.ico for the repo case anyway.
+   if revEnvironmentIsInstalled() then
+      put revEnvironmentResourcesPath() & "/Sample Icons" into tName
+   else
+      put revEnvironmentRuntimePath() & "/Windows/x86-32/Support/Sample Icons" into tName
+   end if
+   if sStandaloneSettingsA["Windows,iconFile"] = "" then
       put tName & "/genericapp.ico" into sStandaloneSettingsA["Windows,iconFile"]
    end if
-   
-   if sStandaloneSettingsA["Windows,documenticonFile"] = "" then 
+
+   if sStandaloneSettingsA["Windows,documenticonFile"] = "" then
       put tName & "/genericdoc.ico" into sStandaloneSettingsA["Windows,documenticonFile"]
    end if
    

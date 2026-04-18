@@ -6,6 +6,10 @@ set LOGFILE=%~dp0build-release-x64.log
 set VCXPROJ_ENGINE=build-win-x86_64\livecode\engine\development.vcxproj
 set VCXPROJ_BROWSER=build-win-x86_64\livecode\libbrowser\libbrowser.vcxproj
 set VCXPROJ_DBMYSQL=build-win-x86_64\livecode\revdb\dbmysql.vcxproj
+set VCXPROJ_DBODBC=build-win-x86_64\livecode\revdb\dbodbc.vcxproj
+set VCXPROJ_DBPOSTGRESQL=build-win-x86_64\livecode\revdb\dbpostgresql.vcxproj
+set VCXPROJ_DBSQLITE=build-win-x86_64\livecode\revdb\dbsqlite.vcxproj
+set VCXPROJ_OPENSSL_STUBS=build-win-x86_64\livecode\thirdparty\libopenssl\libopenssl_stubs.vcxproj
 set VCXPROJ_LCB_MODULES=build-win-x86_64\livecode\engine\engine_lcb_modules.vcxproj
 set VCXPROJ_LIBFFI=build-win-x86_64\livecode\thirdparty\libffi\libffi.vcxproj
 set VCXPROJ_LIBFOUNDATION=build-win-x86_64\livecode\libfoundation\libFoundation.vcxproj
@@ -156,6 +160,48 @@ echo Building dbmysql ... >> "%LOGFILE%"
 "%MSBUILD%" %VCXPROJ_DBMYSQL% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
 if errorlevel 1 ( echo DBMYSQL BUILD FAILED. See %LOGFILE% & exit /b 1 )
 echo dbmysql OK.
+
+echo.
+echo Building dbodbc (Release) ...
+echo Building dbodbc ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_DBODBC% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 ( echo DBODBC BUILD FAILED. See %LOGFILE% & exit /b 1 )
+echo dbodbc OK.
+
+echo.
+:: ----------------------------------------------------------
+:: Build libopenssl_stubs.lib for x64 Release.
+::
+:: The Debug->Release lib bootstrap copies an x86 artifact of
+:: libopenssl_stubs.lib into Release\lib.  dbpostgresql links
+:: against libopenssl_stubs to weakly reference OpenSSL symbols;
+:: if the lib is x86 the linker ignores it (LNK4272) and every
+:: SSL_* symbol becomes unresolved.  We build the x64 Release
+:: version here and overwrite the bad x86 copy before linking.
+:: ----------------------------------------------------------
+echo Building libopenssl_stubs (Release x64) ...
+echo Building libopenssl_stubs ... >> "%LOGFILE%"
+:: Pass SolutionDir explicitly so $(SolutionDir)$(Configuration)\lib resolves to
+:: build-win-x86_64\livecode\Release\lib\ — the same path used by the .sln Debug
+:: build — and overwrites the x86 artifact left there by the bootstrap step.
+"%MSBUILD%" %VCXPROJ_OPENSSL_STUBS% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false "/p:SolutionDir=%~dp0build-win-x86_64\livecode\\" /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 ( echo LIBOPENSSL_STUBS BUILD FAILED. See %LOGFILE% & exit /b 1 )
+if not exist "%RELEASE_LIB_DIR%\libopenssl_stubs.lib" ( echo ERROR: libopenssl_stubs.lib not found in %RELEASE_LIB_DIR% & exit /b 1 )
+echo libopenssl_stubs OK.
+
+echo.
+echo Building dbpostgresql (Release) ...
+echo Building dbpostgresql ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_DBPOSTGRESQL% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 ( echo DBPOSTGRESQL BUILD FAILED. See %LOGFILE% & exit /b 1 )
+echo dbpostgresql OK.
+
+echo.
+echo Building dbsqlite (Release) ...
+echo Building dbsqlite ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_DBSQLITE% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 ( echo DBSQLITE BUILD FAILED. See %LOGFILE% & exit /b 1 )
+echo dbsqlite OK.
 
 echo.
 echo Building libffi (Release) ...
