@@ -533,8 +533,6 @@ Boolean MCScreenDC::open()
         g_signal_connect(m_im_context, "retrieve-surrounding", G_CALLBACK(&on_retrieve_surrounding), this);
     }
 		
-	MCuselibgnome = False;
-
     // There are also some atoms that we need to set up
     MCworkareaatom = gdk_atom_intern_static_string("_NET_WORKAREA");
     MCclientlistatom = gdk_atom_intern_static_string("_NET_CLIENT_LIST");
