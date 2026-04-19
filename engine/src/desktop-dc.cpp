@@ -946,17 +946,40 @@ void MCScreenDC::closeIME()
 
 void MCScreenDC::getsystemappearance(MCSystemAppearance &r_appearance)
 {
+#if defined(_WINDOWS)
+	// On Windows, MCPlatformGetSystemProperty has no implementation, so we
+	// query the registry and system metrics directly.
+	//
+	// "custom" maps to Windows High Contrast mode, which indicates the user
+	// has selected a specialised accessibility theme rather than the standard
+	// light or dark themes.
+	HIGHCONTRAST t_hc = {};
+	t_hc.cbSize = sizeof(t_hc);
+	if (SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(t_hc), &t_hc, 0) &&
+	    (t_hc.dwFlags & HCF_HIGHCONTRASTON))
+	{
+		r_appearance = kMCSystemAppearanceCustom;
+	}
+	else
+	{
+		extern "C" bool MCplatformIsDarkMode(void);
+		r_appearance = MCplatformIsDarkMode() ? kMCSystemAppearanceDark : kMCSystemAppearanceLight;
+	}
+#else
 	MCPlatformGetSystemProperty(kMCPlatformSystemPropertySystemAppearance, kMCPlatformPropertyTypeInt32, &r_appearance);
+#endif
 }
 
-#if defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))
+// Platform helpers are available on macOS arm64 (mac-stubs-arm64.mm) and
+// Windows (w32dcs.cpp).  Both provide extern "C" strong definitions.
+#if (defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))) || defined(_WINDOWS)
 extern "C" void MCplatformGetWindowBackgroundColor(char *, size_t);
 extern "C" void MCplatformGetLabelColor(char *, size_t);
 #endif
 
 void MCScreenDC::getsystemwindowcolor(MCStringRef &r_color)
 {
-#if defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))
+#if (defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))) || defined(_WINDOWS)
 	char t_buf[8] = "#ffffff";
 	MCplatformGetWindowBackgroundColor(t_buf, sizeof(t_buf));
 	/* UNCHECKED */ MCStringCreateWithCString(t_buf, r_color);
@@ -967,7 +990,7 @@ void MCScreenDC::getsystemwindowcolor(MCStringRef &r_color)
 
 void MCScreenDC::getsystemtextcolor(MCStringRef &r_color)
 {
-#if defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))
+#if (defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))) || defined(_WINDOWS)
 	char t_buf[8] = "#000000";
 	MCplatformGetLabelColor(t_buf, sizeof(t_buf));
 	/* UNCHECKED */ MCStringCreateWithCString(t_buf, r_color);

@@ -1126,6 +1126,58 @@ void MCScreenDC::settaskbarstate(bool p_visible)
 	processdesktopchanged(false, false);
 }
 
+// ── Windows dark-mode appearance helpers ──────────────────────────────────
+// These provide the strong definitions declared as extern "C" in desktop.cpp.
+// They are called from MCPlatformHandleSystemAppearanceChanged() to supply the
+// three parameters sent with the systemAppearanceChanged message.
+
+// Read AppsUseLightTheme from the Themes\Personalize registry key.
+// Value 0 (or absent) means dark mode; 1 (default) means light mode.
+extern "C" bool MCplatformIsDarkMode(void)
+{
+    DWORD t_value = 1; // default: light
+    DWORD t_size  = sizeof(t_value);
+    RegGetValueW(HKEY_CURRENT_USER,
+                 L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                 L"AppsUseLightTheme",
+                 RRF_RT_REG_DWORD,
+                 nullptr,
+                 &t_value,
+                 &t_size);
+    return t_value == 0;
+}
+
+static void s_colorref_to_hex(COLORREF p_color, char *p_buf, size_t p_buflen)
+{
+    if (p_buflen < 8) return;
+    snprintf(p_buf, p_buflen, "#%02x%02x%02x",
+             (unsigned)GetRValue(p_color),
+             (unsigned)GetGValue(p_color),
+             (unsigned)GetBValue(p_color));
+}
+
+// Return the window background colour as a LiveCode hex string ("#rrggbb").
+// In dark mode we use the canonical Windows 11 dark surface colour (#1e1e1e);
+// in light mode we read the live system colour so custom themes are respected.
+extern "C" void MCplatformGetWindowBackgroundColor(char *p_buf, size_t p_buflen)
+{
+    if (MCplatformIsDarkMode())
+        snprintf(p_buf, p_buflen, "#1e1e1e");
+    else
+        s_colorref_to_hex(GetSysColor(COLOR_WINDOW), p_buf, p_buflen);
+}
+
+// Return the primary label (text) colour as a LiveCode hex string ("#rrggbb").
+extern "C" void MCplatformGetLabelColor(char *p_buf, size_t p_buflen)
+{
+    if (MCplatformIsDarkMode())
+        snprintf(p_buf, p_buflen, "#ffffff");
+    else
+        s_colorref_to_hex(GetSysColor(COLOR_WINDOWTEXT), p_buf, p_buflen);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 void MCScreenDC::processdesktopchanged(bool p_notify, bool p_update_fonts)
 {
 	// IM-2014-01-28: [[ HiDPI ]] Use updatedisplayinfo() method to update & compare display details

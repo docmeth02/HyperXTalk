@@ -49,6 +49,16 @@
 extern "C" __attribute__((weak)) bool MCplatformIsDarkMode(void) { return false; }
 extern "C" __attribute__((weak)) void MCplatformGetWindowBackgroundColor(char *, size_t) {}
 extern "C" __attribute__((weak)) void MCplatformGetLabelColor(char *, size_t) {}
+#elif defined(_WINDOWS)
+// Strong definitions provided by w32dcs.cpp.
+extern "C" bool MCplatformIsDarkMode(void);
+extern "C" void MCplatformGetWindowBackgroundColor(char *p_buf, size_t p_buflen);
+extern "C" void MCplatformGetLabelColor(char *p_buf, size_t p_buflen);
+#else
+// Stub fallbacks for Linux and other non-Mac, non-Windows platforms.
+extern "C" bool MCplatformIsDarkMode(void) { return false; }
+extern "C" void MCplatformGetWindowBackgroundColor(char *, size_t) {}
+extern "C" void MCplatformGetLabelColor(char *, size_t) {}
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,19 +191,22 @@ void MCPlatformHandleSystemAppearanceChanged(void)
 	if (MCscreen == nil)
 		return;
 
-#if defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))
-    // Pass the appearance name ("dark"/"light") as p1 and the resolved
-    // windowBackgroundColor as a hex string ("#rrggbb") as p2, e.g.:
-    //   on systemAppearanceChanged pMode, pWindowColor
-    //     set the backgroundColor of this stack to pWindowColor
-    //   end systemAppearanceChanged
-    char t_color_buf[8];
+// Send systemAppearanceChanged to all open stacks with three parameters:
+    //   p1 – "dark" or "light"
+    //   p2 – window background colour as "#rrggbb"
+    //   p3 – label (text) colour as "#rrggbb"
+    //
+    // Platforms that provide real helper implementations:
+    //   • macOS arm64  — mac-stubs-arm64.mm  (NSAppearance / NSColor)
+    //   • Windows      — w32dcs.cpp          (registry + GetSysColor)
+    // All other platforms fall back to stubs that return false / empty strings,
+    // so p1 is always "light" and p2/p3 are empty on those targets.
+    char t_color_buf[8] = {};
+    char t_text_color_buf[8] = {};
     MCplatformGetWindowBackgroundColor(t_color_buf, sizeof(t_color_buf));
-    char t_text_color_buf[8];
     MCplatformGetLabelColor(t_text_color_buf, sizeof(t_text_color_buf));
     bool t_is_dark = MCplatformIsDarkMode();
 
-    // Send to all open stacks (not just the default stack)
     MCStacknode *t_stack_node = MCstacks->topnode();
     MCStacknode *t_first_node = t_stack_node;
     while (t_stack_node != NULL)
@@ -214,13 +227,9 @@ void MCPlatformHandleSystemAppearanceChanged(void)
             MCValueRelease(t_text_color_str);
         }
         t_stack_node = t_stack_node->next();
-        // Stop when we loop back to the first node
         if (t_stack_node == t_first_node)
             break;
     }
-#else
-	MCscreen -> delaymessage(MCdefaultstackptr -> getcurcard(), MCM_system_appearance_changed);
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -327,6 +327,7 @@ enum MCSystemAppearance
 {
 	kMCSystemAppearanceLight = 0,
 	kMCSystemAppearanceDark = 1,
+	kMCSystemAppearanceCustom = 2,
 };
 
 class MCUIDC

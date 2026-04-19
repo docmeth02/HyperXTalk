@@ -438,6 +438,7 @@ static MCExecEnumTypeElementInfo _kMCInterfaceSystemAppearanceElementInfo[] =
 {
 	{ "light", 0, false },
 	{ "dark", 1, false },
+	{ "custom", 2, false },
 };
 
 static MCExecEnumTypeInfo _kMCInterfaceSystemAppearanceTypeInfo =
