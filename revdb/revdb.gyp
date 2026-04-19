@@ -150,6 +150,10 @@
 				[
 					'OS == "mac"',
 					{
+						'dependencies!':
+						[
+							'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
+						],
 						'xcode_settings':
 						{
 							'OTHER_LDFLAGS': ['-undefined dynamic_lookup', '-lcustomcrypto', '-lcustomssl'],
@@ -207,6 +211,15 @@
 							'-Wl,-Bstatic',
 							'-lstdc++',
 							'-Wl,-Bdynamic',
+						],
+					},
+				],
+				[
+					'OS == "mac"',
+					{
+						'dependencies!':
+						[
+							'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
 						],
 					},
 				],

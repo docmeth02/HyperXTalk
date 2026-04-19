@@ -768,45 +768,13 @@ dlmmap (void *start, size_t length, int prot,
       return ptr;
     }
 
-#if defined(__APPLE__) && defined(__aarch64__) && !defined(TARGET_SUBPLATFORM_IPHONE)
-  /* macOS arm64 / hardened runtime: mmap(PROT_RWX, MAP_ANON) always fails
-   * with EPERM, which would otherwise fall through to the temp-file path in
-   * dlmmap_locked.  That path mmap's an unsigned /tmp file as executable,
-   * causing AppleSystemPolicy/syspolicyd to pause for ~4 seconds on every
-   * first closure allocation while it evaluates the unsigned mapping.
-   *
-   * Use MAP_JIT with anonymous memory instead.  On Apple Silicon the
-   * per-thread JIT write-protection must be lowered before writing;
-   * dlmalloc's internal bookkeeping writes happen right here on the same
-   * thread so wrapping them is sufficient.  After the mmap the rest of the
-   * write-protect dance is handled by the ffi_prep_closure call site.
-   * Requires the com.apple.security.cs.allow-jit process entitlement. */
-  if (execfd == -1)
-    {
-#  if defined(__has_builtin) && __has_builtin(__builtin_available)
-      if (__builtin_available(macOS 10.14, *))
-        {
-          extern void pthread_jit_write_protect_np(int) __attribute__((weak_import));
-          if (pthread_jit_write_protect_np)
-            pthread_jit_write_protect_np(0);
-        }
-#  endif
-      ptr = mmap (start, length, prot | PROT_EXEC,
-		  flags | MAP_JIT, fd, offset);
-#  if defined(__has_builtin) && __has_builtin(__builtin_available)
-      if (__builtin_available(macOS 10.14, *))
-        {
-          extern void pthread_jit_write_protect_np(int) __attribute__((weak_import));
-          if (pthread_jit_write_protect_np)
-            pthread_jit_write_protect_np(1);
-        }
-#  endif
-      if (ptr != MFAIL)
-	return ptr;
-      /* MAP_JIT not available (e.g. entitlement absent); fall through to
-       * the temp-file path which will work, just with a one-time delay. */
-    }
-#endif /* __APPLE__ && __aarch64__ && !TARGET_SUBPLATFORM_IPHONE */
+  /* NOTE: On macOS arm64 the dlmalloc-backed path (dlmmap → MAP_JIT) is
+   * no longer used for closure allocation.  ffi_closure_alloc below uses
+   * a private per-closure mmap(MAP_JIT) instead, so dlmmap is never
+   * called in the closure hot-path on that platform.  The block that
+   * previously lived here to handle MAP_JIT + np(0/1) has been removed
+   * to avoid confusion; see the ffi_closure_alloc implementation for the
+   * authoritative handling. */
 
   if (execfd == -1 && !is_selinux_enabled ())
     {
@@ -882,6 +850,81 @@ segment_holding_code (mstate m, char* addr)
 /* Allocate a chunk of memory with the given size.  Returns a pointer
    to the writable address, and sets *CODE to the executable
    corresponding virtual address.  */
+
+#if defined(__APPLE__) && defined(__aarch64__) && !defined(TARGET_SUBPLATFORM_IPHONE)
+
+/* On macOS arm64, dlmalloc manages a shared MAP_JIT segment and writes chunk
+ * bookkeeping metadata (chunk headers, bin pointers, etc.) to it on EVERY
+ * malloc/free call — not just during the initial dlmmap that acquires pages.
+ * Those internal writes require pthread_jit_write_protect_np(0) to be active,
+ * but correctly serialising np(0/1) around all dlmalloc internals without
+ * pervasive changes to dlmalloc is impractical.
+ *
+ * Fix: give each ffi_closure its own private MAP_JIT mapping.  With no shared
+ * segment there are no dlmalloc chunk-header writes to MAP_JIT pages.  The
+ * only writes to a MAP_JIT page are then those in ffi_prep_closure_loc, which
+ * already wraps them correctly with np(0) before the first store and np(1)
+ * after the last.
+ *
+ * Page layout:
+ *   [0 .. sizeof(size_t)-1]  total mmap'd byte count  (for munmap)
+ *   [sizeof(size_t) ..]      ffi_closure struct (tramp + cif/fun/user_data)
+ *
+ * Write-protection protocol:
+ *   np(0) is called here, before mmap and the size-header write, and is left
+ *   lowered on return.  ffi_prep_closure_loc calls np(0) again (idempotent),
+ *   writes the trampoline and closure fields, then calls np(1) after its last
+ *   store.  All of this happens sequentially on the same thread. */
+
+void *
+ffi_closure_alloc (size_t size, void **code)
+{
+  if (!code)
+    return NULL;
+
+  size_t page_size = (size_t) getpagesize ();
+  size_t total     = sizeof (size_t) + size;
+  size_t alloc     = (total + page_size - 1) & ~(page_size - 1);
+
+#  if defined(__has_builtin) && __has_builtin(__builtin_available)
+  if (__builtin_available(macOS 10.14, *))
+    {
+      extern void pthread_jit_write_protect_np (int) __attribute__((weak_import));
+      if (pthread_jit_write_protect_np)
+        pthread_jit_write_protect_np (0);
+    }
+#  endif
+
+  void *base = mmap (NULL, alloc,
+                     PROT_READ | PROT_WRITE | PROT_EXEC,
+                     MAP_PRIVATE | MAP_ANON | MAP_JIT,
+                     -1, 0);
+  if (base == (void *) -1)
+    return NULL;
+
+  /* Store allocation size at the base so ffi_closure_free can munmap it.
+   * np(0) is active here so the write to the MAP_JIT page is safe. */
+  *(size_t *) base = alloc;
+
+  void *closure = (char *) base + sizeof (size_t);
+  /* Leave np(0) active: ffi_prep_closure_loc will write next and will
+   * call np(1) after its last store. */
+  *code = closure;
+  return closure;
+}
+
+/* Release a closure allocated with the above ffi_closure_alloc.
+   ptr is the value returned (and stored in *code) by ffi_closure_alloc. */
+void
+ffi_closure_free (void *ptr)
+{
+  void  *base  = (char *) ptr - sizeof (size_t);
+  size_t alloc = *(size_t *) base;  /* read is always safe (no np guard) */
+  munmap (base, alloc);
+}
+
+#else /* !(macOS arm64) — original dlmalloc-backed implementation */
+
 void *
 ffi_closure_alloc (size_t size, void **code)
 {
@@ -918,6 +961,8 @@ ffi_closure_free (void *ptr)
 
   dlfree (ptr);
 }
+
+#endif /* !(macOS arm64) */
 
 
 #if FFI_CLOSURE_TEST

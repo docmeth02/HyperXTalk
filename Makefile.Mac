@@ -98,12 +98,16 @@ endif
 	    "_build/mac/$(BUILDTYPE)/HyperXTalk.app"; \
 	fi
 	@# Sign external bundles that live beside the app (revbrowser.bundle,
-	@# revdb.bundle, etc.).  They are loaded into the HyperXTalk process so
-	@# they do not need their own CS_RUNTIME — bare --sign - is sufficient.
+	@# revdb.bundle, etc.).  They are loaded into the HyperXTalk process.
+	@# On macOS 26+, bundles dlopen'd into a CS_RUNTIME process must also
+	@# carry CS_RUNTIME (--options runtime); without it the kernel rejects
+	@# mapped pages with SIGKILL (CODESIGNING, Code 2, Invalid Page).
 	@echo "Signing external bundles in _build/mac/$(BUILDTYPE)/..."
 	@find "_build/mac/$(BUILDTYPE)" -maxdepth 1 \
 	    \( -name "*.bundle" -o -name "*.dylib" \) | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      "$$F" 2>/dev/null || true; \
 	done
 	@# Sign loose standalone executables (server-community, lc-compile,
 	@# lc-run, lc-compile-ffi-java, installer-stub) with Hardened Runtime
@@ -124,6 +128,67 @@ endif
 ifneq ($(TRAVIS),undefined)
 	@echo "travis_fold:end:compile"
 endif
+	@# ----------------------------------------------------------------
+	@# Sign mac-bin/ outputs (binzip-copy runs DURING xcodebuild, before
+	@# our post-signing step, so mac-bin/ always gets unsigned copies).
+	@# Sign them here so mac-bin/ is directly usable for development
+	@# without needing to separately run package-mac-bin.
+	@# ----------------------------------------------------------------
+	@echo "Signing mac-bin/ outputs..."
+	@if [ -f "mac-bin/HyperXTalk.app/Contents/MacOS/HyperXTalk" ]; then \
+	  echo "  Signing nested frameworks/dylibs in mac-bin/HyperXTalk.app..."; \
+	  find "mac-bin/HyperXTalk.app" \
+	      \( -name "*.framework" -o -name "*.dylib" \) | \
+	    sort -r | while read F; do \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
+	  done; \
+	  echo "  Signing nested bundles in mac-bin/HyperXTalk.app (Externals, Runtime, etc.)..."; \
+	  find "mac-bin/HyperXTalk.app" -name "*.bundle" | \
+	    sort -r | while read F; do \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	        --options runtime \
+	        "$$F" 2>/dev/null || true; \
+	  done; \
+	  echo "  Signing mac-bin/HyperXTalk.app with Hardened Runtime + entitlements..."; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	    --options runtime \
+	    --entitlements HyperXTalk.entitlements \
+	    "mac-bin/HyperXTalk.app"; \
+	fi
+	@for appname in HyperXTalk-Standalone Installer; do \
+	  if [ -d "mac-bin/$$appname.app" ]; then \
+	    find "mac-bin/$$appname.app" \
+	        \( -name "*.framework" -o -name "*.dylib" \) | \
+	      sort -r | while read F; do \
+	      codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
+	    done; \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements HyperXTalk.entitlements \
+	      "mac-bin/$$appname.app" || true; \
+	  fi; \
+	done
+	@echo "  Signing external bundles in mac-bin/..."
+	@find "mac-bin" -maxdepth 1 -name "*.bundle" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      "$$F" || true; \
+	done
+	@echo "  Signing dylibs in mac-bin/..."
+	@find "mac-bin" -maxdepth 1 -name "*.dylib" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      "$$F" || true; \
+	done
+	@echo "  Signing loose executables in mac-bin/..."
+	@for f in server-community lc-compile lc-run lc-compile-ffi-java installer-stub; do \
+	  if [ -f "mac-bin/$$f" ]; then \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	        --options runtime \
+	        --entitlements HyperXTalk.entitlements \
+	        "mac-bin/$$f" || true; \
+	  fi; \
+	done
 
 check-mac:
 ifneq ($(TRAVIS),undefined)
@@ -202,10 +267,12 @@ package-mac:
 	    cp -R "$(MAC_BIN)/$$b.bundle" \
 	      "$(TOOLS_DIR)/Externals/Database Drivers/" || true; \
 	done
-	@# Sign all bundles from mac-bin with hardened runtime before copying
+	@# Sign all bundles from mac-bin with hardened runtime before copying.
+	@# Do NOT use --deep: on macOS 26+ --deep re-signs nested executables
+	@# with --options runtime and produces page-hash mismatches (SIGKILL).
 	@for b in revbrowser revxml revspeech revzip revdb revpdfprinter dbmysql dbodbc dbpostgresql dbsqlite; do \
 	  [ -d "$(MAC_BIN)/$$b.bundle" ] && \
-	    codesign --force --deep --sign "$(CODESIGN_IDENTITY)" \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	        --options runtime \
 	        --entitlements HyperXTalk.entitlements \
 	        "$(MAC_BIN)/$$b.bundle" || true; \
@@ -323,7 +390,9 @@ package-mac:
 	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
 	done
 	@find "$(BUNDLE)" -name "*.bundle" | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" "$$F" 2>/dev/null || true; \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
 	done
 	@codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
@@ -377,10 +446,12 @@ package-mac-bin:
 	        --entitlements HyperXTalk.entitlements \
 	        "$(MACBIN_BIN)/$$f" || true; \
 	done
-	@# Sign all loose bundles in mac-bin with hardened runtime
+	@# Sign all loose bundles in mac-bin with hardened runtime.
+	@# Do NOT use --deep: on macOS 26+ --deep re-signs nested executables
+	@# with --options runtime and produces page-hash mismatches (SIGKILL).
 	@for b in revbrowser revxml revspeech revzip revdb revpdfprinter dbmysql dbodbc dbpostgresql dbsqlite; do \
 	  [ -d "$(MACBIN_BIN)/$$b.bundle" ] && \
-	    codesign --force --deep --sign "$(CODESIGN_IDENTITY)" \
+	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	        --options runtime \
 	        --entitlements HyperXTalk.entitlements \
 	        "$(MACBIN_BIN)/$$b.bundle" || true; \

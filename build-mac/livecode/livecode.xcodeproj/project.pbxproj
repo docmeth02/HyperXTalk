@@ -152,7 +152,7 @@
 				48625BE2B37A3B33F502FADA /* PBXTargetDependency */,
 				7FD81953E6714B3C6E41D17C /* PBXTargetDependency */,
 				09EF0406DBB321C760B873E6 /* PBXTargetDependency */,
-				FA61601B48994BEDE1BBB107 /* PBXTargetDependency */,
+				3B10BD422D6D742BEBD0C001 /* PBXTargetDependency */,
 				70A37BC8D829E05D7DF5E2D9 /* PBXTargetDependency */,
 			);
 			name = "thirdparty-prebuilts";
@@ -340,6 +340,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = EDBD37A89120F0754471B804;
 			remoteInfo = "external-revpdfprinter";
+		};
+		2243B873364CE83C07211E2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5B2600BE02EB3601A402F1A8 /* libpq.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 55A50A08413AA05AC541F1CD;
+			remoteInfo = libpq;
 		};
 		228596F79965C2BFFE42967F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -530,13 +537,6 @@
 			remoteGlobalIDString = BBAE767D26BE459AE79447F8;
 			remoteInfo = "run-test-kernel-installer";
 		};
-		4E9A69A3B283819FF300386F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5B2600BE02EB3601A402F1A8 /* libpq.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 798F6954A07E43C2E6B1899A;
-			remoteInfo = libpq;
-		};
 		512AB6BEF8356B85BE8787F5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 588E6147C4AA946CE07C5ABA /* libskia.xcodeproj */;
@@ -641,13 +641,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = DBC572B268827D443DDC9E11;
 			remoteInfo = libgif;
-		};
-		671CC661397110EF3AA5CB2E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5B2600BE02EB3601A402F1A8 /* libpq.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = A92C2194441C45BA132EABD8;
-			remoteInfo = libpq;
 		};
 		6896F25650EB26A5ED95F9B3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1836,19 +1829,18 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C19F240106EBB4CEF17F4653 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				523A28A3D87907D6A63A0A5C /* libpq.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		D689636FEADB5E3D4B48EF32 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				86DFFDE2C412AB474EF1033D /* libcpptest.a */,
 				8EC69EED58BB144AB354116F /* test-libcpptest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D9884CE76AAC4397F5B4DB33 /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2016,7 +2008,7 @@
 					ProjectRef = BE90EB075E37BC887B69E1B8 /* libpng.xcodeproj */;
 				},
 				{
-					ProductGroup = C19F240106EBB4CEF17F4653 /* Products */;
+					ProductGroup = D9884CE76AAC4397F5B4DB33 /* Products */;
 					ProjectRef = 5B2600BE02EB3601A402F1A8 /* libpq.xcodeproj */;
 				},
 				{
@@ -2310,13 +2302,6 @@
 			fileType = "compiled.mach-o.dylib";
 			path = "server-dbpostgresql.dylib";
 			remoteRef = 1C575179AEBD4E32EDEAD32B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		523A28A3D87907D6A63A0A5C /* libpq.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libpq.a;
-			remoteRef = 4E9A69A3B283819FF300386F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		52662A5DC8CD55749CC6E184 /* libkernel-standalone.a */ = {
@@ -2806,6 +2791,11 @@
 			name = "external-revzip";
 			targetProxy = F5CAA14FA8E7008F01423F6A /* PBXContainerItemProxy */;
 		};
+		3B10BD422D6D742BEBD0C001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpq;
+			targetProxy = 2243B873364CE83C07211E2D /* PBXContainerItemProxy */;
+		};
 		3D87082CBF599A9392FE26BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 60459FBC10CEE991DD6B8B4B /* binzip-copy */;
@@ -3065,11 +3055,6 @@
 			isa = PBXTargetDependency;
 			name = "run-test-kernel-standalone";
 			targetProxy = 33513CEE1FEDD013A00BFE47 /* PBXContainerItemProxy */;
-		};
-		FA61601B48994BEDE1BBB107 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libpq;
-			targetProxy = 671CC661397110EF3AA5CB2E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
