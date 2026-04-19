@@ -43,6 +43,13 @@ for F in "${BUILD_OUT}"/libskia*.a; do
     cp "$F" "${PREBUILT_LIB}/$(basename "$F")"
 done
 
+# Rebuild libskia_opt_arm.a with real NEON + CRC32 objects.
+# The GYP target_conditions arch check often fails to select NEON sources at
+# config time, leaving the archive as a stub (opts_dummy.o only). This script
+# compiles the correct sources directly and replaces the stub.
+echo "=== Rebuilding libskia_opt_arm.a with NEON + CRC32 sources ==="
+sh "${SCRIPT_DIR}/build-libskia-opt-arm-mac-arm64.sh"
+
 echo ""
 echo "=== Done. prebuilt/lib/mac now has: ==="
 ls "${PREBUILT_LIB}/" | sort

@@ -80,6 +80,7 @@
 		020E6EDC6FDF03769CF7DE56 /* fiber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7435D8942ED7BC11D2999A52 /* fiber.cpp */; };
 		022B0CCBF008F37DC3ED5022 /* exec-interface-graphic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FD413AF3AFB3C4BC981DB684 /* exec-interface-graphic.cpp */; };
 		02F3F323EEBF89EB1B6E792A /* exec-interface-image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EEDBBD2B9B2AE6A015B459FF /* exec-interface-image.cpp */; };
+		033E4C563524D6742D52EF6E /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E023CC95F91A73A4FCFCA465 /* libicuio.a */; };
 		035EFFDD669AA3D906BC6DDD /* lextable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E2E5CAC5A1A6848106BF410 /* lextable.cpp */; };
 		03FD98016A04623E7ABB5376 /* visual.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7FB34FF5DD25BA89AF54389 /* visual.cpp */; };
 		0469CBC60EC4C84F195D9A34 /* sellst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08F973F5665AD12570B6DC6F /* sellst.cpp */; };
@@ -175,8 +176,6 @@
 		2CA166BE5346FE7BA3F9404B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BF5C7DD88AE1D1B26272863 /* Carbon.framework */; };
 		2CF30998C462FE5985B30701 /* mcstring.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74AF029019AAF8477A501AA9 /* mcstring.cpp */; };
 		2D0968BADE2463A4550888C0 /* graphic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BB198C656CCF835A7B8574AA /* graphic.cpp */; };
-		2D1ABAE6D67F76A576827E7D /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EC11EC6A2EB1402CF09A120 /* libicui18n.a */; };
-		2E35088146256088F48FADC6 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B522AC7421981192189BE68 /* libicuio.a */; };
 		2F9723B9971EB54C9D732A51 /* operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F6A3D4D67132E01E36AD528 /* operator.cpp */; };
 		2FADCF850CC979E772DB564C /* clipboard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A10B17AA5CDE2EAF0F3C3D05 /* clipboard.cpp */; };
 		2FF0EB4AE168B391F1EF549F /* property.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FE6525F58EB5466F2A66426E /* property.cpp */; };
@@ -230,12 +229,12 @@
 		4052182086B90FFA282C638E /* object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C403EAD49368929E4986232F /* object.cpp */; };
 		4088EFFA9E51B9342D203E89 /* quicktimestubs.mac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F3F11BED26782FC9CCF28176 /* quicktimestubs.mac.cpp */; };
 		40E5FBD788953C7AB2A716C6 /* foundation-legacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D9746E615AC3D8B53E77515 /* foundation-legacy.cpp */; };
-		410F74610DCDAE0CA8E615F7 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E38A3753A0483118F2B6E1C2 /* libicutu.a */; };
 		41649658C378D57CD3998B1B /* cmdsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 91AAB5448F4230F0A03BFAF5 /* cmdsm.cpp */; };
 		417A1453661D7A9A40386C90 /* sysspec-url.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19CCE9E8065A8BFE77B99E8F /* sysspec-url.cpp */; };
 		4182AF82A569D93D25AFC1AD /* tooltip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FBDAF842A73FF0DE96D63CC /* tooltip.cpp */; };
 		428A4069E6B3A602793F9B77 /* parentscript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 908EA2CBE96D3812A1C549C2 /* parentscript.cpp */; };
 		42905D80BDE5FBE4E83130D5 /* hc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 41EE372DA6FF64703E9178C1 /* hc.cpp */; };
+		430B52B438B593B6C245C56C /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43E7DAD0341ED31DE5F92F8B /* libicui18n.a */; };
 		435704C5AB7FD353B1AB9DD3 /* exec-mail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 136F7022663D231E37EFABC3 /* exec-mail.cpp */; };
 		4415FCB987C224C34C425853 /* unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 613A71E3D8518D2A8B930E67 /* unicode.cpp */; };
 		441B1FF92210CCD26E581917 /* operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F6A3D4D67132E01E36AD528 /* operator.cpp */; };
@@ -282,6 +281,7 @@
 		55789A659A74FCD5F140CC9F /* exec-interface-field.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9CD5E4C73DFBC9D9A9DF056 /* exec-interface-field.cpp */; };
 		56B1F1364F4FF215D6E7F595 /* exec-interface-player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 08BDAFBAA953CAB1DB81D754 /* exec-interface-player.cpp */; };
 		57F2BF979E72BCAAEB76A43A /* socket_resolve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A15983FCF5E2C11F42DD8775 /* socket_resolve.cpp */; };
+		585D2ABAEC64C04AB066EB4E /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 510BA98ABC9E1B248730CA62 /* libicudata.a */; };
 		58D5C488B0833016F9AC8B3D /* srvcgi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B65703C75740AF977DA1149C /* srvcgi.cpp */; };
 		58E02F8665BB65C57CDEBE00 /* exec-pick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0260C7F3A363EE3A203111A9 /* exec-pick.cpp */; };
 		593DFC7418FBDA988D3AE22E /* stackcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F053061F0C1DCFAC3794EBDA /* stackcache.cpp */; };
@@ -306,7 +306,6 @@
 		641563C9F151C0A8C53A31D4 /* text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 90C4882313E80446BE19E7CE /* text.cpp */; };
 		64B06665530D8A1C3AB74DC7 /* exec-interface-field.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9CD5E4C73DFBC9D9A9DF056 /* exec-interface-field.cpp */; };
 		65599B16E8404D859404BAC5 /* exec-interface-widget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5283057BBFB1DC804CC5EDE4 /* exec-interface-widget.cpp */; };
-		657992BB28213BD9917FD754 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EA372CFAC02961E70783B41F /* libicuuc.a */; };
 		66C1642519292DB1F44135FE /* mcerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0088D359D0629CF60CE05919 /* mcerror.cpp */; };
 		66D354BF52BD08464CA9FFE3 /* foundation-legacy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D9746E615AC3D8B53E77515 /* foundation-legacy.cpp */; };
 		672DA5EE97180A8A2DD32371 /* fields.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 918CC93722FC48228DA01336 /* fields.cpp */; };
@@ -382,7 +381,6 @@
 		8305ECEB5C9ED46F88B49B6A /* widget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 41BEA300F5DF1371B09132C0 /* widget.cpp */; };
 		855D6C21531602FBF7FA29F7 /* keywords.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0DED2F207061FBC6ACE4AC81 /* keywords.cpp */; };
 		86EA1B7924FBEEBEAF654E51 /* test_path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C3E74B1FC2CF1AFF653CE9F /* test_path.cpp */; };
-		881CEC54214ACD51336D7EAD /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43319FDEE5A73595931604C9 /* libicudata.a */; };
 		893D1CF3FF42D2DBD41152BA /* literal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2249915A7F8A614DB7BE5D22 /* literal.cpp */; };
 		8955190D030309CEA1B7519A /* fieldf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0620B13416D4AB3578F389FD /* fieldf.cpp */; };
 		895D05DB0BFE37E51B2359DB /* exec-engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEDD77002CF7301A19B50B4 /* exec-engine.cpp */; };
@@ -430,6 +428,7 @@
 		A1BD6E94587BD57546CB8BF6 /* srvtheme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA8F299BA332BADCCA232CC0 /* srvtheme.cpp */; };
 		A26D7CF92D4BD5CEAC55BBFD /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B9229E36A69F8FD4EF5C55BA /* md5.cpp */; };
 		A27E9431237DFF89C202F28B /* sysspec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ABEF4BAD87A1322C5630A2E0 /* sysspec.cpp */; };
+		A287C17A214FE4DF76C4E638 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51E26D3BABC4AB7123F8F00D /* libicuuc.a */; };
 		A375FC1785D84E78987C04C6 /* securemode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D442A5CF99B3B2EC996E0FBC /* securemode.cpp */; };
 		A46EBB2B26E0E8F8D950A1A1 /* libcustomcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53AC29158669A81328E9D820 /* libcustomcrypto.a */; };
 		A4EA53404D032AB8E04B80DE /* exec-calendar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 411F1A6244A651CC465984AB /* exec-calendar.cpp */; };
@@ -583,6 +582,7 @@
 		EC96C697D57746DB802FEE4B /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B5397E325ABE0DC78CBB410 /* JavaScriptCore.framework */; };
 		ECA97F3F1ACD427C21B9B2F9 /* libskia_opt_hsw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 35C2B50DC8D3BE9294CEBC7A /* libskia_opt_hsw.a */; };
 		ECFF1F84A0405470F6860617 /* combiners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B9C40204E505B418F06D76 /* combiners.cpp */; };
+		ED34741FCBA045BDFE7F5E6A /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4CF4EB873AE064A94884E07 /* libicutu.a */; };
 		ED465402BCBF007ABF93D620 /* segment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C1A6EFCB4B47E42FB6516460 /* segment.cpp */; };
 		EE97FAB36D0239D40D54DFF1 /* exec-interface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9B68669EA526471CAC328BEB /* exec-interface.cpp */; };
 		EEBDE6259608136EF3DB5EB0 /* tilecachecg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF50C991269D579F69729355 /* tilecachecg.cpp */; };
@@ -1643,7 +1643,6 @@
 		3AFB98E67C1BC57F796394E0 /* widget-popup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "widget-popup.cpp"; sourceTree = "<group>"; };
 		3B328E81DA81AB71C190CFA5 /* gradient.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gradient.cpp; sourceTree = "<group>"; };
 		3B3E0B174E3414EF2E1BAD60 /* mbldc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mbldc.cpp; sourceTree = "<group>"; };
-		3B522AC7421981192189BE68 /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/x86_64/libicuio.a; sourceTree = "<group>"; };
 		3B5D7282357DB73E86C4F05B /* imagelist.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imagelist.h; sourceTree = "<group>"; };
 		3B7CDD6C79941EB2CE389367 /* exec-printing.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-printing.cpp"; sourceTree = "<group>"; };
 		3BF490A50A648D7B9065CD9A /* gradient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gradient.h; sourceTree = "<group>"; };
@@ -1663,8 +1662,8 @@
 		41FF0DF8F67C417CA5447DBA /* imagebitmap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = imagebitmap.h; sourceTree = "<group>"; };
 		42B04611F3C79F6ED5F2EC2D /* exec-idletimer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-idletimer.cpp"; sourceTree = "<group>"; };
 		42CE2B3ADC3576F93646BFFD /* externalv1.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = externalv1.mm; sourceTree = "<group>"; };
-		43319FDEE5A73595931604C9 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/x86_64/libicudata.a; sourceTree = "<group>"; };
 		434CA3EA21294F766D97B2C6 /* mctheme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mctheme.h; sourceTree = "<group>"; };
+		43E7DAD0341ED31DE5F92F8B /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/libicui18n.a; sourceTree = "<group>"; };
 		442833852290FC6C37057C1E /* libcpptest.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libcpptest.xcodeproj; path = "../build-mac/livecode/libcpptest/libcpptest.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		448CF561F60629C48EFF7991 /* skiatypeface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = skiatypeface.cpp; sourceTree = "<group>"; };
 		44CBE51C1A99AF141E49D1CD /* dllst.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dllst.h; sourceTree = "<group>"; };
@@ -1699,13 +1698,15 @@
 		506B172032C5575AB227EECF /* mcsemaphore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mcsemaphore.h; sourceTree = "<group>"; };
 		50AFAB5090DB6AEFF63928E6 /* mblandroidmediapick.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mblandroidmediapick.cpp; sourceTree = "<group>"; };
 		50E914E562D5234E0138053E /* mblandroidplayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mblandroidplayer.cpp; sourceTree = "<group>"; };
+		510BA98ABC9E1B248730CA62 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/libicudata.a; sourceTree = "<group>"; };
 		51638548E788588D35359129 /* iimport.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = iimport.cpp; sourceTree = "<group>"; };
 		51B8F121BD69512344EA9694 /* exec-network.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-network.cpp"; sourceTree = "<group>"; };
+		51E26D3BABC4AB7123F8F00D /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/libicuuc.a; sourceTree = "<group>"; };
 		52077852C7B6DB459676755F /* typedefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = typedefs.h; sourceTree = "<group>"; };
 		5283057BBFB1DC804CC5EDE4 /* exec-interface-widget.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-interface-widget.cpp"; sourceTree = "<group>"; };
 		52B563168A9A35E4084840B2 /* exec-busyindicator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-busyindicator.cpp"; sourceTree = "<group>"; };
 		532E3A5ACE084E3BA04A99E7 /* libffi.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libffi.xcodeproj; path = "../build-mac/livecode/thirdparty/libffi/libffi.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		53AC29158669A81328E9D820 /* libcustomcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomcrypto.a; path = ../prebuilt/lib/mac/x86_64/libcustomcrypto.a; sourceTree = "<group>"; };
+		53AC29158669A81328E9D820 /* libcustomcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomcrypto.a; path = ../prebuilt/lib/mac/libcustomcrypto.a; sourceTree = "<group>"; };
 		53BEBBCF7422417B6A046FF0 /* mbliphonecamera.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = mbliphonecamera.mm; sourceTree = "<group>"; };
 		53E2D2A6E8CD4D145303E4B5 /* filepath.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = filepath.cpp; sourceTree = "<group>"; };
 		540B055FF8BC2E100A343D1D /* mbliphonepick.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = mbliphonepick.mm; sourceTree = "<group>"; };
@@ -1837,7 +1838,6 @@
 		8BABB726777D63C31342E827 /* module-canvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-canvas.h"; sourceTree = "<group>"; };
 		8E1E3BB0296DF15E8988CC66 /* cmds.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cmds.cpp; sourceTree = "<group>"; };
 		8EB700235E29A3C0C415DCC6 /* exec-interface-button.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-interface-button.cpp"; sourceTree = "<group>"; };
-		8EC11EC6A2EB1402CF09A120 /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/x86_64/libicui18n.a; sourceTree = "<group>"; };
 		8F298390541D43D2EA85B236 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8F54B5153487AABEE74C1F33 /* graphic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = graphic.h; sourceTree = "<group>"; };
 		8F6BA20C17B9B7A54E508267 /* hashedstrings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hashedstrings.cpp; sourceTree = "<group>"; };
@@ -1893,7 +1893,7 @@
 		A15983FCF5E2C11F42DD8775 /* socket_resolve.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = socket_resolve.cpp; sourceTree = "<group>"; };
 		A1A0CBFAAEAB223D61456329 /* mblandroidnotification.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mblandroidnotification.cpp; sourceTree = "<group>"; };
 		A3AEDFCF286EE7E57362E249 /* bitmapeffectblur.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bitmapeffectblur.cpp; sourceTree = "<group>"; };
-		A3C8126B52365B87876D283C /* libcustomssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomssl.a; path = ../prebuilt/lib/mac/x86_64/libcustomssl.a; sourceTree = "<group>"; };
+		A3C8126B52365B87876D283C /* libcustomssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomssl.a; path = ../prebuilt/lib/mac/libcustomssl.a; sourceTree = "<group>"; };
 		A654699BCBB7DD7F1EFE0A0C /* sha512.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sha512.cpp; sourceTree = "<group>"; };
 		A6A62D14BBA5A1E68B15D6B8 /* mbliphonedialog.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = mbliphonedialog.mm; sourceTree = "<group>"; };
 		A77EFFC07D106695809868B5 /* shacommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = shacommon.h; sourceTree = "<group>"; };
@@ -2016,6 +2016,7 @@
 		D3DFB191A4E6CE0DBFBF04C2 /* test_new.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test_new.cpp; sourceTree = "<group>"; };
 		D42A5A19FD90ABCBB61019AE /* kernel-server.gyp */ = {isa = PBXFileReference; explicitFileType = sourcecode; path = "kernel-server.gyp"; sourceTree = "<group>"; };
 		D442A5CF99B3B2EC996E0FBC /* securemode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = securemode.cpp; sourceTree = "<group>"; };
+		D4CF4EB873AE064A94884E07 /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/libicutu.a; sourceTree = "<group>"; };
 		D4D8DEE60668E782AA009CC3 /* module-resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-resources.h"; sourceTree = "<group>"; };
 		D549BDA42D7DD90EDCEB6A99 /* mblcalendar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mblcalendar.cpp; sourceTree = "<group>"; };
 		D5A0A7896E1EB986FCB52592 /* paragraf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = paragraf.h; sourceTree = "<group>"; };
@@ -2040,13 +2041,13 @@
 		DF50C991269D579F69729355 /* tilecachecg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tilecachecg.cpp; sourceTree = "<group>"; };
 		DF67A3177FA8EDB5E51FB5D7 /* exec-extension.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-extension.cpp"; sourceTree = "<group>"; };
 		DFE26B862A11D8EE68634A35 /* lnxflst.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = lnxflst.cpp; sourceTree = "<group>"; };
+		E023CC95F91A73A4FCFCA465 /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/libicuio.a; sourceTree = "<group>"; };
 		E0598CB26FD1D7A12D49DDB1 /* mbliphonevideo.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = mbliphonevideo.mm; sourceTree = "<group>"; };
 		E07ED1665D6769026298F762 /* exec-store.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-store.cpp"; sourceTree = "<group>"; };
 		E17CF6ED902651DD296BCCAF /* widget-syntax.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "widget-syntax.cpp"; sourceTree = "<group>"; };
 		E2BFE2E58B7F464B610E6D15 /* menuparse.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = menuparse.h; sourceTree = "<group>"; };
 		E2F83356DD05D85193F8333E /* imageloader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = imageloader.cpp; sourceTree = "<group>"; };
 		E32542855750CD4B9D638594 /* mblsyntax.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mblsyntax.h; sourceTree = "<group>"; };
-		E38A3753A0483118F2B6E1C2 /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/x86_64/libicutu.a; sourceTree = "<group>"; };
 		E3F0F578A8965582B4ACBBF0 /* raw-clipboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "raw-clipboard.h"; sourceTree = "<group>"; };
 		E4C1BC670993BA94F870150E /* libkernel-server (host).a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libkernel-server (host).a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4C7CAC127B8BFBD32BB8CC2 /* menuparse.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = menuparse.cpp; sourceTree = "<group>"; };
@@ -2066,7 +2067,6 @@
 		E9A3189643D6C1FD6FAD2002 /* emscripten.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = emscripten.gypi; path = ../config/emscripten.gypi; sourceTree = "<group>"; };
 		EA2231B811A0CB44A66E7176 /* packed.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = packed.h; sourceTree = "<group>"; };
 		EA2E8B78E2A59A127C2FCB6A /* uuid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = uuid.cpp; sourceTree = "<group>"; };
-		EA372CFAC02961E70783B41F /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/x86_64/libicuuc.a; sourceTree = "<group>"; };
 		EB35D516332CA26757B251F5 /* image_rep.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = image_rep.cpp; sourceTree = "<group>"; };
 		EBA84FC42AB845740E75B6F3 /* exec-filters.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "exec-filters.cpp"; sourceTree = "<group>"; };
 		EBF129B2B778B04FEE8164FD /* handler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = handler.h; sourceTree = "<group>"; };
@@ -2149,9 +2149,7 @@
 				7B0FDE26A0D3CFF8856C2B1E /* libkernel-server.a in Frameworks */,
 				B7E7B9EFD9065F4B8BB9067B /* libFoundation.a in Frameworks */,
 				48D05C725B365A0292653EFE /* libGraphics.a in Frameworks */,
-				DC3DD3C37B38F3ED6C4188F9 /* libz.a in Frameworks */,
-				E4734F3AD84994A0838779EB /* libffi.a in Frameworks */,
-				D77B5907E96027E339AF886A /* libgif.a in Frameworks */,
+				DC3DD3C37B38F3ED6C4188F9 /* libz.a in Frameworks */,				D77B5907E96027E339AF886A /* libgif.a in Frameworks */,
 				CB27BC1AB9DD4417F6A621B1 /* libpng.a in Frameworks */,
 				26082C290296365EBC2D2962 /* libjpeg.a in Frameworks */,
 				4EF95FCC18F9E7D60369BB8C /* libskia.a in Frameworks */,
@@ -2179,11 +2177,11 @@
 				DFD4B26A73B8113E060E6463 /* CoreText.framework in Frameworks */,
 				0BF3B4E33A7BA41B9E9DBBF2 /* CoreFoundation.framework in Frameworks */,
 				04B3D4375728E1468C96EE36 /* Foundation.framework in Frameworks */,
-				2D1ABAE6D67F76A576827E7D /* libicui18n.a in Frameworks */,
-				2E35088146256088F48FADC6 /* libicuio.a in Frameworks */,
-				410F74610DCDAE0CA8E615F7 /* libicutu.a in Frameworks */,
-				657992BB28213BD9917FD754 /* libicuuc.a in Frameworks */,
-				881CEC54214ACD51336D7EAD /* libicudata.a in Frameworks */,
+				430B52B438B593B6C245C56C /* libicui18n.a in Frameworks */,
+				033E4C563524D6742D52EF6E /* libicuio.a in Frameworks */,
+				ED34741FCBA045BDFE7F5E6A /* libicutu.a in Frameworks */,
+				A287C17A214FE4DF76C4E638 /* libicuuc.a in Frameworks */,
+				585D2ABAEC64C04AB066EB4E /* libicudata.a in Frameworks */,
 				0C7E80DC7F02742DC32B5985 /* libffi.a in Frameworks */,
 				810CA1083924BDD66B0587FC /* libcurl.dylib in Frameworks */,
 				A46EBB2B26E0E8F8D950A1A1 /* libcustomcrypto.a in Frameworks */,
@@ -2323,11 +2321,11 @@
 				53AC29158669A81328E9D820 /* libcustomcrypto.a */,
 				A3C8126B52365B87876D283C /* libcustomssl.a */,
 				31E8482F1DC2BB132469097B /* libffi.a */,
-				43319FDEE5A73595931604C9 /* libicudata.a */,
-				8EC11EC6A2EB1402CF09A120 /* libicui18n.a */,
-				3B522AC7421981192189BE68 /* libicuio.a */,
-				E38A3753A0483118F2B6E1C2 /* libicutu.a */,
-				EA372CFAC02961E70783B41F /* libicuuc.a */,
+				510BA98ABC9E1B248730CA62 /* libicudata.a */,
+				43E7DAD0341ED31DE5F92F8B /* libicui18n.a */,
+				E023CC95F91A73A4FCFCA465 /* libicuio.a */,
+				D4CF4EB873AE064A94884E07 /* libicutu.a */,
+				51E26D3BABC4AB7123F8F00D /* libicuuc.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -4801,7 +4799,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -4904,7 +4902,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -5435,7 +5433,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (

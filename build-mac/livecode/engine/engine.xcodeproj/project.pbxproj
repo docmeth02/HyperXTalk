@@ -99,15 +99,15 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		02AA4A03AF41AFC090BEF775 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 935CFE5FC6DF2AA46F6B5236 /* libicutu.a */; };
+		03A3C2B3AEEB998C83E5D129 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30DBA9DA1D200DDDD99D4892 /* libicuio.a */; };
 		03AB8AD91D972980C48ABCBC /* libpcre (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F318EDA2A9A17DC2B045642 /* libpcre (host).a */; };
 		03E99974E89F17C88EBE693C /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D042857F01B945E7A531FC /* Carbon.framework */; };
 		049E9144C0D0C0FE1469D96E /* libskia_opt_arm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72C05C8B63AA37C8ED22E2AA /* libskia_opt_arm.a */; };
+		050095CF5C9E4EFF0A85B97D /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F491936D472AE302E7924D /* libicutu.a */; };
 		056ADBE26782BBB34BB155B4 /* libScript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 69D08846995F47A4316C7842 /* libScript.a */; };
 		05E1296AB8E15764C47C78BC /* libcups.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 40CBA8A477415E76D92D18EA /* libcups.dylib */; };
 		0797F569125E68FAA78F308A /* startupstack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CDA20FAB76F0A980A099F4C5 /* startupstack.cpp */; };
 		0827F1212F7BF35CE04A3CFD /* libskia_opt_avx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EDD9849D7D0D6142C444FD0B /* libskia_opt_avx.a */; };
-		08817AA576869826BF90BE28 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF1264794D4CAE0F8F43958 /* libicui18n.a */; };
 		095D60104DD27C10A447030F /* libFoundation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 50836C43A6EBD90CD5CFB73A /* libFoundation.a */; };
 		0A391A81B1F0911D29D784FF /* libskia_opt_avx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EDD9849D7D0D6142C444FD0B /* libskia_opt_avx.a */; };
 		0C30731EB58B1196DB0783A1 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9085221E561C3041C597767 /* Security.framework */; };
@@ -121,24 +121,20 @@
 		114FF95221FE4B567682EC17 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51785C2E9DF34B3C5FC7902B /* libffi.a */; };
 		129A59BDE8371B0584DBA75F /* libskia_opt_sse41 (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDAD92C927D13F96CC3C0B18 /* libskia_opt_sse41 (host).a */; };
 		12C8A8DEC5EDC10194D35919 /* libskia_opt_none.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 369F0CAA6DB00AB55E8BD758 /* libskia_opt_none.a */; };
-		131D38E4ABF47FD1064A3729 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */; };
 		134B4FB58E8C625F2C2E18B1 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9085221E561C3041C597767 /* Security.framework */; };
 		13D0B48ED339A08524E33CB7 /* libScript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 69D08846995F47A4316C7842 /* libScript.a */; };
 		13F2699BFD7F89E3CE39DF11 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 579691938457283837E7DFEE /* AudioToolbox.framework */; };
-		141201E92A9BFE8453560CC2 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */; };
+		1527BC53E24F9B34C1DD814C /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF2031CA40F78D1D995F4D2 /* libicui18n.a */; };
 		15DFB1031B9ECDB985DA1499 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC9B7AF8F28BE680EC5ACF1F /* Quartz.framework */; };
 		1634E337D214CBD26643DFCE /* libskia_opt_sse2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A98174D110547D33F1DACA92 /* libskia_opt_sse2.a */; };
 		1670EE83FDBABFCCD91DC785 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */; };
-		17358326CE943A00B854CF1F /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF1264794D4CAE0F8F43958 /* libicui18n.a */; };
 		17F7409A0C69413C0FA96339 /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27FD540B4CE986BA3AA40CA2 /* MediaToolbox.framework */; };
-		18159F8B992339593BFB011F /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A57C575EF46A61AF3CAA8AA7 /* libicuio.a */; };
 		18F2BFEA44A1DCF908A64573 /* terminology.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 38AA7DCFC6E5361FEE3EE60E /* terminology.sdef */; };
 		1A544D77BE21E10931A961E6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B52D24440498CE69EA1A85 /* Cocoa.framework */; };
 		1A771E4F388ADD9A954D9A31 /* libskia_opt_none.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 369F0CAA6DB00AB55E8BD758 /* libskia_opt_none.a */; };
 		1B4AAB42822F8D7B049CFF3E /* libffi-host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EB746157A71F0853D81D9FF0 /* libffi-host.a */; };
 		1CD1BF9143F7B9E840751E06 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */; };
 		1E6D1E841185619F30460145 /* engine_lcb_modules.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CECBD01ED4A616C388364D26 /* engine_lcb_modules.cpp */; };
-		1E78B37F88423F1A9408F74B /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 644B21C3FAA8F7916EF4523C /* libicuuc.a */; };
 		1EF7665730963EC532FA6AB9 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF2617E3B7DE34289E4F10B1 /* CoreFoundation.framework */; };
 		1F603F4C3BD59E6CA01F87EE /* libScript-host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D50599B99398582AC55222B /* libScript-host.a */; };
 		1FC5C9471E7E5165638EA806 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 562AE13E9F0BE93D0244CB26 /* libpng.a */; };
@@ -150,9 +146,9 @@
 		27F20D4BFA7BFE2D82FF794C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 579691938457283837E7DFEE /* AudioToolbox.framework */; };
 		2875734F5B8F8BA22B564C17 /* Localisation.strings in Resources */ = {isa = PBXBuildFile; fileRef = FF1ECF3BF79519BA821A3EF9 /* Localisation.strings */; };
 		291517253FD3AEBAC1CAB4C2 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 562AE13E9F0BE93D0244CB26 /* libpng.a */; };
+		2AF9FBFFFA6E3435F88B9AA9 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30DBA9DA1D200DDDD99D4892 /* libicuio.a */; };
 		2B2A084FC0E73FE01559D876 /* libpng (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D840AD2BA2E220572DC9C9B /* libpng (host).a */; };
 		2B9C0D7A04343D126B16A8C9 /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 562AE13E9F0BE93D0244CB26 /* libpng.a */; };
-		2CC9A0FE60C7972AB2DC3FB8 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 935CFE5FC6DF2AA46F6B5236 /* libicutu.a */; };
 		2CF5AEA59778F78DA0938829 /* terminology.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 38AA7DCFC6E5361FEE3EE60E /* terminology.sdef */; };
 		2ECF2290AD614B643042C34F /* engine_lcb_modules.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CECBD01ED4A616C388364D26 /* engine_lcb_modules.cpp */; };
 		2FE2560FCA3638AF803F6C7E /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9395DE81FF5B7C6F006FEF9 /* libffi.a */; };
@@ -169,19 +165,23 @@
 		3930CF29D4610185E96B5492 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3A6C181A1AB2B6376AEA190 /* WebKit.framework */; };
 		3AD383EE89AD053CD4D71E83 /* libskia_opt_hsw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFCBC97A1D1B794E5872D6ED /* libskia_opt_hsw.a */; };
 		3B1B7A4BFB070FEA55066F2A /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9395DE81FF5B7C6F006FEF9 /* libffi.a */; };
+		3CC7DEACB140D94D21E1FDE4 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30DBA9DA1D200DDDD99D4892 /* libicuio.a */; };
+		3D9E6A09CCDDD7847A191512 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F491936D472AE302E7924D /* libicutu.a */; };
 		3E21CFBF308EA95B3216069E /* libFoundation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 50836C43A6EBD90CD5CFB73A /* libFoundation.a */; };
 		3E4E448A0436123C7967FA72 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9085221E561C3041C597767 /* Security.framework */; };
 		3E6AAD5CD647A0079F213A02 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C625828BEB5C2F1E09390B8 /* libpcre.a */; };
 		3E74F9181D5CBC639DF82EDE /* stdscript.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D5DA91B5C51EE6E84A5F2682 /* stdscript.a */; };
 		3EAEE10F8A9B1CDDA0A4FAE8 /* libgif.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 930E5D5E7404A2103EAF56CB /* libgif.a */; };
+		3EB043035AFFFCAF1F372565 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7862EBA8C3F6165E618A27A4 /* libicudata.a */; };
 		3FE0584D723DFAC96BD88447 /* dummy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE95FB8405383C1DE5775625 /* dummy.cpp */; };
-		402C487F8F50CE6647C4A70B /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF1264794D4CAE0F8F43958 /* libicui18n.a */; };
-		4134B5312F5B841B4A805A05 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A57C575EF46A61AF3CAA8AA7 /* libicuio.a */; };
+		43E5435D2B9AE63A1CD16353 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF2031CA40F78D1D995F4D2 /* libicui18n.a */; };
 		440403A679861BB1B856397D /* libskia_opt_avx (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10FCB65BBF8EFD204F7BA17 /* libskia_opt_avx (host).a */; };
 		4575B0ADED12D6A081D912B0 /* libcups.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 40CBA8A477415E76D92D18EA /* libcups.dylib */; };
 		4672B269C0C8BD4727C2E0C5 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3A6C181A1AB2B6376AEA190 /* WebKit.framework */; };
+		49713254DBDC67BE1026DFA2 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F491936D472AE302E7924D /* libicutu.a */; };
 		49DACD8673A5B41276E9D2F8 /* HyperXTalk.rsrc in Resources */ = {isa = PBXBuildFile; fileRef = A2FA5F34C349F1903257F9D6 /* HyperXTalk.rsrc */; };
 		4CFDEE3CF8D8B7405D5A8B94 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47D2260307EB3E59175803F3 /* SystemConfiguration.framework */; };
+		4D0BB281E8A17B1806923555 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F491936D472AE302E7924D /* libicutu.a */; };
 		4D7C0CF50848779FA6A54660 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A9922D48175DA0E1D5BBDA /* main.cpp */; };
 		4DCD51FCD468B87705C11FD9 /* HyperXTalk.rsrc in Resources */ = {isa = PBXBuildFile; fileRef = A2FA5F34C349F1903257F9D6 /* HyperXTalk.rsrc */; };
 		4E75B3A627E581DBCCC20CC9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E04E5A11866B3B48AA3D410 /* Foundation.framework */; };
@@ -190,13 +190,13 @@
 		516FA8FB20DCE8B4013CA4EA /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC44BDB13ECEE5596F184C94 /* CoreMedia.framework */; };
 		51B726A04BB68CB36798BB3C /* libopenssl_stubs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7C0E18C00FB578C6C8ED293 /* libopenssl_stubs.a */; };
 		5433544620AC1D31A8A5E059 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9085221E561C3041C597767 /* Security.framework */; };
-		5485C639D7DBF8DE4F836F6A /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */; };
 		54D2CFE187F54B76FDDD9023 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47D2260307EB3E59175803F3 /* SystemConfiguration.framework */; };
 		55633A8EBE9CA186F9648F14 /* libskia_opt_sse3 (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = B49DFA15F1D0E2EEE3DCAC32 /* libskia_opt_sse3 (host).a */; };
 		5603DC2D8E5D41DF613C5696 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8416525A62C91BC008B2DAB1 /* CoreText.framework */; };
 		57324AB42804296CD7894815 /* libskia_opt_none (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF8BD5E63094EB391C3CA1A2 /* libskia_opt_none (host).a */; };
 		58BE66D44BDDE1B361603CDE /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8416525A62C91BC008B2DAB1 /* CoreText.framework */; };
 		58FA9DCE2E7BA73126FD38D3 /* libgif.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 930E5D5E7404A2103EAF56CB /* libgif.a */; };
+		592036CEAB3F1EAE4E14446D /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7862EBA8C3F6165E618A27A4 /* libicudata.a */; };
 		59C2D7837B0F49C05AAD6F8A /* libcustomssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 772998AAEC794B83275EE75F /* libcustomssl.a */; };
 		5A1D5997B7DB87F7556DF422 /* libskia_opt_arm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72C05C8B63AA37C8ED22E2AA /* libskia_opt_arm.a */; };
 		5B1AEE423738FC90F8F34B2D /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EC9B7AF8F28BE680EC5ACF1F /* Quartz.framework */; };
@@ -215,16 +215,16 @@
 		6A42D3683F394B2C5B82EF14 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B6B494B78C5B2FF2D592A28 /* Accelerate.framework */; };
 		6DAD879BB782CA782207BA6F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */; };
 		6DC19E11B00EBCC8EFA1AA12 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 445CF12E072C34F29DBFD95B /* IOKit.framework */; };
+		6DF95A11002408319280A41C /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF2031CA40F78D1D995F4D2 /* libicui18n.a */; };
 		6F3E0B4D5DE928CCC06D6014 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C625828BEB5C2F1E09390B8 /* libpcre.a */; };
 		6FFC41130A36B52AA1CD2767 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D042857F01B945E7A531FC /* Carbon.framework */; };
+		71552E2C83F5EE8DBF218392 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF2031CA40F78D1D995F4D2 /* libicui18n.a */; };
 		719D928A4F1EBD8CA9E12D2D /* libFoundation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 50836C43A6EBD90CD5CFB73A /* libFoundation.a */; };
 		7364F674E40DDB6518A0DFCF /* revpdfprinter.bundle in Copy to $(BUILT_PRODUCTS_DIR)/HyperXTalk.app/Contents/MacOS */ = {isa = PBXBuildFile; fileRef = 97A924D0B053CBDC95C8AA71 /* revpdfprinter.bundle */; };
 		7436AB8735F5B14C36BDC152 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9085221E561C3041C597767 /* Security.framework */; };
 		776FE8F366965DFF81BC6C27 /* libGraphics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E03BC65C8F9488DE90E9823E /* libGraphics.a */; };
 		799B25CFFCFBE7CD3124C8BC /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36DB9478D7E0DC0BF4E385CF /* stacksecurity.cpp */; };
 		79A803A26A58B37F7ADA2231 /* libkernel-installer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21C86298F396EB077EAB58B8 /* libkernel-installer.a */; };
-		79B6E11808E5349B1F1DF051 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 935CFE5FC6DF2AA46F6B5236 /* libicutu.a */; };
-		7AA31C5D385CEA2C7C9E68D9 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF1264794D4CAE0F8F43958 /* libicui18n.a */; };
 		7AA48F443D9F37F4B977FC04 /* libGraphics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E03BC65C8F9488DE90E9823E /* libGraphics.a */; };
 		7ABA369BDD87CBD400CA3C76 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3A6C181A1AB2B6376AEA190 /* WebKit.framework */; };
 		7C1288E42E16A12889C952B6 /* engine_lcb_modules.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CECBD01ED4A616C388364D26 /* engine_lcb_modules.cpp */; };
@@ -234,6 +234,7 @@
 		8441D7EF85F57E7F3B9A501A /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E87CA7845C223C38DF1A7D30 /* libcurl.dylib */; };
 		847ECF78FE15FB1715ED24D5 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A81BB630B5F0CF5E4C5F6036 /* JavaScriptCore.framework */; };
 		84F1834405447D6618488A80 /* libFoundation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 50836C43A6EBD90CD5CFB73A /* libFoundation.a */; };
+		857F6E00406ED442504D1170 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F491936D472AE302E7924D /* libicutu.a */; };
 		869F989B482859462B036DA5 /* libbrowser.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 042B0B4AEE827523B371BD9C /* libbrowser.a */; };
 		87D19999162086D52CEF1D93 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9395DE81FF5B7C6F006FEF9 /* libffi.a */; };
 		87F4115622F0740CD307182D /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA248C0E9843DD2958D03B8A /* libjpeg.a */; };
@@ -245,7 +246,6 @@
 		8B30437705028A3258CE8711 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E87CA7845C223C38DF1A7D30 /* libcurl.dylib */; };
 		8C8FF70FEE37933ED3382434 /* libskia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA9CDA4EA72652D029E05F2 /* libskia.a */; };
 		8CDFA31EA56F2A61E9C1251A /* libskia_opt_sse2 (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = C64DE6D0C2846BF8FA400E5C /* libskia_opt_sse2 (host).a */; };
-		8CEA09019A5A6E874B4EB15C /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 644B21C3FAA8F7916EF4523C /* libicuuc.a */; };
 		8D20E9A26185A71A9C452E98 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E04E5A11866B3B48AA3D410 /* Foundation.framework */; };
 		8D2CF51D2863614A31BB666B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF2617E3B7DE34289E4F10B1 /* CoreFoundation.framework */; };
 		8E6975A152639964670BAE59 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C625828BEB5C2F1E09390B8 /* libpcre.a */; };
@@ -253,21 +253,22 @@
 		90CD64DB6D8FABC4AF7D91C4 /* libskia_opt_sse41.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 280346BD7E86EE38C0D2C9B3 /* libskia_opt_sse41.a */; };
 		90DE5BED0696B8533CCD2D2E /* libkernel-server.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BB776BFD4BEC6B493B9AD8BF /* libkernel-server.a */; };
 		914F7505F2B6409C63300B3C /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9395DE81FF5B7C6F006FEF9 /* libffi.a */; };
+		91DF7A2D0C61D94C8839100C /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30DBA9DA1D200DDDD99D4892 /* libicuio.a */; };
 		93DE77FB4398E573A546AD81 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF2617E3B7DE34289E4F10B1 /* CoreFoundation.framework */; };
 		95BABDDCFCBB2756259C813B /* libkernel-server (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = 92A37F435378C203C6D5A2F0 /* libkernel-server (host).a */; };
 		95C7245ECE477CBCC454AA33 /* libskia_opt_sse2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A98174D110547D33F1DACA92 /* libskia_opt_sse2.a */; };
 		9682AD85DF7893BD94D39E00 /* libkernel.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4858D912F1C4E0CA1293350 /* libkernel.a */; };
 		975C660A395F89D8A024F4B7 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3A6C181A1AB2B6376AEA190 /* WebKit.framework */; };
 		981688890C611FC19476377A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B52D24440498CE69EA1A85 /* Cocoa.framework */; };
-		98FA1E829C4A7FA8277B2A5B /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */; };
 		990A800ECCF3EF93BB5D050D /* engine_lcb_modules.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CECBD01ED4A616C388364D26 /* engine_lcb_modules.cpp */; };
 		9B1BA8BE5C0583D74F7E4EDB /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA248C0E9843DD2958D03B8A /* libjpeg.a */; };
+		9BB8CEE7998FA518077A95F5 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DF2031CA40F78D1D995F4D2 /* libicui18n.a */; };
 		9C700A22C2B0C2B253B4CC4B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2E04E5A11866B3B48AA3D410 /* Foundation.framework */; };
 		9D33A6E95798F4D48F01AA3E /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27FD540B4CE986BA3AA40CA2 /* MediaToolbox.framework */; };
+		9D5428D0A6FAB10AB02462E1 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7862EBA8C3F6165E618A27A4 /* libicudata.a */; };
 		9D9B1554CB46B1A6A5D4934D /* libkernel.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4858D912F1C4E0CA1293350 /* libkernel.a */; };
 		A0BE33F197A15DDDB0E7E4AF /* libskia_opt_avx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EDD9849D7D0D6142C444FD0B /* libskia_opt_avx.a */; };
-		A166DAF53289E5850DBFD91B /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A57C575EF46A61AF3CAA8AA7 /* libicuio.a */; };
-		A27774BD8BFE0C9E3E62E53C /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 644B21C3FAA8F7916EF4523C /* libicuuc.a */; };
+		A4665BBCEEDAD1B4D4EE1BB5 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FFCA982B503572DCA9650E6 /* libicuuc.a */; };
 		A4DF17EF789991E632A5A8AD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 445CF12E072C34F29DBFD95B /* IOKit.framework */; };
 		A518BE4282E4B299C62AEFBB /* libskia_opt_avx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EDD9849D7D0D6142C444FD0B /* libskia_opt_avx.a */; };
 		A5B61949B667614B97FBF2F6 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D042857F01B945E7A531FC /* Carbon.framework */; };
@@ -276,25 +277,22 @@
 		A80DFC64616438D1D37EB5FE /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 445CF12E072C34F29DBFD95B /* IOKit.framework */; };
 		AB79D22BE9212867A636B8A5 /* libskia_opt_hsw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFCBC97A1D1B794E5872D6ED /* libskia_opt_hsw.a */; };
 		AE14FE0B74D8D055DE0372DC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C017A5488895848B14CA4F1 /* AppKit.framework */; };
-		AE6EB20DCD8B5A880E19FE8E /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 935CFE5FC6DF2AA46F6B5236 /* libicutu.a */; };
 		AF2433D5BC588DC2B9EAF094 /* HyperXTalkDoc.icns in Resources */ = {isa = PBXBuildFile; fileRef = E03DF4A54F17DE97AB0EE7DD /* HyperXTalkDoc.icns */; };
 		B1A63334AE26ED9284B3B5F5 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CA036E985B1015AF9FE9356 /* ApplicationServices.framework */; };
 		B1FDA62BF2315BDB3254D0F8 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51785C2E9DF34B3C5FC7902B /* libffi.a */; };
-		B231944CAC5B061E15185D4D /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 935CFE5FC6DF2AA46F6B5236 /* libicutu.a */; };
 		B34574FFCB739392091FEA0F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA248C0E9843DD2958D03B8A /* libjpeg.a */; };
 		B3F441BCF2ED85B5AB456614 /* libskia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA9CDA4EA72652D029E05F2 /* libskia.a */; };
-		B5C59CE41076FE00D6B0FA05 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */; };
 		B6A4543371C8F0A9434E62D2 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF2617E3B7DE34289E4F10B1 /* CoreFoundation.framework */; };
 		B8F518AF457B58DA6CC72B05 /* libskia_opt_arm (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = 726FE295B966854553AB2045 /* libskia_opt_arm (host).a */; };
 		BA04721622C4A22A1339DC34 /* libskia_opt_sse3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B825E37096F001277CDC357 /* libskia_opt_sse3.a */; };
 		BA111A60BF166F8B5D6E15AB /* libskia_opt_sse42.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 267642A922931A516407AC21 /* libskia_opt_sse42.a */; };
-		BA178C2B86A573DA5E01495F /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 644B21C3FAA8F7916EF4523C /* libicuuc.a */; };
 		BC6050983FBF889732862256 /* libskia_opt_none.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 369F0CAA6DB00AB55E8BD758 /* libskia_opt_none.a */; };
 		BE0FDBAF181950581A833063 /* libsecurity-community.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43AF16C8E0B365F6DE5C1CD7 /* libsecurity-community.a */; };
 		BEB103C577DB050B1E254402 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */; };
 		BF0A8492B7F33BBEC818E13B /* libz-host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 40EE1BED099A401197723F6B /* libz-host.a */; };
 		BF1AFF1A364F48C68786D1A5 /* libskia_opt_sse41.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 280346BD7E86EE38C0D2C9B3 /* libskia_opt_sse41.a */; };
 		C05AD208D3694D43F647387C /* libcustomssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 772998AAEC794B83275EE75F /* libcustomssl.a */; };
+		C174FA428BBB29140B9DC26D /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FFCA982B503572DCA9650E6 /* libicuuc.a */; };
 		C208B992E63E410EF28714EA /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1D042857F01B945E7A531FC /* Carbon.framework */; };
 		C2A093298C95B145CAB40B9D /* libskia_opt_sse2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A98174D110547D33F1DACA92 /* libskia_opt_sse2.a */; };
 		C3725C6E6D5343BB53B2BFD7 /* terminology.sdef in Resources */ = {isa = PBXBuildFile; fileRef = 38AA7DCFC6E5361FEE3EE60E /* terminology.sdef */; };
@@ -302,7 +300,8 @@
 		C47418537A8F04FC3FD40E22 /* libskia.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6CA9CDA4EA72652D029E05F2 /* libskia.a */; };
 		C4FC86ADFA1982A9E617A366 /* libgif (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD0A69F5F454AB9293A8F305 /* libgif (host).a */; };
 		CAAA90C35C96FE8224A603C4 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8416525A62C91BC008B2DAB1 /* CoreText.framework */; };
-		CD77D5B1B8FAF1517A9DAD01 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A57C575EF46A61AF3CAA8AA7 /* libicuio.a */; };
+		CAECA40787D51E0EDC47C628 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7862EBA8C3F6165E618A27A4 /* libicudata.a */; };
+		CCDC78A99F8A9A9AC4A88FEF /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FFCA982B503572DCA9650E6 /* libicuuc.a */; };
 		CDD385042B9D10815E7DDF0B /* libjpeg (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = A6EE287818D7FE4D9382C1FA /* libjpeg (host).a */; };
 		D0C0D1B48DA3F764ED71C87B /* dummy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE95FB8405383C1DE5775625 /* dummy.cpp */; };
 		D2175DD5F55E1CCEA45D3732 /* Installer.icns in Resources */ = {isa = PBXBuildFile; fileRef = FD53611CBA54B6A3B4687F76 /* Installer.icns */; };
@@ -315,7 +314,6 @@
 		D821BD6F62E1E804D66106A3 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51785C2E9DF34B3C5FC7902B /* libffi.a */; };
 		D913F2AA7CB08D84A5C8F5B2 /* libkernel.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4858D912F1C4E0CA1293350 /* libkernel.a */; };
 		D98A451435092684FE32C4D7 /* libGraphics (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96021B41BFD0C6028795E025 /* libGraphics (host).a */; };
-		D9A23DE245AF72E084C8AC02 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A57C575EF46A61AF3CAA8AA7 /* libicuio.a */; };
 		D9C07E32652A626D545C7B62 /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36DB9478D7E0DC0BF4E385CF /* stacksecurity.cpp */; };
 		D9C19C78515E5052C41A7417 /* libskia_opt_sse42.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 267642A922931A516407AC21 /* libskia_opt_sse42.a */; };
 		D9E0C5317F003F4431205EA0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */; };
@@ -333,13 +331,14 @@
 		E578795CAA20A57A282F11A5 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 579691938457283837E7DFEE /* AudioToolbox.framework */; };
 		E63B20C1B36F953C9C98C916 /* libGraphics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E03BC65C8F9488DE90E9823E /* libGraphics.a */; };
 		E64CF5C650D3F0BCDBABFE37 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF2617E3B7DE34289E4F10B1 /* CoreFoundation.framework */; };
-		E67D57C4D41B27C87509F7C7 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DF1264794D4CAE0F8F43958 /* libicui18n.a */; };
 		E68B639781DF71724F541A37 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C017A5488895848B14CA4F1 /* AppKit.framework */; };
 		E762E2574E0D0332754032C8 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8416525A62C91BC008B2DAB1 /* CoreText.framework */; };
 		E87B321C47800CB5940DE89F /* libskia_opt_none.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 369F0CAA6DB00AB55E8BD758 /* libskia_opt_none.a */; };
 		E8D545E56B1F63A2B0F2DBF1 /* libbrowser (host).a in Frameworks */ = {isa = PBXBuildFile; fileRef = C6D886B29AED0BEC070D5508 /* libbrowser (host).a */; };
 		E9326EF98A07829924B3F2BB /* libcustomcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6370467D810B0A4681C9F81D /* libcustomcrypto.a */; };
+		EB077A651D9D4EED77D4384B /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7862EBA8C3F6165E618A27A4 /* libicudata.a */; };
 		EB35CDB4E9C684C93BAD8C93 /* libskia_opt_hsw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFCBC97A1D1B794E5872D6ED /* libskia_opt_hsw.a */; };
+		EBB7CBA37F3E5FC13EA3E3C9 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FFCA982B503572DCA9650E6 /* libicuuc.a */; };
 		EBDD9EDD30F7D0591D0DDF52 /* HyperXTalk.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4312AD1B32862CCB0894D29E /* HyperXTalk.icns */; };
 		ECBB98336CD12CA53203D736 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B52D24440498CE69EA1A85 /* Cocoa.framework */; };
 		ECBDE559FEFC81745265B57A /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F9F99AE5FE42CEBB601B6194 /* libz.a */; };
@@ -347,15 +346,16 @@
 		EE8BFEBFFC62224A320BB0FF /* libskia_opt_hsw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFCBC97A1D1B794E5872D6ED /* libskia_opt_hsw.a */; };
 		EF5A2B48F49A86E121C4B35F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A9922D48175DA0E1D5BBDA /* main.cpp */; };
 		F16AF1B5C931492189408AD8 /* libskia_opt_sse42.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 267642A922931A516407AC21 /* libskia_opt_sse42.a */; };
+		F1F207F1365E939A8A460A10 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FFCA982B503572DCA9650E6 /* libicuuc.a */; };
 		F351EC31477A4F41CAA3C2B1 /* libz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F9F99AE5FE42CEBB601B6194 /* libz.a */; };
 		F4B4787A032FA3A143B8835E /* libskia_opt_sse41.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 280346BD7E86EE38C0D2C9B3 /* libskia_opt_sse41.a */; };
 		F573EFD7A70AD3B2714A0840 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A81BB630B5F0CF5E4C5F6036 /* JavaScriptCore.framework */; };
-		F59E360452FDB992BB384DAD /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 644B21C3FAA8F7916EF4523C /* libicuuc.a */; };
 		F6D0A4DBA35D4C985D362021 /* stdscript-host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BD922313FB6480CFE98E68CC /* stdscript-host.a */; };
 		F6DF4CCB3AE38F11F8071157 /* libkernel-standalone.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9C46C7359927E6C0AE1CF943 /* libkernel-standalone.a */; };
 		F78A54F297962A8D33B75601 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51785C2E9DF34B3C5FC7902B /* libffi.a */; };
 		F8EDA882757058924078EC36 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CA036E985B1015AF9FE9356 /* ApplicationServices.framework */; };
 		F8F107272D4D8CA0D52A3A76 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA248C0E9843DD2958D03B8A /* libjpeg.a */; };
+		F9E3DC67A0D3DE7E37C2E2F5 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30DBA9DA1D200DDDD99D4892 /* libicuio.a */; };
 		FCB94D5149F548E9EFE0B92E /* Localisation.strings in Resources */ = {isa = PBXBuildFile; fileRef = FF1ECF3BF79519BA821A3EF9 /* Localisation.strings */; };
 		FD2DF18D10CFD577643AB24B /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9395DE81FF5B7C6F006FEF9 /* libffi.a */; };
 		FD65C5379457FD3D490764DE /* libskia_opt_sse3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B825E37096F001277CDC357 /* libskia_opt_sse3.a */; };
@@ -2352,6 +2352,7 @@
 		2C89B8F8834942C113DE82DE /* libfoundation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libfoundation.xcodeproj; path = "../build-mac/livecode/libfoundation/libfoundation.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		2E04E5A11866B3B48AA3D410 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		2F6FBDB336EEC8E54C873950 /* engine-sources.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; path = "engine-sources.gypi"; sourceTree = "<group>"; };
+		30DBA9DA1D200DDDD99D4892 /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/libicuio.a; sourceTree = "<group>"; };
 		3301D0995B1A98FDE394325D /* automaticactivationbackgroundgroupbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = automaticactivationbackgroundgroupbehavior.livecodescript; sourceTree = "<group>"; };
 		330951177D6803D0F2274DA7 /* libz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libz.xcodeproj; path = "../build-mac/livecode/thirdparty/libz/libz.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		3528FA96ADC619173C941C14 /* win32.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = win32.gypi; path = ../config/win32.gypi; sourceTree = "<group>"; };
@@ -2367,20 +2368,20 @@
 		4312AD1B32862CCB0894D29E /* HyperXTalk.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = HyperXTalk.icns; sourceTree = "<group>"; };
 		445CF12E072C34F29DBFD95B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		47D2260307EB3E59175803F3 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		49F491936D472AE302E7924D /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/libicutu.a; sourceTree = "<group>"; };
 		4B5DF9A0F127CA174F41714B /* HyperXTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HyperXTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BF8324C0E47802A0EA4686F /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localisation.strings; sourceTree = "<group>"; };
 		4FF1431E6D08DB3EC8A428F9 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/Localisation.strings; sourceTree = "<group>"; };
+		4FFCA982B503572DCA9650E6 /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/libicuuc.a; sourceTree = "<group>"; };
 		525F9077B840DA1B57A2B402 /* no */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = no; path = no.lproj/Localisation.strings; sourceTree = "<group>"; };
 		53D5B71814DE06A692C214D0 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localisation.strings; sourceTree = "<group>"; };
 		579691938457283837E7DFEE /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		593DF33441AD18CA8C69A67B /* app-bundle-template.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; path = "app-bundle-template.gypi"; sourceTree = "<group>"; };
 		5A6AF4A0D2B8BBB33F87A49C /* yacc.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = yacc.gypi; path = ../config/yacc.gypi; sourceTree = "<group>"; };
 		5ADADA5638ECDF332D860ECE /* Installer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Installer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		5DF1264794D4CAE0F8F43958 /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/x86_64/libicui18n.a; sourceTree = "<group>"; };
-		6370467D810B0A4681C9F81D /* libcustomcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomcrypto.a; path = ../prebuilt/lib/mac/x86_64/libcustomcrypto.a; sourceTree = "<group>"; };
+		6370467D810B0A4681C9F81D /* libcustomcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomcrypto.a; path = ../prebuilt/lib/mac/libcustomcrypto.a; sourceTree = "<group>"; };
 		63837DE04702BC9C0F27C7EB /* emscripten-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "emscripten-settings.gypi"; path = "../config/emscripten-settings.gypi"; sourceTree = "<group>"; };
 		63943116AFF2CEEF1F507F51 /* unlicensedbkgndbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = unlicensedbkgndbehavior.livecodescript; sourceTree = "<group>"; };
-		644B21C3FAA8F7916EF4523C /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/x86_64/libicuuc.a; sourceTree = "<group>"; };
 		661DC5FE02163EB0C6DE4292 /* standalone.rc */ = {isa = PBXFileReference; lastKnownFileType = text; path = standalone.rc; sourceTree = "<group>"; };
 		692DCF408354E7949A9F25AD /* kernel-standalone.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "kernel-standalone.xcodeproj"; path = "../build-mac/livecode/engine/kernel-standalone.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		6C25A22B6F8446445112E304 /* kernel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = kernel.xcodeproj; path = "../build-mac/livecode/engine/kernel.xcodeproj"; sourceTree = SOURCE_ROOT; };
@@ -2390,9 +2391,10 @@
 		6FF5F84EC673493AF752ED34 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		730FE298B705F2E418D73504 /* revliburl.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = revliburl.livecodescript; sourceTree = "<group>"; };
 		767DFB8435A651483D953EDE /* server-community-host */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "server-community-host"; sourceTree = BUILT_PRODUCTS_DIR; };
-		772998AAEC794B83275EE75F /* libcustomssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomssl.a; path = ../prebuilt/lib/mac/x86_64/libcustomssl.a; sourceTree = "<group>"; };
+		772998AAEC794B83275EE75F /* libcustomssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomssl.a; path = ../prebuilt/lib/mac/libcustomssl.a; sourceTree = "<group>"; };
 		77CE41DF00E735EB6A5FC21D /* revpdfprinter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = revpdfprinter.xcodeproj; path = "../build-mac/livecode/revpdfprinter/revpdfprinter.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		7832BFE0045DADF1B7CDB3ED /* server-community */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "server-community"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7862EBA8C3F6165E618A27A4 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/libicudata.a; sourceTree = "<group>"; };
 		79C032C0621DDEFD536FF0BC /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localisation.strings; sourceTree = "<group>"; };
 		7B79E4BBE392157BA766884D /* getstartedgetstartedstatusgroupbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = getstartedgetstartedstatusgroupbehavior.livecodescript; sourceTree = "<group>"; };
 		7B91141E44658F93AA5D44A8 /* perl.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = perl.gypi; path = ../config/perl.gypi; sourceTree = "<group>"; };
@@ -2411,9 +2413,9 @@
 		86083363047B5D02820B131A /* automaticactivationcardbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = automaticactivationcardbehavior.livecodescript; sourceTree = "<group>"; };
 		8948B9C11E91C17E2E2F93A1 /* unlicensedactivatefieldbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = unlicensedactivatefieldbehavior.livecodescript; sourceTree = "<group>"; };
 		8B6B494B78C5B2FF2D592A28 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		8DF2031CA40F78D1D995F4D2 /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/libicui18n.a; sourceTree = "<group>"; };
 		91722355EB7CEFA566C63414 /* android.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = android.gypi; path = ../config/android.gypi; sourceTree = "<group>"; };
 		930A65BCE3B5771543CBDFED /* libicu.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libicu.xcodeproj; path = "../build-mac/livecode/prebuilt/libicu.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		935CFE5FC6DF2AA46F6B5236 /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/x86_64/libicutu.a; sourceTree = "<group>"; };
 		93AC112AC110C437E3B7D062 /* kernel-server.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "kernel-server.xcodeproj"; path = "../build-mac/livecode/engine/kernel-server.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		944CD06A97717BFBAAAF34CE /* version */ = {isa = PBXFileReference; lastKnownFileType = text; path = version; sourceTree = "<group>"; };
 		94A9922D48175DA0E1D5BBDA /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -2428,7 +2430,6 @@
 		A1D042857F01B945E7A531FC /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		A2FA5F34C349F1903257F9D6 /* HyperXTalk.rsrc */ = {isa = PBXFileReference; lastKnownFileType = text; path = HyperXTalk.rsrc; sourceTree = "<group>"; };
 		A49B9ECB46466C0B70D8651A /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localisation.strings; sourceTree = "<group>"; };
-		A57C575EF46A61AF3CAA8AA7 /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/x86_64/libicuio.a; sourceTree = "<group>"; };
 		A81BB630B5F0CF5E4C5F6036 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		A9408BDA174C61D75E8865F3 /* development.rc */ = {isa = PBXFileReference; lastKnownFileType = text; path = development.rc; sourceTree = "<group>"; };
 		AA1B055F82BDF1982A324E36 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localisation.strings; sourceTree = "<group>"; };
@@ -2450,7 +2451,6 @@
 		CE499BA6C935A9A96A06C6F9 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localisation.strings; sourceTree = "<group>"; };
 		CECBD01ED4A616C388364D26 /* engine_lcb_modules.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = engine_lcb_modules.cpp; sourceTree = "<group>"; };
 		CF3B30F0E674EBEF181E3DC5 /* unlicensedbuynowbuttonbehavior.livecodescript */ = {isa = PBXFileReference; lastKnownFileType = text; path = unlicensedbuynowbuttonbehavior.livecodescript; sourceTree = "<group>"; };
-		D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/x86_64/libicudata.a; sourceTree = "<group>"; };
 		D2B52D24440498CE69EA1A85 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D2EF524EEAACD9994850B8A5 /* installer.rc */ = {isa = PBXFileReference; lastKnownFileType = text; path = installer.rc; sourceTree = "<group>"; };
 		D4846353400FB8515E23F56E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Italian; path = Italian.lproj/Localisation.strings; sourceTree = "<group>"; };
@@ -2484,9 +2484,7 @@
 				BE0FDBAF181950581A833063 /* libsecurity-community.a in Frameworks */,
 				9682AD85DF7893BD94D39E00 /* libkernel.a in Frameworks */,
 				3E21CFBF308EA95B3216069E /* libFoundation.a in Frameworks */,
-				F351EC31477A4F41CAA3C2B1 /* libz.a in Frameworks */,
-				B1FDA62BF2315BDB3254D0F8 /* libffi.a in Frameworks */,
-				C41366932C2BE278141618BC /* libGraphics.a in Frameworks */,
+				F351EC31477A4F41CAA3C2B1 /* libz.a in Frameworks */,				C41366932C2BE278141618BC /* libGraphics.a in Frameworks */,
 				58FA9DCE2E7BA73126FD38D3 /* libgif.a in Frameworks */,
 				6910D786D5435DEA8CAA17EB /* libpng.a in Frameworks */,
 				F8F107272D4D8CA0D52A3A76 /* libjpeg.a in Frameworks */,
@@ -2520,11 +2518,11 @@
 				D9E0C5317F003F4431205EA0 /* CoreGraphics.framework in Frameworks */,
 				EE656CB83921587FA25E756B /* CoreText.framework in Frameworks */,
 				FE5C590A48559CFCA5DA0C1B /* Foundation.framework in Frameworks */,
-				E67D57C4D41B27C87509F7C7 /* libicui18n.a in Frameworks */,
-				CD77D5B1B8FAF1517A9DAD01 /* libicuio.a in Frameworks */,
-				AE6EB20DCD8B5A880E19FE8E /* libicutu.a in Frameworks */,
-				1E78B37F88423F1A9408F74B /* libicuuc.a in Frameworks */,
-				131D38E4ABF47FD1064A3729 /* libicudata.a in Frameworks */,
+				43E5435D2B9AE63A1CD16353 /* libicui18n.a in Frameworks */,
+				03A3C2B3AEEB998C83E5D129 /* libicuio.a in Frameworks */,
+				857F6E00406ED442504D1170 /* libicutu.a in Frameworks */,
+				C174FA428BBB29140B9DC26D /* libicuuc.a in Frameworks */,
+				EB077A651D9D4EED77D4384B /* libicudata.a in Frameworks */,
 				914F7505F2B6409C63300B3C /* libffi.a in Frameworks */,
 				230A172A89AEEE3823FAD36B /* WebKit.framework in Frameworks */,
 				3362FC9C0A6E0F22C41AA868 /* JavaScriptCore.framework in Frameworks */,
@@ -2568,11 +2566,11 @@
 				58BE66D44BDDE1B361603CDE /* CoreText.framework in Frameworks */,
 				8D2CF51D2863614A31BB666B /* CoreFoundation.framework in Frameworks */,
 				35B3B093A3E59EF8134DF748 /* Foundation.framework in Frameworks */,
-				7AA31C5D385CEA2C7C9E68D9 /* libicui18n.a in Frameworks */,
-				4134B5312F5B841B4A805A05 /* libicuio.a in Frameworks */,
-				02AA4A03AF41AFC090BEF775 /* libicutu.a in Frameworks */,
-				8CEA09019A5A6E874B4EB15C /* libicuuc.a in Frameworks */,
-				98FA1E829C4A7FA8277B2A5B /* libicudata.a in Frameworks */,
+				9BB8CEE7998FA518077A95F5 /* libicui18n.a in Frameworks */,
+				3CC7DEACB140D94D21E1FDE4 /* libicuio.a in Frameworks */,
+				3D9E6A09CCDDD7847A191512 /* libicutu.a in Frameworks */,
+				A4665BBCEEDAD1B4D4EE1BB5 /* libicuuc.a in Frameworks */,
+				592036CEAB3F1EAE4E14446D /* libicudata.a in Frameworks */,
 				2FE2560FCA3638AF803F6C7E /* libffi.a in Frameworks */,
 				8B30437705028A3258CE8711 /* libcurl.dylib in Frameworks */,
 				E9326EF98A07829924B3F2BB /* libcustomcrypto.a in Frameworks */,
@@ -2589,9 +2587,7 @@
 				90DE5BED0696B8533CCD2D2E /* libkernel-server.a in Frameworks */,
 				84F1834405447D6618488A80 /* libFoundation.a in Frameworks */,
 				E63B20C1B36F953C9C98C916 /* libGraphics.a in Frameworks */,
-				ECBDE559FEFC81745265B57A /* libz.a in Frameworks */,
-				114FF95221FE4B567682EC17 /* libffi.a in Frameworks */,
-				30AFCACC997EFF39F020FAF6 /* libgif.a in Frameworks */,
+				ECBDE559FEFC81745265B57A /* libz.a in Frameworks */,				30AFCACC997EFF39F020FAF6 /* libgif.a in Frameworks */,
 				291517253FD3AEBAC1CAB4C2 /* libpng.a in Frameworks */,
 				B34574FFCB739392091FEA0F /* libjpeg.a in Frameworks */,
 				DE01E314C9DA38EE7F0F9297 /* libskia.a in Frameworks */,
@@ -2619,11 +2615,11 @@
 				5603DC2D8E5D41DF613C5696 /* CoreText.framework in Frameworks */,
 				B6A4543371C8F0A9434E62D2 /* CoreFoundation.framework in Frameworks */,
 				9C700A22C2B0C2B253B4CC4B /* Foundation.framework in Frameworks */,
-				402C487F8F50CE6647C4A70B /* libicui18n.a in Frameworks */,
-				18159F8B992339593BFB011F /* libicuio.a in Frameworks */,
-				B231944CAC5B061E15185D4D /* libicutu.a in Frameworks */,
-				A27774BD8BFE0C9E3E62E53C /* libicuuc.a in Frameworks */,
-				141201E92A9BFE8453560CC2 /* libicudata.a in Frameworks */,
+				6DF95A11002408319280A41C /* libicui18n.a in Frameworks */,
+				91DF7A2D0C61D94C8839100C /* libicuio.a in Frameworks */,
+				49713254DBDC67BE1026DFA2 /* libicutu.a in Frameworks */,
+				EBB7CBA37F3E5FC13EA3E3C9 /* libicuuc.a in Frameworks */,
+				3EB043035AFFFCAF1F372565 /* libicudata.a in Frameworks */,
 				FD2DF18D10CFD577643AB24B /* libffi.a in Frameworks */,
 				8441D7EF85F57E7F3B9A501A /* libcurl.dylib in Frameworks */,
 				102252BD358915942F4EDD7A /* libcustomcrypto.a in Frameworks */,
@@ -2641,9 +2637,7 @@
 				DCFF28413CB0634B58F5FBE9 /* libsecurity-community.a in Frameworks */,
 				9D9B1554CB46B1A6A5D4934D /* libkernel.a in Frameworks */,
 				719D928A4F1EBD8CA9E12D2D /* libFoundation.a in Frameworks */,
-				DA83D7A354BE791CF71B12BC /* libz.a in Frameworks */,
-				F78A54F297962A8D33B75601 /* libffi.a in Frameworks */,
-				776FE8F366965DFF81BC6C27 /* libGraphics.a in Frameworks */,
+				DA83D7A354BE791CF71B12BC /* libz.a in Frameworks */,				776FE8F366965DFF81BC6C27 /* libGraphics.a in Frameworks */,
 				D4D4DBC7ECC46BFAFC82487B /* libgif.a in Frameworks */,
 				1FC5C9471E7E5165638EA806 /* libpng.a in Frameworks */,
 				87F4115622F0740CD307182D /* libjpeg.a in Frameworks */,
@@ -2677,11 +2671,11 @@
 				1670EE83FDBABFCCD91DC785 /* CoreGraphics.framework in Frameworks */,
 				E762E2574E0D0332754032C8 /* CoreText.framework in Frameworks */,
 				4E75B3A627E581DBCCC20CC9 /* Foundation.framework in Frameworks */,
-				08817AA576869826BF90BE28 /* libicui18n.a in Frameworks */,
-				A166DAF53289E5850DBFD91B /* libicuio.a in Frameworks */,
-				2CC9A0FE60C7972AB2DC3FB8 /* libicutu.a in Frameworks */,
-				F59E360452FDB992BB384DAD /* libicuuc.a in Frameworks */,
-				B5C59CE41076FE00D6B0FA05 /* libicudata.a in Frameworks */,
+				1527BC53E24F9B34C1DD814C /* libicui18n.a in Frameworks */,
+				2AF9FBFFFA6E3435F88B9AA9 /* libicuio.a in Frameworks */,
+				050095CF5C9E4EFF0A85B97D /* libicutu.a in Frameworks */,
+				CCDC78A99F8A9A9AC4A88FEF /* libicuuc.a in Frameworks */,
+				9D5428D0A6FAB10AB02462E1 /* libicudata.a in Frameworks */,
 				87D19999162086D52CEF1D93 /* libffi.a in Frameworks */,
 				975C660A395F89D8A024F4B7 /* WebKit.framework in Frameworks */,
 				649947B0197F3DB186CC66C6 /* JavaScriptCore.framework in Frameworks */,
@@ -2696,9 +2690,7 @@
 				8821BE8C8C71D13DDE9FE85D /* libsecurity-community.a in Frameworks */,
 				D913F2AA7CB08D84A5C8F5B2 /* libkernel.a in Frameworks */,
 				095D60104DD27C10A447030F /* libFoundation.a in Frameworks */,
-				5B4E0C16D16AF2FF5F1FDEBA /* libz.a in Frameworks */,
-				D821BD6F62E1E804D66106A3 /* libffi.a in Frameworks */,
-				7AA48F443D9F37F4B977FC04 /* libGraphics.a in Frameworks */,
+				5B4E0C16D16AF2FF5F1FDEBA /* libz.a in Frameworks */,				7AA48F443D9F37F4B977FC04 /* libGraphics.a in Frameworks */,
 				3EAEE10F8A9B1CDDA0A4FAE8 /* libgif.a in Frameworks */,
 				2B9C0D7A04343D126B16A8C9 /* libpng.a in Frameworks */,
 				9B1BA8BE5C0583D74F7E4EDB /* libjpeg.a in Frameworks */,
@@ -2732,11 +2724,11 @@
 				1CD1BF9143F7B9E840751E06 /* CoreGraphics.framework in Frameworks */,
 				CAAA90C35C96FE8224A603C4 /* CoreText.framework in Frameworks */,
 				8D20E9A26185A71A9C452E98 /* Foundation.framework in Frameworks */,
-				17358326CE943A00B854CF1F /* libicui18n.a in Frameworks */,
-				D9A23DE245AF72E084C8AC02 /* libicuio.a in Frameworks */,
-				79B6E11808E5349B1F1DF051 /* libicutu.a in Frameworks */,
-				BA178C2B86A573DA5E01495F /* libicuuc.a in Frameworks */,
-				5485C639D7DBF8DE4F836F6A /* libicudata.a in Frameworks */,
+				71552E2C83F5EE8DBF218392 /* libicui18n.a in Frameworks */,
+				F9E3DC67A0D3DE7E37C2E2F5 /* libicuio.a in Frameworks */,
+				4D0BB281E8A17B1806923555 /* libicutu.a in Frameworks */,
+				F1F207F1365E939A8A460A10 /* libicuuc.a in Frameworks */,
+				CAECA40787D51E0EDC47C628 /* libicudata.a in Frameworks */,
 				3B1B7A4BFB070FEA55066F2A /* libffi.a in Frameworks */,
 				4672B269C0C8BD4727C2E0C5 /* WebKit.framework in Frameworks */,
 				FF50578B3083704C65CCF3EC /* JavaScriptCore.framework in Frameworks */,
@@ -2895,11 +2887,11 @@
 				6370467D810B0A4681C9F81D /* libcustomcrypto.a */,
 				772998AAEC794B83275EE75F /* libcustomssl.a */,
 				C9395DE81FF5B7C6F006FEF9 /* libffi.a */,
-				D1D1FF46699DBF8EDFE0F9A9 /* libicudata.a */,
-				5DF1264794D4CAE0F8F43958 /* libicui18n.a */,
-				A57C575EF46A61AF3CAA8AA7 /* libicuio.a */,
-				935CFE5FC6DF2AA46F6B5236 /* libicutu.a */,
-				644B21C3FAA8F7916EF4523C /* libicuuc.a */,
+				7862EBA8C3F6165E618A27A4 /* libicudata.a */,
+				8DF2031CA40F78D1D995F4D2 /* libicui18n.a */,
+				30DBA9DA1D200DDDD99D4892 /* libicuio.a */,
+				49F491936D472AE302E7924D /* libicutu.a */,
+				4FFCA982B503572DCA9650E6 /* libicuuc.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -3149,8 +3141,8 @@
 				1B7FC9E4013C1046793089EA /* libgraphics.xcodeproj */,
 				930A65BCE3B5771543CBDFED /* libicu.xcodeproj */,
 				1E7BC92CE69E9C5341748152 /* libjpeg.xcodeproj */,
-				D6CF378F685264511FC9E299 /* libopenssl.xcodeproj */,
 				C1C77A0A16F9A50C5F7A1E16 /* libopenssl.xcodeproj */,
+				D6CF378F685264511FC9E299 /* libopenssl.xcodeproj */,
 				BF324AD348FB35189AF9676B /* libpcre.xcodeproj */,
 				385ABB2F42787A1FFE8A5B7D /* libpng.xcodeproj */,
 				23F80ABCADF3351FC5CC838B /* libscript.xcodeproj */,
@@ -3611,12 +3603,12 @@
 					ProjectRef = 1E7BC92CE69E9C5341748152 /* libjpeg.xcodeproj */;
 				},
 				{
-					ProductGroup = 6001E0A328AE9C419C0D2A87 /* Products */;
-					ProjectRef = D6CF378F685264511FC9E299 /* libopenssl.xcodeproj */;
-				},
-				{
 					ProductGroup = E4D9B45E14EC69B1542AF05C /* Products */;
 					ProjectRef = C1C77A0A16F9A50C5F7A1E16 /* libopenssl.xcodeproj */;
+				},
+				{
+					ProductGroup = 6001E0A328AE9C419C0D2A87 /* Products */;
+					ProjectRef = D6CF378F685264511FC9E299 /* libopenssl.xcodeproj */;
 				},
 				{
 					ProductGroup = 53D8BF44E430E02708E592DC /* Products */;
@@ -5603,7 +5595,6 @@
 				INFOPLIST_FILE = "rsrc/Standalone-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -5885,7 +5876,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -5980,7 +5971,6 @@
 				INFOPLIST_FILE = "rsrc/Installer-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6164,7 +6154,6 @@
 				INFOPLIST_FILE = "rsrc/Standalone-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6262,7 +6251,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6359,7 +6348,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6573,7 +6562,6 @@
 				INFOPLIST_FILE = "rsrc/Installer-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6672,7 +6660,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -6767,7 +6755,6 @@
 				INFOPLIST_FILE = "rsrc/Standalone-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -7135,7 +7122,6 @@
 				INFOPLIST_FILE = "rsrc/HyperXTalk-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -7535,7 +7521,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -7717,7 +7703,6 @@
 				INFOPLIST_FILE = "rsrc/HyperXTalk-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -7915,7 +7900,6 @@
 				INFOPLIST_FILE = "rsrc/HyperXTalk-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -8011,7 +7995,6 @@
 				INFOPLIST_FILE = "rsrc/Installer-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -8229,7 +8212,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
+					../prebuilt/lib/mac,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (

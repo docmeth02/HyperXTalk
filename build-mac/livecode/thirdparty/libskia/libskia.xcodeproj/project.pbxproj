@@ -3527,6 +3527,7 @@
 			buildPhases = (
 				3F9636B6B32055B4D74B02BC /* Sources */,
 				4E4885F7FD143C3695CB26CD /* Frameworks */,
+				1BC703BE421B1D4E928830CF /* Postbuild "Install arm64 prebuilt libskia_opt_arm" */,
 			);
 			buildRules = (
 			);
@@ -3639,6 +3640,7 @@
 			buildPhases = (
 				9918C3C54F457A81DEEC8BBD /* Sources */,
 				D04EE6ECC94E4B02441E5BE7 /* Frameworks */,
+				13095D34B97EA646C01A543E /* Postbuild "Install arm64 prebuilt libskia_opt_arm" */,
 			);
 			buildRules = (
 			);
@@ -3751,6 +3753,41 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		13095D34B97EA646C01A543E /* Postbuild "Install arm64 prebuilt libskia_opt_arm" */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Postbuild \"Install arm64 prebuilt libskia_opt_arm\"";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "exec sh \"${SRCROOT}/../../prebuilt/scripts/install-libskia-opt-arm-arm64.sh\"\nexit 1\n";
+			showEnvVarsInLog = 0;
+		};
+		1BC703BE421B1D4E928830CF /* Postbuild "Install arm64 prebuilt libskia_opt_arm" */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Postbuild \"Install arm64 prebuilt libskia_opt_arm\"";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "exec sh \"${SRCROOT}/../../prebuilt/scripts/install-libskia-opt-arm-arm64.sh\"\nexit 1\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		05A9E7F7FEFD197A2F15A4CA /* Sources */ = {

@@ -12,15 +12,8 @@
 
 #include "mysql/components/services/bits/my_io_bits.h"
 
-/**
-  Return type for the non-blocking MySQL client API functions
-  (mysql_real_connect_nonblocking, mysql_real_query_nonblocking, etc.)
-*/
-enum net_async_status {
-  NET_ASYNC_COMPLETE = 0,       /**< Operation finished successfully */
-  NET_ASYNC_NOT_READY,          /**< Still in progress — call again */
-  NET_ASYNC_ERROR,              /**< Operation failed */
-  NET_ASYNC_COMPLETE_NO_MORE_RESULTS /**< Complete; no more result sets */
-};
+/* net_async_status is defined in mysql/plugin_auth_common.h, which is
+   always included downstream via mysql/client_plugin.h → mysql.h.
+   Do not define it here to avoid redefinition errors. */
 
 #endif /* MY_IO_H */

@@ -95,11 +95,14 @@ file "${OUT_LIB}"
 echo "Symbols:"
 nm -g "${OUT_LIB}" | grep " T _ffi_" | head -10
 
-# ── Also copy to _build/mac/Debug/ if it already exists ─────────────────────
-# The Xcode linker for lc-bootstrap-compile expects libffi.a in that directory
-# (it's listed as an explicit absolute path in the link command, not via -lffi).
-BUILD_DEBUG="${REPO_ROOT}/_build/mac/Debug"
-if [ -d "${BUILD_DEBUG}" ]; then
-    cp "${OUT_LIB}" "${BUILD_DEBUG}/libffi.a"
-    echo "  CP  -> _build/mac/Debug/libffi.a"
-fi
+# ── Copy to _build/mac/Debug/ and _build/mac/Release/ ────────────────────────
+# The Xcode linker for lc-bootstrap-compile expects libffi.a in the build
+# products directory (it's listed as an explicit absolute path, not via -lffi).
+# Pre-populate both configurations so the correct arm64 library is in place
+# before xcodebuild runs — even on a fresh clone where _build/ doesn't exist.
+for BUILD_CONF in Debug Release; do
+    BUILD_CONF_DIR="${REPO_ROOT}/_build/mac/${BUILD_CONF}"
+    mkdir -p "${BUILD_CONF_DIR}"
+    cp "${OUT_LIB}" "${BUILD_CONF_DIR}/libffi.a"
+    echo "  CP  -> _build/mac/${BUILD_CONF}/libffi.a"
+done

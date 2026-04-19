@@ -5,6 +5,11 @@
   matching the same pattern as org.openxtalk.nstoolbar.
 */
 
+/**
+Title: macOS FSEvents
+Type: library
+Summary: macOS FSEvents filesystem monitoring library.
+*/
 library com.hyperxtalk.macosfsevents
 
 metadata version  is "1.0.0"
@@ -77,10 +82,16 @@ end handler
 -- Lifecycle
 -- ---------------------------------------------------------------------------
 
+/**
+Summary: Called when the library is loaded into memory.
+*/
 public handler OnLoad()
     put "" into mLastEventPath
 end handler
 
+/**
+Summary: Called when the library is unloaded from memory.
+*/
 public handler OnUnload()
     unsafe
         LCBFSEventsClearCallback()

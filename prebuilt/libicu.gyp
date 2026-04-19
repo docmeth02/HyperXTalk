@@ -143,17 +143,19 @@
 									{
 										'libraries':
 										[
-											'lib/mac/>(toolset_arch)/libicui18n.a',
-											'lib/mac/>(toolset_arch)/libicuio.a',
-											'lib/mac/>(toolset_arch)/libicutu.a',
-											'lib/mac/>(toolset_arch)/libicuuc.a',
-											'lib/mac/>(toolset_arch)/libicudata.a',
+											# arm64 mac build installs ICU directly to
+											# prebuilt/lib/mac/ (no arch subdirectory).
+											'lib/mac/libicui18n.a',
+											'lib/mac/libicuio.a',
+											'lib/mac/libicutu.a',
+											'lib/mac/libicuuc.a',
+											'lib/mac/libicudata.a',
 										],
 									},
 									{
 										'library_dirs':
 										[
-											'lib/mac/>(toolset_arch)',
+											'lib/mac',
 										],
 
 										'libraries':

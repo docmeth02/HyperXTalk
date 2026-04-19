@@ -262,6 +262,22 @@
                     },
                 ],
 			],
+
+			# On macOS arm64, replace the source-built archive with the prebuilt
+			# arm64 version (which has NEON + CRC32 objects) immediately after
+			# libtool archives it. This guards against the target_conditions
+			# arch check not selecting NEON sources at GYP evaluation time.
+			'postbuilds':
+			[
+				{
+					'postbuild_name': 'Install arm64 prebuilt libskia_opt_arm',
+					'action':
+					[
+						'sh',
+						'$(SRCROOT)/../../prebuilt/scripts/install-libskia-opt-arm-arm64.sh',
+					],
+				},
+			],
 		},
 
 		{

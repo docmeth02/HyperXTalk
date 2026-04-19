@@ -1,4 +1,4 @@
-﻿script "com.hyperxtalk.library.animationengine"
+﻿script "com.livecode.library.animationengine"
 
 on extensionInitialize
    if the target is me then
@@ -11,7 +11,6 @@ on extensionFinalize
       remove the script of me from back
    end if
 end extensionFinalize
-
 
 
 ----- Malte Brill AnimationEngine library ------
@@ -263,6 +262,29 @@ end touchEnd
 
 --> aeinfos
 
+/**
+
+Title: Animation Engine
+
+Author: Malte Pfaff-Brill
+
+Type: library
+
+Version: 6.0.1
+
+Description:
+Animation Engine is a LiveCode script library providing geometry, collision
+detection, easing functions, isometric and 3D projection utilities, and
+general-purpose animation helpers.
+
+*/
+
+/**
+
+Summary: Returns information about the Animation Engine library
+
+Returns: The computed result
+*/
 function animationEngineInfo
    local animationEngineInfo
    try
@@ -276,6 +298,12 @@ function animationEngineInfo
    end try
 end animationEngineInfo
 
+/**
+
+Summary: Returns the version number of the Animation Engine library
+
+Returns: The computed result
+*/
 function animationEngineVersion
    try
       --which version is animationEngine?
@@ -285,6 +313,12 @@ function animationEngineVersion
    end try
 end animationEngineVersion
 
+/**
+
+Summary: Returns the release date of the Animation Engine library
+
+Returns: The computed result
+*/
 function animationEngineDate
    try
       --which creation date?
@@ -296,6 +330,12 @@ end animationEngineDate
 
 --> aspect ratio
 
+/**
+
+Summary: Calculates the aspect ratio of a width and height
+
+Returns: The computed result
+*/
 function aspectRatio isWidth,isHeight
    try
       --return the width-to-height ratio
@@ -312,6 +352,12 @@ end aspectRatio
 -- toDo update to pass a control reference!!!
 -- Der blöde Mist funktioniert nicht recht. 
 -- Irgendwie ist der ganze aspectResize Kram nicht das was ich mir vorgestellt habe.
+/**
+
+Summary: Resizes dimensions while preserving the original aspect ratio
+
+Returns: The computed result
+*/
 function aspectResize
    local i,isBottom,isLeft,isRectRatio
    local isRight,isTargetRatio,isTop,theValue
@@ -377,6 +423,12 @@ end aspectResize
 
 --> collision detection
 
+/**
+
+Summary: Tests whether two circles overlap
+
+Returns: The computed result
+*/
 function circleCollide
    local i,theValue,threshold,x1
    local x2,y1,y2
@@ -418,6 +470,12 @@ function circleCollide
    end try
 end circleCollide
 
+/**
+
+Summary: Tests whether a circle and a line segment intersect
+
+Returns: The computed result
+*/
 function circleLineSegmentCollide
    local i,intersectionPointX,intersectionPointY,radius
    local theValue,u,x1,x2
@@ -480,6 +538,12 @@ end circleLineSegmentCollide
 
 --> closest points
 
+/**
+
+Summary: Returns the closest point on a line to a given point
+
+Returns: The computed result
+*/
 function closestpointOnLine
    local closestPointX,closestPointY,i,theValue
    local u,x1,x2,x3
@@ -528,6 +592,12 @@ end closestPointOnLine
 
 --> basic geometry
 
+/**
+
+Summary: Returns the slope of a line defined by two points
+
+Returns: The computed result
+*/
 function getSlope 
    local i,theValue,xEnd,xStart
    local yEnd,yStart
@@ -562,6 +632,12 @@ function getSlope
    end try
 end getSlope
 
+/**
+
+Summary: Returns the distance between two points
+
+Returns: The computed result
+*/
 function distance 
    -- Unglaublich wie viel code man schreibt nur um die Parameter zu checken. Wär chic das schlauer zu regeln...
    
@@ -601,6 +677,12 @@ function distance
    end try
 end distance
 
+/**
+
+Summary: Returns the angle in degrees between two points
+
+Returns: The computed result
+*/
 function findAngle
    local adjacentLeg,alpha,foundAngle,i
    local oppositeLeg,theValue,x1,x2
@@ -654,6 +736,12 @@ function findAngle
    end try
 end findAngle
 
+/**
+
+Summary: Returns a precise angle in degrees between two points
+
+Returns: The computed result
+*/
 function findPreciseAngle
    --grrrrrr Das hätte ich mal von Anfang an so machen sollen... Solln die User doch selber runden.
    local adjacentLeg,alpha,foundAngle,i
@@ -708,6 +796,12 @@ function findPreciseAngle
    end try
 end findPreciseAngle
 
+/**
+
+Summary: Returns a precise angle along the X axis between two points
+
+Returns: The computed result
+*/
 function findPreciseAngleX
    local foundAngle,i,theValue
    try
@@ -735,6 +829,12 @@ function findPreciseAngleX
    end try
 end findPreciseAngleX
 
+/**
+
+Summary: Returns the angle along the X axis between two points
+
+Returns: The computed result
+*/
 function findAngleX
    local foundAngle,i,theValue
    try
@@ -762,6 +862,12 @@ function findAngleX
    end try
 end findAngleX
 
+/**
+
+Summary: Returns the angle along the Y axis between two points
+
+Returns: The computed result
+*/
 function findAngleY
    local foundAngle,i,theValue
    try
@@ -788,6 +894,12 @@ function findAngleY
    end try
 end findAngleY
 
+/**
+
+Summary: Returns the angle between three points
+
+Returns: The computed result
+*/
 function findAngle2
    local foundAngle,i,theValue
    try
@@ -818,6 +930,12 @@ function findAngle2
    end try
 end findAngle2
 
+/**
+
+Summary: Tests whether two rectangles intersect and returns the overlap
+
+Returns: The computed result
+*/
 function intersectRect
    local bottom1,bottom2,i,left1
    local left2,right1,right2,s1
@@ -977,6 +1095,12 @@ function intersectRect
    end try
 end intersectRect
 
+/**
+
+Summary: Compares pixel masks between two objects at given points
+
+Returns: The computed result
+*/
 function maskComparePoints
    local abc,b1,b2,bottom1
    local bottom2,e1,e2,i
@@ -1036,6 +1160,12 @@ function maskComparePoints
    end try
 end maskComparePoints
 
+/**
+
+Summary: Returns the midpoint of the left edge of an object
+
+Returns: The computed result
+*/
 function midLeft theObject
    local midPoint
    try
@@ -1046,6 +1176,12 @@ function midLeft theObject
    end try
 end midleft
 
+/**
+
+Summary: Returns the midpoint of the right edge of an object
+
+Returns: The computed result
+*/
 function midRight theObject
    local midPoint
    try
@@ -1056,6 +1192,12 @@ function midRight theObject
    end try
 end midRight
 
+/**
+
+Summary: Returns the midpoint of the top edge of an object
+
+Returns: The computed result
+*/
 function midTop theObject
    local midPoint
    try
@@ -1066,6 +1208,12 @@ function midTop theObject
    end try
 end midTop
 
+/**
+
+Summary: Returns the midpoint of the bottom edge of an object
+
+Returns: The computed result
+*/
 function midBottom theObject
    local midPoint
    try
@@ -1076,6 +1224,12 @@ function midBottom theObject
    end try
 end midBottom
 
+/**
+
+Summary: Returns the alpha channel value of an object at a point
+
+Returns: The computed result
+*/
 function splitAlpha theObject
    local i,tAlpha,theData,theLength
    local theLoops
@@ -1097,6 +1251,12 @@ end splitAlpha
 
 -- completely obsolete with the new intersect fnction!
 -- deprecate it
+/**
+
+Summary: Tests whether two image objects overlap using pixel comparison
+
+Returns: The computed result
+*/
 function imageCollide object1,object2,threshold
    try
       if threshold is empty then put 0 into threshold
@@ -1110,6 +1270,12 @@ function imageCollide object1,object2,threshold
    end try
 end imageCollide
 
+/**
+
+Summary: Tests whether two image objects overlap using an alternate pixel method
+
+Returns: The computed result
+*/
 function imageCollide2 object1,object2,threshold
    local abc,counterChar,counterLine,endCounterChar
    local endCounterLine,offset1,offset2,offset3
@@ -1154,6 +1320,12 @@ function imageCollide2 object1,object2,threshold
    end try
 end imageCollide2
 
+/**
+
+Summary: Returns the coordinates of a point on a circle at a given angle
+
+Returns: The computed result
+*/
 function pointOnCircle
    local centerX,centerY,i,isAngle
    local isNewX,isNewY,isRadius,theValue
@@ -1186,6 +1358,12 @@ function pointOnCircle
    end try
 end pointOnCircle
 
+/**
+
+Summary: Returns the coordinates of a point on an ellipse at a given angle
+
+Returns: The computed result
+*/
 function pointOnEllipse
    local centerX,centerY,ellipseNewX,ellipseNewY
    local i,isAngle,isRadiusX,isRadiusY
@@ -1222,6 +1400,12 @@ function pointOnEllipse
    end try
 end pointOnEllipse
 
+/**
+
+Summary: Returns the coordinates of a point on a line at a given distance
+
+Returns: The computed result
+*/
 function pointOnLine
    local i,isDistance,myAngle,newX
    local newY,theValue,x1,x2
@@ -1260,6 +1444,12 @@ end pointOnLine
 
 --Added in AE 1.5
 
+/**
+
+Summary: Returns the position of a point relative to a line
+
+Returns: The computed result
+*/
 function whereIsThePoint
    local i,theParameters,tWhere,x1
    local x2,x3,y1,y2
@@ -1298,6 +1488,12 @@ function whereIsThePoint
    end try
 end whereIsThePoint
 
+/**
+
+Summary: Tests whether a point lies inside a polygon
+
+Returns: The computed result
+*/
 function pointInPoly
    local containsP,i,j,mycounter
    local pts,tot,x,y
@@ -1345,6 +1541,12 @@ function pointInPoly
 end pointInPoly
 
 
+/**
+
+Summary: Returns the intersection point of two line segments
+
+Returns: The computed result
+*/
 function lineSegmentIntersectionPoint 
    local ap1x,ap1y,ap2x,ap2y
    local ep1x,ep1y,ep2x,ep2y
@@ -1425,6 +1627,12 @@ function lineSegmentIntersectionPoint
    end try
 end lineSegmentIntersectionPoint
 
+/**
+
+Summary: Returns the intersection point of two infinite lines
+
+Returns: The computed result
+*/
 function lineIntersectionPoint 
    local ap1x,ap1y,ap2x,ap2y
    local ep1x,ep1y,ep2x,ep2y
@@ -1492,6 +1700,12 @@ function lineIntersectionPoint
    end try
 end lineIntersectionPoint
 
+/**
+
+Summary: Tests whether two polygons intersect
+
+Returns: The computed result
+*/
 function polyCollide pointlist1,pointlist2,method
    local firstpoint,fourthpoint,linecounter,linecounter2
    local p1x,p1y,p2x,p2y
@@ -1578,6 +1792,12 @@ end polyCollide
 
 --end added in 1.5
 
+/**
+
+Summary: Calculates a point on a Gielis superformula curve
+
+Returns: The computed result
+*/
 function superformula m,n1,n2,n3,phi,a,b
    local i,r,t1,t2
    local theValue,x,y
@@ -2917,6 +3137,12 @@ end movePolygonalChangeStepInOut
 
 -- easing functions
 
+/**
+
+Summary: Returns an ease-in interpolated value
+
+Returns: The computed result
+*/
 function aeEaseIn pStart,pEnd,pDuration,pElapsedTime,pExponent
    try
       if pDuration<=pElapsedTime then return pEnd
@@ -2928,6 +3154,12 @@ function aeEaseIn pStart,pEnd,pDuration,pElapsedTime,pExponent
    
 end aeEaseIn
 
+/**
+
+Summary: Returns an ease-out interpolated value
+
+Returns: The computed result
+*/
 function aeEaseOut pStart,pEnd,pDuration,pElapsedTime,pExponent
    try
       if pDuration<=pElapsedTime then return pEnd
@@ -2939,6 +3171,12 @@ function aeEaseOut pStart,pEnd,pDuration,pElapsedTime,pExponent
    
 end aeEaseOut
 
+/**
+
+Summary: Returns an ease-in-out interpolated value
+
+Returns: The computed result
+*/
 function aeEaseInOut pStart,pEnd,pDuration,pElapsedTime,pExponent
    try
       if pDuration<=pElapsedTime then return pEnd
@@ -2954,6 +3192,12 @@ function aeEaseInOut pStart,pEnd,pDuration,pElapsedTime,pExponent
    
 end aeEaseInOut
 
+/**
+
+Summary: Returns a mathematically computed ease-out value
+
+Returns: The computed result
+*/
 function aeMathEaseOut pR,pExponent
    try
       return 1-(1-pR)^pExponent
@@ -2964,6 +3208,12 @@ end aeMathEaseOut
 
 -- isometric drawing and 3d
 
+/**
+
+Summary: Converts an isometric X coordinate to screen X
+
+Returns: The computed result
+*/
 function isoToScreenX
    local i,pOriginX,pX,pY
    local pZ,theValue,tXCartesian
@@ -3003,6 +3253,12 @@ function isoToScreenX
    end try
 end isoToScreenX
 
+/**
+
+Summary: Converts an isometric Y coordinate to screen Y
+
+Returns: The computed result
+*/
 function isoToScreenY
    local i,pOriginY,pX,pY
    local pZ,theValue,tYCartesian
@@ -3041,6 +3297,12 @@ function isoToScreenY
    end try
 end isoToScreenY
 
+/**
+
+Summary: Converts isometric coordinates to screen coordinates
+
+Returns: The computed result
+*/
 function isoToScreen
    local i,pOriginX,pOriginY,pX
    local pY,pZ,theValue
@@ -3179,6 +3441,12 @@ on drawIsoBox
    end try
 end drawIsoBox
 
+/**
+
+Summary: Rotates a point in isometric space
+
+Returns: The computed result
+*/
 function rotateIsoPoint
    local cX,cY,cZ,i
    local newX,newY,newZ,pFocalLength
@@ -3244,6 +3512,12 @@ function rotateIsoPoint
    end try
 end rotateIsoPoint
 
+/**
+
+Summary: Projects a 3D point onto the 2D screen
+
+Returns: The computed result
+*/
 function ae3dConvertToScreen
    local i,pFocalLength,pOriginX,pOriginy
    local pX,pY,pZ,theValue
@@ -3288,6 +3562,12 @@ end ae3dConvertToScreen
 
 
 
+/**
+
+Summary: Rotates a point in 3D space around the X, Y and Z axes
+
+Returns: The computed result
+*/
 function rotate3DPoint
    local cX,cY,cZ,i
    local newX,newY,newZ,pFocalLength
@@ -3355,6 +3635,12 @@ function rotate3DPoint
    end try
 end rotate3DPoint
 
+/**
+
+Summary: Returns the scale ratio for a point at a given Z depth
+
+Returns: The computed result
+*/
 function ae3dScaleRatio pZ,pFocalLength
    try
       return pFocalLength/(pFocalLength+pZ)
@@ -3365,6 +3651,12 @@ end ae3dScaleRatio
 
 -- unSupported
 
+/**
+
+Summary: Draws a 3D box primitive
+
+Returns: The computed result
+*/
 function AePrimitive_Box px,py,pz,pa,pb,pc
    local pointlist
    try
@@ -3489,6 +3781,12 @@ end aeChangeTextSize
 --> 2.9 moving stuff
 local tAeEasing,tAEEasingCircular,sAEFrameRate,sAERealFrameRate,sAELockMoves
 
+/**
+
+Summary: Returns the current average animation frame rate
+
+Returns: The computed result
+*/
 function aeGetAverageFrameRate
    if sAERealFrameRate is not empty then
       return sAERealFrameRate
@@ -3608,6 +3906,10 @@ end aeUnlockMoves
 
 local sTimeTaken
 
+/**
+
+Summary: Performs a general animation step on the target object
+*/
 command aeGeneral
    lock screen
    local tTimeLost,tFramesLost,tElapsed,tControls
@@ -3880,6 +4182,12 @@ end aeStopMoving
 
 --> 2.9 geometry stuff
 
+/**
+
+Summary: Tests whether a point lies within an ellipse
+
+Returns: The computed result
+*/
 function aeWithinEllipse
    -- params center of ellipse,xRadius,yRadius,testPoint
    local tX,tY,tRadX,tRadY,tX2,tY2,theValue
@@ -3978,6 +4286,12 @@ on aeMorphGradientDone
    
 end aeMorphGradientDone
 
+/**
+
+Summary: Interpolates between two point lists over time
+
+Returns: The computed result
+*/
 function aeMorphPointlists pList1,pList2,pDuration,pCurrentTime,pEffect
    local tResultList,tCounter
    if the number of lines of pList1 <> the number of lines of pList2 then return "error: number of points in lists is not equal"
@@ -4012,6 +4326,12 @@ function aeMorphPointlists pList1,pList2,pDuration,pCurrentTime,pEffect
    return tResultList
 end aeMorphPointlists
 
+/**
+
+Summary: Interpolates between two numeric lists over time
+
+Returns: The computed result
+*/
 function aeMorphLists pList1,pList2,pDuration,pCurrentTime,pEffect,pRound,pMin,pMax
    local tResultList,tCounter,tVal
    if the number of lines of pList1 <> the number of lines of pList2 then return "error: number of lines in lists is not equal"
@@ -4063,6 +4383,12 @@ function aeMorphLists pList1,pList2,pDuration,pCurrentTime,pEffect,pRound,pMin,p
 end aeMorphLists
 
 
+/**
+
+Summary: Interpolates between two gradient ramp lists over time
+
+Returns: The computed result
+*/
 function aeMorphGradient pList1,pList2,pDuration,pCurrentTime,pEffect
    --answer pDuration & cr & pCurrenttime
    local tResultList,tCounter,tVal
@@ -4114,6 +4440,12 @@ end aeMorphGradient
 
 --> 2.9 easing stuff
 
+/**
+
+Summary: Returns a bounce ease-in interpolated value
+
+Returns: The computed result
+*/
 function aeBounceEaseIn pStart,pEnd,pDuration,pCurrentTime
    if pStart is not a number then return "error: start is not a number"
    if pEnd is not a number then return "error: end is not a number"
@@ -4123,6 +4455,12 @@ function aeBounceEaseIn pStart,pEnd,pDuration,pCurrentTime
    return pEnd - aeBounceEaseOut(pDuration - pCurrentTime,0,pEnd,pDuration) + pStart
 end aeBounceEaseIn
 
+/**
+
+Summary: Performs the aeBounceEaseOut operation
+
+Returns: The computed result
+*/
 function aeBounceEaseOut pStart,pEnd,pDuration,pCurrentTime
    local tValue
    if pStart is not a number then return "error: start is not a number"
@@ -4149,6 +4487,12 @@ function aeBounceEaseOut pStart,pEnd,pDuration,pCurrentTime
    end if
 end aeBounceEaseOut
 
+/**
+
+Summary: Returns an overshoot ease-in interpolated value
+
+Returns: The computed result
+*/
 function aeOvershootEaseIn pStart,pEnd,pDuration,pCurrentTime,pOvershoot
    if pStart is not a number then return "error: start is not a number"
    if pEnd is not a number then return "error: end is not a number"
@@ -4161,6 +4505,12 @@ function aeOvershootEaseIn pStart,pEnd,pDuration,pCurrentTime,pOvershoot
    return (pEnd - pStart)*(pCurrentTime/pDuration)*(pcurrentTime/pDuration)*((pOvershoot+1)*(pcurrenttime/pDuration)-pOvershoot)+pStart
 end aeOvershootEaseIn
 
+/**
+
+Summary: Performs the aeOverShootEaseOut operation
+
+Returns: The computed result
+*/
 function aeOverShootEaseOut pStart,pEnd,pDuration,pCurrentTime,pOvershoot
    if pOvershoot is empty then put 1.70158 into pOvershoot
    if pStart is not a number then return "error: start is not a number"
@@ -4173,6 +4523,10 @@ function aeOverShootEaseOut pStart,pEnd,pDuration,pCurrentTime,pOvershoot
    return (pEnd - pStart)*((pCurrentTime/pDuration-1)*(pCurrentTime/pDuration-1)*((pOverShoot+1)*(pCurrentTime/pDuration-1)+pOvershoot)+1)+pStart
 end aeOverShootEaseOut
 
+/**
+
+Summary: Logs a debug value to the animation engine debug output
+*/
 command aeDebug pValue
    put cr&pValue after msg
 end aeDebug
@@ -4386,6 +4740,10 @@ end aeUnlockRects
 
 local sTimeTakenToChangeRects
 
+/**
+
+Summary: Animates the rect property of the target object
+*/
 command aeChangingRect
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -4538,6 +4896,10 @@ end aeUnlockHeights
 
 local sTimeTakenToChangeHeights
 
+/**
+
+Summary: Animates the height property of the target object
+*/
 command aeChangingHeight
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -4662,6 +5024,10 @@ end aeUnlockWidths
 
 local sTimeTakenToChangeWidths
 
+/**
+
+Summary: Animates the width property of the target object
+*/
 command aeChangingWidth
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -4785,6 +5151,10 @@ end aeUnlockHScrolls
 
 local sTimeTakenToChangeHScrolls
 
+/**
+
+Summary: Animates the hscroll property of the target object
+*/
 command aeChangingHScroll
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -4908,6 +5278,10 @@ end aeUnlockVScrolls
 
 local sTimeTakenToChangeVScrolls
 
+/**
+
+Summary: Animates the vscroll property of the target object
+*/
 command aeChangingVScroll
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -5057,6 +5431,10 @@ end aeUnlockBackColors
 
 local sTimeTakenToChangeBackColors
 
+/**
+
+Summary: Animates the backColor property of the target object
+*/
 command aeChangingBackColor
    
    lock screen
@@ -5217,6 +5595,10 @@ end aeUnlockforeColors
 
 local sTimeTakenToChangeforeColors
 
+/**
+
+Summary: Animates the foreColor property of the target object
+*/
 command aeChangingforeColor
    
    lock screen
@@ -5360,6 +5742,10 @@ end aeUnlockThumbPositions
 
 local sTimeTakenToChangeThumbPositions
 
+/**
+
+Summary: Animates the thumbPosition property of the target object
+*/
 command aeChangingThumbPosition
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -5528,6 +5914,10 @@ end aeUnlockBackColorOfChunks
 
 local sTimeTakenToChangeBackColorOfChunks
 
+/**
+
+Summary: Animates the backColor of a text chunk in the target object
+*/
 command aeChangingBackColorOfChunk
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -5715,6 +6105,10 @@ end aeUnlockforecolorOfChunks
 
 local sTimeTakenToChangeforecolorOfChunks
 
+/**
+
+Summary: Animates the foreColor of a text chunk in the target object
+*/
 command aeChangingforecolorOfChunk
    lock screen
    local tTimeLost,tFramesLost,tElapsed
@@ -5955,6 +6349,10 @@ end aeUnlockScrolls
 
 local sTimeTakenToChangeScroll
 
+/**
+
+Summary: Animates the scroll property of the target object
+*/
 command aeChangingScroll
    --put the millisecs
    lock screen
@@ -6110,6 +6508,12 @@ on aeCollision pObjects
 
 end aeCollision
 
+/**
+
+Summary: Returns a list of objects colliding with the target
+
+Returns: The computed result
+*/
 function aeCollidingObjects
    local tObjects,tReturn
    repeat for each key theKey in aeCollisionListener
@@ -6128,6 +6532,12 @@ end aeCollidingObjects
 
 -- contribution by Geoff Canyon
 
+/**
+
+Summary: Rotates a list of 3D points around the X, Y and Z axes
+
+Returns: The computed result
+*/
 function rotate3DPointList pointList,pXRotation,pYRotation,pZRotation,pFocalLength
    local cX,cY,cZ,i
    local newX,newY,newZ
@@ -6177,6 +6587,12 @@ local tReturnList
    end try
 end rotate3DPointList
 
+/**
+
+Summary: Projects a list of 3D points onto the 2D screen
+
+Returns: The computed result
+*/
 function ae3dConvertListToScreen pointList,pOriginX,pOriginY,pFocalLength
    local i
    local pX,pY,pZ,theValue

@@ -1,3 +1,8 @@
+/**
+Title: macOS MenuBar
+Type: library
+Summary: Creates and manages a native macOS menu bar via NSMenu/NSMenuItem.
+*/
 library com.hyperxtalk.macosmenubar
 
 use com.livecode.foreign

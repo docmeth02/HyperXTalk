@@ -163,8 +163,8 @@
 				'libraries/macostoolbar/macostoolbar.lcb',
 				'libraries/macosusernotifications/macosusernotifications.lcb',
 
-				'widgets/androidbutton/androidbutton.lcb',
-				'widgets/androidfield/androidfield.lcb',
+				#'widgets/androidbutton/androidbutton.lcb',  # Android-only, no androidutils on macOS
+				#'widgets/androidfield/androidfield.lcb',    # Android-only
 				'widgets/html5button/html5button.lcb',
 				'widgets/macbutton/macbutton.lcb',
 				'widgets/mactextfield/mactextfield.lcb',

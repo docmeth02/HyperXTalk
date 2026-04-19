@@ -115,6 +115,7 @@ extern void query_cache_insert(const char *packet, ulong length,
 #define MAX_PACKET_LENGTH (256L*256L*256L-1)
 
 static my_bool net_write_buff(NET *net,const uchar *packet,ulong len);
+static int net_real_write(NET *net, const uchar *packet, size_t len);
 
 
 /** Init with packet info. */

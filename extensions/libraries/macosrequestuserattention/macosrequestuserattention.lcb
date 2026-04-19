@@ -1,3 +1,8 @@
+/**
+Title: macOS Request User Attention
+Type: library
+Summary: Requests user attention in the macOS Dock via NSApplication.
+*/
 library com.hyperxtalk.macosrequestuserattention
 
 use com.livecode.foreign

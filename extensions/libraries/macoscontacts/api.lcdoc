@@ -1,12 +1,24 @@
+Library: com.hyperxtalk.macoscontacts
+
+Type: library
+
+Title: macOS Contacts
+
+Summary: Provides access to the macOS Contacts framework (CNContactStore).
+
+version: 1.0.0
+
+author: HyperXTalk
+
+
 Name: contactsGroups
 
 Type: handler
 
 Syntax: contactsGroups()
 
-Summary:
-   * contactsGroups
-   * Returns a List of Arrays, each with keys "name" and "identifier".
+Summary: Returns a List of Arrays, each with keys "name" and "identifier".
+
 
 
 
@@ -16,10 +28,8 @@ Type: handler
 
 Syntax: contactsFetchByPhone(<pPhone>)
 
-Summary:
-   * contactsFetchByPhone pPhone
-   * Returns all contacts and filters locally for phone number containing pPhone.
-   * (The Contacts framework does not expose a public phone predicate in all OS versions.)
+Summary: Returns all contacts and filters locally for phone number containing pPhone.
+
 
 Parameters:
 :
@@ -33,11 +43,11 @@ Type: handler
 
 Syntax: contactsRequestAccessGlue()
 
-Summary:
-   * contactsRequestAccessGlue
-   * Uses OXTContactsGlue.m to request Contacts access via native ObjC on the
-   * main thread. This bypasses the LCB ObjC bridge for the permission call.
-   * Fires "accessRequestComplete" on the caller when the user responds.
+Summary: Request Contacts access via the native ObjC glue on the main thread.
+
+Description:
+Bypasses the LCB ObjC bridge for the permission call.
+    Fires "accessRequestComplete" on the caller when the user responds.
 
 
 
@@ -47,12 +57,26 @@ Type: handler
 
 Syntax: contactsFetchByGroup(<pGroupIdentifier>)
 
-Summary:
-   * contactsFetchByGroup pGroupIdentifier
-   * Returns a List of contact Arrays for all contacts in the given group.
+Summary: Returns a List of contact Arrays for all contacts in the given group.
+
 
 Parameters:
 :
+
+
+
+
+Name: contactsAccessPoll
+
+Type: handler
+
+Syntax: contactsAccessPoll()
+
+Summary: Poll the result of a pending contacts access request.
+
+Returns: -1 if still pending, 0 if denied, 1 if granted.
+
+Description: Call from a LiveCode Script timer until non-negative.
 
 
 
@@ -63,11 +87,11 @@ Type: handler
 
 Syntax: contactsFetchAll()
 
-Summary:
-   * contactsFetchAll
-   * Returns a List of Arrays, one per contact, with keys:
-   *   identifier, givenName, familyName, fullName, organizationName,
-   *   emailAddresses (List), phoneNumbers (List), note
+Summary: Returns a List of Arrays, one per contact.
+
+Description:
+Each array has keys: identifier, givenName, familyName,
+    fullName, organizationName, emailAddresses (List), phoneNumbers (List), note.
 
 
 
@@ -77,9 +101,8 @@ Type: handler
 
 Syntax: contactsFetchByName(<pName>)
 
-Summary:
-   * contactsFetchByName pName
-   * Returns contacts whose full name contains pName (case-insensitive, macOS logic).
+Summary: Returns contacts whose full name contains pName.
+
 
 Parameters:
 :
@@ -93,10 +116,10 @@ Type: handler
 
 Syntax: contactsAuthorizationStatus()
 
-Summary:
-   * contactsAuthorizationStatus
-   * Returns the current authorization status without prompting the user.
-   * Result: "granted" | "denied" | "restricted" | "not determined"
+Summary: Returns the current authorization status without prompting the user.
+
+Returns: "granted", "denied", "restricted", or "not determined"
+
 
 
 
@@ -106,25 +129,9 @@ Type: handler
 
 Syntax: contactsInitialize()
 
-Summary:
-   * contactsInitialize
-   * Must be called once before contactsRequestAccess to set up the block pointer
-   * and prime the CNContactStore instance.
-   * Returns true on success.
+Summary: Must be called once before contactsRequestAccess to set up the block pointer.
 
-
-
-Name: contactsDelete
-
-Type: handler
-
-Syntax: contactsDelete(<pIdentifier>)
-
-Summary:    * contactsDelete pIdentifier
-
-
-Parameters:
-:
+Description: Primes the CNContactStore instance. Returns true on success.
 
 
 
@@ -135,10 +142,25 @@ Type: handler
 
 Syntax: contactsDiagnostic()
 
-Summary:
-   * contactsDiagnostic
-   * Posts "contactsDiagnostic" to the caller with a step-by-step status string.
-   * Use this to identify exactly where initialisation or access request fails.
+Summary: Posts "contactsDiagnostic" to the caller with a step-by-step status string.
+
+Description: Use this to identify exactly where initialisation or access request fails.
+
+
+
+
+Name: contactsDelete
+
+Type: handler
+
+Syntax: contactsDelete(<pIdentifier>)
+
+Summary: Deletes the contact with the given identifier.
+
+
+Parameters:
+:
+
 
 
 
@@ -148,7 +170,7 @@ Type: handler
 
 Syntax: contactsUpdate(<pIdentifier>,<pArray>)
 
-Summary:    * contactsUpdate pIdentifier, pArray
+Summary: Updates the contact with pIdentifier using fields from pArray.
 
 
 Parameters:
@@ -166,12 +188,14 @@ Type: handler
 
 Syntax: contactsCreate(<pArray>)
 
-Summary:
-   * contactsCreate pArray
-   * Creates a new contact.  pArray keys: givenName, familyName,
-   * organizationName, emailAddresses (comma-delimited string or List),
-   * phoneNumbers (comma-delimited string or List), note.
-   * Returns the new contact's identifier string, or empty on failure.
+Summary: Creates a new contact from pArray.
+
+Description:
+pArray keys: givenName, familyName, organizationName,
+    emailAddresses, phoneNumbers, note.
+
+Returns: The new contact's identifier string, or empty on failure.
+
 
 Parameters:
 :
@@ -185,9 +209,8 @@ Type: handler
 
 Syntax: contactsFetchByEmail(<pEmail>)
 
-Summary:
-   * contactsFetchByEmail pEmail
-   * Returns contacts with an email address matching pEmail.
+Summary: Returns contacts with an email address matching pEmail.
+
 
 Parameters:
 :
@@ -201,24 +224,16 @@ Type: handler
 
 Syntax: contactsRequestAccess()
 
-Summary:
-   * contactsRequestAccess
-   * Presents the system permission dialog if not yet determined, then
-   returns
-   end if
-   * immediately. When the user responds, the ObjC block callback posts the
-   * custom message "accessRequestComplete" with a Boolean parameter indicating
-   * whether access was granted. Handle this in your card or stack script:
-   *
-   *   on accessRequestComplete pGranted
-   *     if pGranted then
-   ... else ...
-   end if
-   *   end accessRequestComplete
-   *
-   * If status is already determined, returns the current status string without
-   * showing a dialog and without posting a message.
-   * Result: "granted" | "denied" | "restricted" | "not determined"
+Summary: Presents the system permission dialog if not yet determined.
+
+Description:
+Returns immediately. When the user responds, posts
+    "accessRequestComplete" with a Boolean parameter to the caller.
+    If status is already determined, returns the current status without
+    showing a dialog and without posting a message.
+
+Returns: "granted", "denied", "restricted", or "not determined"
+
 
 
 

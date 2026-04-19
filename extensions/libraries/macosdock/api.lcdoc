@@ -1,6 +1,10 @@
-Library: 
+Library: com.hyperxtalk.macosdock
 
-Type: 
+Type: library
+
+Title: macOS Dock
+
+Summary: Controls the macOS Dock badge, icon bounce, and tile image.
 
 author: HyperXTalk
 

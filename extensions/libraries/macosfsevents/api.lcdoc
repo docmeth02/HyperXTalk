@@ -1,10 +1,36 @@
-Library: 
+Library: com.hyperxtalk.macosfsevents
 
-Type: 
+Type: library
+
+Title: macOS FSEvents
+
+Summary: macOS FSEvents filesystem monitoring library.
 
 version: 1.0.0
 
 author: HyperXTalk
+
+
+Name: OnLoad
+
+Type: handler
+
+Syntax: OnLoad()
+
+Summary: Called when the library is loaded into memory.
+
+
+
+
+Name: OnUnload
+
+Type: handler
+
+Syntax: OnUnload()
+
+Summary: Called when the library is unloaded from memory.
+
+
 
 
 Name: fseventsLastPath

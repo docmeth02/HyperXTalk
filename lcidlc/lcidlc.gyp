@@ -14,6 +14,7 @@
       'dependencies':
 			[
 				'../libfoundation/libfoundation.gyp:libFoundation',
+				'../thirdparty/libffi/libffi.gyp:libffi',
 				'encode_support',
 			],
 
@@ -60,6 +61,33 @@
 					'OS == "android" or OS == "ios" or OS == "emscripten"',
 					{
 						'type': 'none',
+					},
+				],
+				[
+					'OS == "mac"',
+					{
+						'link_settings':
+						{
+							'conditions':
+							[
+								[
+									'GENERATOR == "xcode"',
+									{
+										'libraries':
+										[
+											# Direct prebuilt path so the linker can find
+											# libffi symbols that libFoundation.a references.
+											# Path is relative to SRCROOT (= lcidlc/).
+											'../prebuilt/lib/mac/libffi.a',
+										],
+									},
+									{
+										'library_dirs': [ '../prebuilt/lib/mac' ],
+										'libraries': [ '-lffi' ],
+									},
+								],
+							],
+						},
 					},
 				],
 			],

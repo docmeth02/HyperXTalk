@@ -10,6 +10,7 @@ The problem: each project.pbxproj has Frameworks build phases that contain 2-3 l
 This script removes the bad references from Frameworks build phases.
 """
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -153,13 +154,19 @@ def fix_pbxproj_file(pbxproj_path):
     }
 
 def main():
-    build_mac_dir = "/sessions/hopeful-stoic-knuth/mnt/HyperXTalk/build-mac"
+    if len(sys.argv) > 1:
+        build_mac_dir = os.path.abspath(sys.argv[1])
+    else:
+        # Default: repo_root/build-mac, where repo_root is two levels above this script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(script_dir))
+        build_mac_dir = os.path.join(repo_root, "build-mac")
 
     pbxproj_files = find_all_pbxproj_files(build_mac_dir)
 
     if not pbxproj_files:
-        print(f"Error: No project.pbxproj files found under {build_mac_dir}")
-        sys.exit(1)
+        print(f"Warning: No project.pbxproj files found under {build_mac_dir} — skipping.")
+        return 0
 
     print(f"Found {len(pbxproj_files)} project.pbxproj files")
     print()

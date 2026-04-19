@@ -230,7 +230,7 @@
 			'conditions':
 			[
 				[
-					'toolset_os == "mac" and toolset_arch != "arm64"',
+					'OS == "mac" and target_arch != "arm64"',
 					{
 						'platform_include_dirs':
 						[
@@ -245,7 +245,7 @@
 					},
 				],
 				[
-					'toolset_os == "mac" and toolset_arch == "arm64"',
+					'OS == "mac" and target_arch == "arm64"',
 					{
 						'platform_include_dirs':
 						[
@@ -268,7 +268,7 @@
 					},
 				],
 				[
-					'toolset_os == "ios"',
+					'OS == "ios"',
 					{
 						'platform_include_dirs':
 						[
@@ -420,6 +420,23 @@
 						'product_name': 'libffi->(_toolset)',
 					},
 				],
+			],
+
+			# On macOS arm64, replace the source-built archive with the prebuilt
+			# arm64 libffi.a immediately after Xcode archives it.  This ensures
+			# that all dependent targets (lc-bootstrap-compile, libScript, etc.)
+			# link against an archive that contains ffi_arm64.o / sysv_arm64.o
+			# rather than the x86 C stubs that lack _ffi_call and friends.
+			'postbuilds':
+			[
+				{
+					'postbuild_name': 'Install arm64 prebuilt libffi',
+					'action':
+					[
+						'sh',
+						'$(SRCROOT)/../../prebuilt/scripts/install-libffi-prebuilt-arm64.sh',
+					],
+				},
 			],
 		},
 	],

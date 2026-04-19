@@ -41,6 +41,10 @@ enum enum_vio_type
 #define VIO_BUFFERED_READ 2                     /* use buffered read */
 #define VIO_READ_BUFFER_SIZE 16384              /* size of read buffer */
 
+/* Forward declaration so bare 'Vio*' is valid in C23 before the full
+   struct definition and typedef at the bottom of this file. */
+typedef struct st_vio Vio;
+
 Vio*	vio_new(my_socket sd, enum enum_vio_type type, uint flags);
 #ifdef __WIN__
 Vio* vio_new_win32pipe(HANDLE hPipe);

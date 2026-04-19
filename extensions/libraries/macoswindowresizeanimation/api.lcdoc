@@ -1,6 +1,10 @@
-Library: 
+Library: com.hyperxtalk.macoswindowresizeanimation
 
-Type: 
+Type: library
+
+Title: macOS Window Resize Animation
+
+Summary: Smooth animated window resizing on macOS via NSAnimationContext.
 
 version: 1.0.0
 

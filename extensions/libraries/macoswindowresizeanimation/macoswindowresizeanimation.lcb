@@ -5,6 +5,11 @@
   CGRect/NSRect struct-marshalling issues in LCB foreign handlers.
 */
 
+/**
+Title: macOS Window Resize Animation
+Type: library
+Summary: Smooth animated window resizing on macOS via NSAnimationContext.
+*/
 library com.hyperxtalk.macoswindowresizeanimation
 
 metadata version  is "1.0.0"

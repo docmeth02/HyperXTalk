@@ -21,36 +21,8 @@ static my_bool     ssl_algorithms_added    = FALSE;
 static my_bool     ssl_error_strings_loaded= FALSE;
 static int      verify_depth = 0;
 
-static unsigned char dh512_p[]=
-{
-  0xDA,0x58,0x3C,0x16,0xD9,0x85,0x22,0x89,0xD0,0xE4,0xAF,0x75,
-  0x6F,0x4C,0xCA,0x92,0xDD,0x4B,0xE5,0x33,0xB8,0x04,0xFB,0x0F,
-  0xED,0x94,0xEF,0x9C,0x8A,0x44,0x03,0xED,0x57,0x46,0x50,0xD3,
-  0x69,0x99,0xDB,0x29,0xD7,0x76,0x27,0x6B,0xA2,0xD3,0xD4,0x12,
-  0xE2,0x18,0xF4,0xDD,0x1E,0x08,0x4C,0xF6,0xD8,0x00,0x3E,0x7C,
-  0x47,0x74,0xE8,0x33,
-};
-
-static unsigned char dh512_g[]={
-  0x02,
-};
-
-static DH *get_dh512(void)
-{
-  DH *dh;
-  if ((dh=DH_new()))
-  {
-    BIGNUM* dhp=BN_bin2bn(dh512_p,sizeof(dh512_p),NULL);
-    BIGNUM* dhg=BN_bin2bn(dh512_g,sizeof(dh512_g),NULL);
-    if (! dhp || ! dhg)
-    {
-      DH_free(dh);
-      dh=0;
-    }
-    DH_set0_pqg(dh,dhp,NULL,dhg);
-  }
-  return(dh);
-}
+/* get_dh512 and its static data removed: OpenSSL 3.x handles ephemeral
+   DH parameters internally via SSL_CTX_set_dh_auto(). */
 
 
 static void
@@ -231,9 +203,8 @@ static void check_ssl_init()
 static struct st_VioSSLFd *
 new_VioSSLFd(const char *key_file, const char *cert_file,
              const char *ca_file, const char *ca_path,
-             const char *cipher, SSL_METHOD *method)
+             const char *cipher, const SSL_METHOD *method)
 {
-  DH *dh;
   struct st_VioSSLFd *ssl_fd;
   DBUG_ENTER("new_VioSSLFd");
   DBUG_PRINT("enter",
@@ -304,10 +275,8 @@ new_VioSSLFd(const char *key_file, const char *cert_file,
     DBUG_RETURN(0);
   }
 
-  /* DH stuff */
-  dh=get_dh512();
-  SSL_CTX_set_tmp_dh(ssl_fd->ssl_context, dh);
-  DH_free(dh);
+  /* DH stuff: let OpenSSL 3.x choose ephemeral DH parameters automatically */
+  SSL_CTX_set_dh_auto(ssl_fd->ssl_context, 1);
 
   DBUG_PRINT("exit", ("OK 1"));
 
@@ -358,7 +327,7 @@ new_VioSSLAcceptorFd(const char *key_file, const char *cert_file,
   struct st_VioSSLFd *ssl_fd;
   int verify= SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE;
   if (!(ssl_fd= new_VioSSLFd(key_file, cert_file, ca_file,
-                             ca_path, cipher, TLSv1_server_method())))
+                             ca_path, cipher, TLS_server_method())))
   {
     return 0;
   }

@@ -87,8 +87,8 @@
 						{
 							'libraries':
 							[
-								'lib/mac/>(toolset_arch)/libcustomcrypto.a',
-								'lib/mac/>(toolset_arch)/libcustomssl.a',
+								'lib/mac/libcustomcrypto.a',
+								'lib/mac/libcustomssl.a',
 							],
 						},
 					],

@@ -41,6 +41,12 @@
 #  define _POSIX_C_SOURCE 200112L
 #endif
 #include <fcntl.h>
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#elif !defined(_WIN32)
+/* Clang 21+ on macOS requires unistd.h for lseek/off_t used by gz* routines */
+#  include <unistd.h>
+#endif
 
 #ifdef _WIN32
 #  include <stddef.h>

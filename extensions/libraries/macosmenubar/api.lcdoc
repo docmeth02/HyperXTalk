@@ -1,6 +1,10 @@
-Library: 
+Library: com.hyperxtalk.macosmenubar
 
-Type: 
+Type: library
+
+Title: macOS MenuBar
+
+Summary: Creates and manages a native macOS menu bar via NSMenu/NSMenuItem.
 
 author: HyperXTalk
 

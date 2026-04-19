@@ -1,31 +1,8 @@
-/*
-  Library:  com.hyperxtalk.macoscontacts
-  Version:  1.0.0
-  Author:   HyperXTalk
-  Platform: macOS
-  Description:
-    Provides access to the macOS Contacts framework (AddressBook / CNContactStore).
-
-  Requirements:
-    • macOS 10.11+ (Contacts framework)
-    • App must have NSContactsUsageDescription in its Info.plist
-      (or the standalone builder settings) and the user must grant access.
-
-  Public handlers
-  ───────────────
-    contactsRequestAccess()             → String   "granted" | "denied" | "restricted" | "not determined"
-    contactsAuthorizationStatus()       → String   same four values
-    contactsFetchAll()                  → List     list of contact arrays
-    contactsFetchByName(pName)          → List     contacts whose full name contains pName
-    contactsFetchByEmail(pEmail)        → List     contacts whose email contains pEmail
-    contactsFetchByPhone(pPhone)        → List     contacts whose phone contains pPhone
-    contactsCreate(pArray)             → String   new contact identifier, or empty on failure
-    contactsUpdate(pIdentifier, pArray)→ Boolean
-    contactsDelete(pIdentifier)        → Boolean
-    contactsGroups()                   → List     list of arrays with keys "name" and "identifier"
-    contactsFetchByGroup(pGroupID)     → List     contacts in the given group
+/**
+Title: macOS Contacts
+Type: library
+Summary: Provides access to the macOS Contacts framework (CNContactStore).
 */
-
 library com.hyperxtalk.macoscontacts
 
   metadata title is "macOS Contacts"
@@ -122,13 +99,6 @@ library com.hyperxtalk.macoscontacts
       returns ObjcId \
       binds to "c:oxtcontactsglue>OXTContactGetIdentifier"
 
-
-
-
-  -- C callback type: void (*)(BOOL granted, int status)
-
-
-
   ------------------------------------------------------------------------
   -- Private ObjC bridge helpers
   ------------------------------------------------------------------------
@@ -206,9 +176,6 @@ library com.hyperxtalk.macoscontacts
       in pContact as ObjcId) \
       returns ObjcId \
       binds to "objc:CNContact.-mutableCopy"
-
-  -- CNContactSaveRequest
-
 
   -- Generic ObjC helpers (NSObject)
   private foreign handler ObjC_NSObjectValueForKey( \
@@ -308,9 +275,6 @@ library com.hyperxtalk.macoscontacts
       unsafe
         put ObjC_CNContactStoreNew() into mStore
       end unsafe
-      if mStore is nothing then
-      else
-      end if
     end if
     unsafe
       OXTSetStore(mStore)
@@ -482,10 +446,11 @@ library com.hyperxtalk.macoscontacts
   -- Public API
   ------------------------------------------------------------------------
 
-  ------------------------------------------------------------------------
-  -- Returns -1 if still pending, 0 if denied, 1 if granted.
-  -- Call this from a LiveCode Script timer (send X in Y ms) until non-negative.
-  ------------------------------------------------------------------------
+  /**
+  Summary: Poll the result of a pending contacts access request.
+  Returns: -1 if still pending, 0 if denied, 1 if granted.
+  Description: Call from a LiveCode Script timer until non-negative.
+  */
   public handler contactsAccessPoll() returns Integer
     variable tResult as CInt
     variable tResultInt as Integer
@@ -511,10 +476,9 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsDiagnostic
-   * Posts "contactsDiagnostic" to the caller with a step-by-step status string.
-   * Use this to identify exactly where initialisation or access request fails.
-   */
+  Summary: Posts "contactsDiagnostic" to the caller with a step-by-step status string.
+  Description: Use this to identify exactly where initialisation or access request fails.
+  */
   public handler contactsDiagnostic() returns nothing
     put the caller into sCallerTarget
     variable tLog as String
@@ -553,13 +517,10 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsInitialize
-   * Must be called once before contactsRequestAccess to set up the block pointer
-   * and prime the CNContactStore instance.
-   * Returns true on success.
-   */
+  Summary: Must be called once before contactsRequestAccess to set up the block pointer.
+  Description: Primes the CNContactStore instance. Returns true on success.
+  */
   public handler contactsInitialize() returns Boolean
-    -- Prime the store
     if GetStore() is nothing then
       return false
     end if
@@ -567,11 +528,10 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsRequestAccessGlue
-   * Uses OXTContactsGlue.m to request Contacts access via native ObjC on the
-   * main thread. This bypasses the LCB ObjC bridge for the permission call.
-   * Fires "accessRequestComplete" on the caller when the user responds.
-   */
+  Summary: Request Contacts access via the native ObjC glue on the main thread.
+  Description: Bypasses the LCB ObjC bridge for the permission call.
+    Fires "accessRequestComplete" on the caller when the user responds.
+  */
   public handler contactsRequestAccessGlue() returns nothing
     put the caller into sCallerTarget
     unsafe
@@ -581,10 +541,9 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsAuthorizationStatus
-   * Returns the current authorization status without prompting the user.
-   * Result: "granted" | "denied" | "restricted" | "not determined"
-   */
+  Summary: Returns the current authorization status without prompting the user.
+  Returns: "granted", "denied", "restricted", or "not determined"
+  */
   public handler contactsAuthorizationStatus() returns String
     variable tStatus as CLong
     unsafe
@@ -597,29 +556,16 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsRequestAccess
-   * Presents the system permission dialog if not yet determined, then
-   returns
-   end if
-   * immediately. When the user responds, the ObjC block callback posts the
-   * custom message "accessRequestComplete" with a Boolean parameter indicating
-   * whether access was granted. Handle this in your card or stack script:
-   *
-   *   on accessRequestComplete pGranted
-   *     if pGranted then
-   ... else ...
-   end if
-   *   end accessRequestComplete
-   *
-   * If status is already determined, returns the current status string without
-   * showing a dialog and without posting a message.
-   * Result: "granted" | "denied" | "restricted" | "not determined"
-   */
+  Summary: Presents the system permission dialog if not yet determined.
+  Description: Returns immediately. When the user responds, posts
+    "accessRequestComplete" with a Boolean parameter to the caller.
+    If status is already determined, returns the current status without
+    showing a dialog and without posting a message.
+  Returns: "granted", "denied", "restricted", or "not determined"
+  */
   public handler contactsRequestAccess() returns String
-    -- Store the caller so the block callback can post back to it
     put the caller into sCallerTarget
 
-    -- Ensure store is ready
     if GetStore() is nothing then
       return "not determined"
     end if
@@ -632,19 +578,17 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsFetchAll
-   * Returns a List of Arrays, one per contact, with keys:
-   *   identifier, givenName, familyName, fullName, organizationName,
-   *   emailAddresses (List), phoneNumbers (List), note
-   */
+  Summary: Returns a List of Arrays, one per contact.
+  Description: Each array has keys: identifier, givenName, familyName,
+    fullName, organizationName, emailAddresses (List), phoneNumbers (List), note.
+  */
   public handler contactsFetchAll() returns List
     return _fetchContacts(nothing)
   end handler
 
   /**
-   * contactsFetchByName pName
-   * Returns contacts whose full name contains pName (case-insensitive, macOS logic).
-   */
+  Summary: Returns contacts whose full name contains pName.
+  */
   public handler contactsFetchByName(in pName as String) returns List
     variable tPred as ObjcId
     unsafe
@@ -654,9 +598,8 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsFetchByEmail pEmail
-   * Returns contacts with an email address matching pEmail.
-   */
+  Summary: Returns contacts with an email address matching pEmail.
+  */
   public handler contactsFetchByEmail(in pEmail as String) returns List
     variable tPred as ObjcId
     unsafe
@@ -666,10 +609,8 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsFetchByPhone pPhone
-   * Returns all contacts and filters locally for phone number containing pPhone.
-   * (The Contacts framework does not expose a public phone predicate in all OS versions.)
-   */
+  Summary: Returns all contacts and filters locally for phone number containing pPhone.
+  */
   public handler contactsFetchByPhone(in pPhone as String) returns List
     variable tAll as List
     put contactsFetchAll() into tAll
@@ -690,12 +631,11 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsCreate pArray
-   * Creates a new contact.  pArray keys: givenName, familyName,
-   * organizationName, emailAddresses (comma-delimited string or List),
-   * phoneNumbers (comma-delimited string or List), note.
-   * Returns the new contact's identifier string, or empty on failure.
-   */
+  Summary: Creates a new contact from pArray.
+  Description: pArray keys: givenName, familyName, organizationName,
+    emailAddresses, phoneNumbers, note.
+  Returns: The new contact's identifier string, or empty on failure.
+  */
   public handler contactsCreate(in pArray as Array) returns String
     variable tContact as optional ObjcId
     variable tReq as optional ObjcId
@@ -741,8 +681,8 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsDelete pIdentifier
-   */
+  Summary: Deletes the contact with the given identifier.
+  */
   public handler contactsDelete(in pIdentifier as String) returns Boolean
     variable tPred as ObjcId
     variable tResults as optional ObjcId
@@ -783,8 +723,8 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsUpdate pIdentifier, pArray
-   */
+  Summary: Updates the contact with pIdentifier using fields from pArray.
+  */
   public handler contactsUpdate(in pIdentifier as String, in pArray as Array) returns Boolean
     variable tPred as ObjcId
     variable tResults as optional ObjcId
@@ -845,10 +785,9 @@ library com.hyperxtalk.macoscontacts
     return tOK
   end handler
 
-    /**
-   * contactsGroups
-   * Returns a List of Arrays, each with keys "name" and "identifier".
-   */
+  /**
+  Summary: Returns a List of Arrays, each with keys "name" and "identifier".
+  */
   public handler contactsGroups() returns List
     variable tErr as optional ObjcId
     variable tGroups as optional ObjcId
@@ -893,9 +832,8 @@ library com.hyperxtalk.macoscontacts
   end handler
 
   /**
-   * contactsFetchByGroup pGroupIdentifier
-   * Returns a List of contact Arrays for all contacts in the given group.
-   */
+  Summary: Returns a List of contact Arrays for all contacts in the given group.
+  */
   public handler contactsFetchByGroup(in pGroupIdentifier as String) returns List
     variable tPred as ObjcId
     unsafe

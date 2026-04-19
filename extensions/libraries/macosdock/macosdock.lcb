@@ -1,3 +1,8 @@
+/**
+Title: macOS Dock
+Type: library
+Summary: Controls the macOS Dock badge, icon bounce, and tile image.
+*/
 library com.hyperxtalk.macosdock
 
 use com.livecode.foreign

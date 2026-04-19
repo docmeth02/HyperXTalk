@@ -91,7 +91,7 @@
 							'include_dirs':
 							[
 #								'../../prebuilt/unpacked/openssl/<(uniform_arch)-win32-$(PlatformToolset)_static_$(ConfigurationName)/include',
-								'../../prebuilt/include/openssl',
+								'../../prebuilt/include',
 							],
 						},
 					],
@@ -100,8 +100,7 @@
 						{
 							'include_dirs':
 							[
-#								'../../prebuilt/include',
-								'../../prebuilt/include/openssl',
+								'../../prebuilt/include',
 							],
 						},
 					],
@@ -148,8 +147,11 @@
 						'sources':
 						[
 							'../../engine/src/dummy.cpp',
+							# Provides backward-compat shims for symbols removed in
+							# OpenSSL 3.2+ (e.g. SSL_get_peer_certificate).
+							'src/revsecurity_compat.cpp',
 						],
-						
+
 						'xcode_settings':
 						{
 							'EXPORTED_SYMBOLS_FILE': '<(SHARED_INTERMEDIATE_DIR)/src/sslstubs.mac.symlist',

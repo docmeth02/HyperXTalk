@@ -54,9 +54,9 @@
 		09330172B85C4D1D06D015D1 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E2DA5452B823C357009773A /* CoreMedia.framework */; };
 		09FE4030A647B09B0DF833B3 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CB21686FC9AF4D760A6ED77 /* Carbon.framework */; };
 		0A9EC106EB27943A2F37C7DD /* libskia_opt_avx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F4A3210DE76DBDB428F98821 /* libskia_opt_avx.a */; };
+		0BBC9F2C810E2B1F60B6A274 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E7A08C34821897AFA26D37A6 /* libicutu.a */; };
 		0C204DAE12FED8C713C703ED /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0394DA2BF2241B11D547831F /* CoreGraphics.framework */; };
 		104D103D37D6315A3CD9C7E7 /* deploy_windows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7DB62ECE39647D467010B80 /* deploy_windows.cpp */; };
-		10EB16C5B9757B9166433C77 /* libicutu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B4E6744974E9103E5B1D376 /* libicutu.a */; };
 		134F823B6B4BF4C36B8FCA1A /* internal_development.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F27DEA8850FA411F2151F821 /* internal_development.cpp */; };
 		172F55610E24D409B6FB7AAA /* libskia_opt_sse41.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 87DC00717CE7BF047176CCDC /* libskia_opt_sse41.a */; };
 		1ED8DB0C97E641D11B3D6996 /* libcpptest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0030736C068AEA325C7ECAE /* libcpptest.a */; };
@@ -72,8 +72,8 @@
 		3D023FCEA40A9CD496D26ED8 /* libpcre.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 817A32315C603D41D303CF7E /* libpcre.a */; };
 		3D5FFEE519EE2D7576BF4B3E /* libFoundation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 719C3835370EAB8583A82D5E /* libFoundation.a */; };
 		3ECBC905B9B16A44CCF887C7 /* MediaToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8CB018D432725DC7D34730E /* MediaToolbox.framework */; };
-		4287FDE632C48F42B9FA9A45 /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 72AC813199D391BDA134912E /* libicuio.a */; };
 		443B386956D2DCEC147DA882 /* libkernel-development.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 38CF3FC37632B15427403F63 /* libkernel-development.a */; };
+		485ED3D9B553CBBA0AEC12FB /* libicuio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9372CDCB3826751B3DFA3891 /* libicuio.a */; };
 		4A597A96194C28E8285C26C9 /* test_path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 487D3B40D5836F5E30245C42 /* test_path.cpp */; };
 		504E4F95D84A77DDF5116AE9 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073A8D1667BD7FE38FB607A /* JavaScriptCore.framework */; };
 		51BE776EF2A5CD2DA2EFFD11 /* libskia_opt_sse2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 10D0EEE57CD9314682D6157D /* libskia_opt_sse2.a */; };
@@ -88,6 +88,8 @@
 		6D3DFB9BD084C481B68CDE8A /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45637A16CFB2AEAA2D43690A /* AudioToolbox.framework */; };
 		6EAE09FC3614678ED9C7075B /* mode_development.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3031B52D1EC75B6AD039DE7F /* mode_development.cpp */; };
 		70DBAF8383882BD3B60AFEC0 /* deploy_emscripten.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2BDD2A75C6906794268592AC /* deploy_emscripten.cpp */; };
+		76E06787AAD74B78FBB25070 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93DD8D9045B5883D30E58C23 /* libicudata.a */; };
+		79107306D0B63019E7211723 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 387B8B9744C95D65DC364A3F /* libicuuc.a */; };
 		7D5CA76927114BD34D9C9C6A /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 28FE5CBDEA057F453459CF44 /* Quartz.framework */; };
 		98DC1178C2EC8C16FBFD741D /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B54FD0861A0E4BA12C0B019 /* Cocoa.framework */; };
 		9F1FB62AECD2968FEE403148 /* test_lextable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C62FB3710F708D96649FFA99 /* test_lextable.cpp */; };
@@ -98,7 +100,6 @@
 		AEC8C9201E487245ED340472 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AC27DD238BC7323BC694B /* libjpeg.a */; };
 		B281F57A34B0876F51EB6E92 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FFC862B548543B289CB2DF0 /* CoreFoundation.framework */; };
 		B34E1996819788FAD627E52F /* deploy_sign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F25D6BB131D276A9504D58B7 /* deploy_sign.cpp */; };
-		B3ABFBAE85CCA5480FEB05C6 /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CCF2BB0C441A6DA8929DC07 /* libicuuc.a */; };
 		C2ADB5B49F8C79CFDCCB0941 /* libbrowser.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D96B0663562D675E04740995 /* libbrowser.a */; };
 		C59EEA1CC7EB605AA61A9E04 /* libskia_opt_sse42.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F1F1FFEE32DA7554294BD0AF /* libskia_opt_sse42.a */; };
 		C66255E3B0BF00702313A01E /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FF4898E5D3AD908EB6E76D0 /* IOKit.framework */; };
@@ -113,12 +114,11 @@
 		E509B90E11B2E69E9D2B907B /* deploy_dmg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C5BC1077FC09ED2470D2E0F /* deploy_dmg.cpp */; };
 		E65DF8B95DFC691C7C549E38 /* libopenssl_stubs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2D3CF9CE99FE02C98DF0D0C /* libopenssl_stubs.a */; };
 		EA9A1E3AD6D6D885BF6B5A53 /* encodederrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022AEC2BE67E41AA75AFFF8E /* encodederrors.cpp */; };
-		ECFAB7F81A461441FC769FC1 /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5462F52F819799AFA9973585 /* libicudata.a */; };
-		EFB4217A8F2538DD2B6B8162 /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A366C8AB30E4517E3242AFBB /* libicui18n.a */; };
 		F1062E5903D1563C806E7AC4 /* deploysecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B0A0EAB13EACF12B71B4BF2 /* deploysecurity.cpp */; };
 		F58A04545F4C3523A68B45DD /* deploy_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE466EC1E93D4D34DCC1E72 /* deploy_file.cpp */; };
 		F9205BD705449C95B0127060 /* deploy_linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B3AD29E09D1E0D1AFD9D548E /* deploy_linux.cpp */; };
 		FAA2F1B298D6BB6C28526B69 /* deploy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B99D1049A210C905378FAEE2 /* deploy.cpp */; };
+		FB7C38D3701447669CD7E42B /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EEDE675220F1A06C0B8559B8 /* libicui18n.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -822,6 +822,7 @@
 		28FE5CBDEA057F453459CF44 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		2BDD2A75C6906794268592AC /* deploy_emscripten.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = deploy_emscripten.cpp; sourceTree = "<group>"; };
 		3031B52D1EC75B6AD039DE7F /* mode_development.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mode_development.cpp; sourceTree = "<group>"; };
+		387B8B9744C95D65DC364A3F /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/libicuuc.a; sourceTree = "<group>"; };
 		38CF3FC37632B15427403F63 /* libkernel-development.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libkernel-development.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		393271C7E75C3A6F0410C5A3 /* fetch.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = fetch.xcodeproj; path = "../build-mac/livecode/prebuilt/fetch.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		3AE9571506E2BCC7F4CF57D0 /* target_os.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = target_os.gypi; path = ../config/target_os.gypi; sourceTree = "<group>"; };
@@ -837,7 +838,6 @@
 		4B54FD0861A0E4BA12C0B019 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4C207AA698CD0D3FE36F947B /* encode_errors.pl */ = {isa = PBXFileReference; lastKnownFileType = text.script.perl; path = encode_errors.pl; sourceTree = "<group>"; };
 		52C0A4CD5C327BEC40C921A9 /* libopenssl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libopenssl.xcodeproj; path = "../build-mac/livecode/prebuilt/libopenssl.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		5462F52F819799AFA9973585 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/x86_64/libicudata.a; sourceTree = "<group>"; };
 		565A71D3B95373D7B2C08727 /* libbrowser.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libbrowser.xcodeproj; path = "../build-mac/livecode/libbrowser/libbrowser.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		5730187F19BE999557E00CD6 /* configurations.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = configurations.gypi; path = ../config/configurations.gypi; sourceTree = "<group>"; };
 		5751E9544C4AE90FBCD41FCB /* win32.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = win32.gypi; path = ../config/win32.gypi; sourceTree = "<group>"; };
@@ -846,12 +846,10 @@
 		6C5BC1077FC09ED2470D2E0F /* deploy_dmg.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = deploy_dmg.cpp; sourceTree = "<group>"; };
 		6E327B7E2EB15D74DB7CE20A /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffi.a; path = ../prebuilt/lib/mac/libffi.a; sourceTree = "<group>"; };
 		6FF4898E5D3AD908EB6E76D0 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
-		72AC813199D391BDA134912E /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/x86_64/libicuio.a; sourceTree = "<group>"; };
 		740F1C297C967875DE788A46 /* perfect.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = perfect.xcodeproj; path = "../build-mac/livecode/util/perfect/perfect.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		76998B324DAFBE2BE50CBD78 /* thirdparty.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = thirdparty.xcodeproj; path = "../build-mac/livecode/prebuilt/thirdparty.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		77DC8C4107F1CDF733B26A69 /* bsdiff_build.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bsdiff_build.cpp; sourceTree = "<group>"; };
 		7C9B1972FB3A12D6E70EE17D /* libjpeg.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libjpeg.xcodeproj; path = "../build-mac/livecode/thirdparty/libjpeg/libjpeg.xcodeproj"; sourceTree = SOURCE_ROOT; };
-		7CCF2BB0C441A6DA8929DC07 /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = ../prebuilt/lib/mac/x86_64/libicuuc.a; sourceTree = "<group>"; };
 		7FFC862B548543B289CB2DF0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		807257DF49CA0DBF4C80AD41 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		827F809B9F2105BAF87F7A7F /* perl.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = perl.gypi; path = ../config/perl.gypi; sourceTree = "<group>"; };
@@ -859,14 +857,14 @@
 		877CFC32F7BC2103787995B8 /* common.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = common.gypi; path = ../common.gypi; sourceTree = "<group>"; };
 		8A6F5E6A2A4BC3A1317BD163 /* libicu.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libicu.xcodeproj; path = "../build-mac/livecode/prebuilt/libicu.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		8FE42D75C7CC8420B9E1C27E /* deploy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = deploy.h; sourceTree = "<group>"; };
+		9372CDCB3826751B3DFA3891 /* libicuio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuio.a; path = ../prebuilt/lib/mac/libicuio.a; sourceTree = "<group>"; };
+		93DD8D9045B5883D30E58C23 /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = ../prebuilt/lib/mac/libicudata.a; sourceTree = "<group>"; };
 		9969652178861332EC19F0DE /* libskia.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libskia.xcodeproj; path = "../build-mac/livecode/thirdparty/libskia/libskia.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		9A435A2C69F2EBBECBEBDE11 /* emscripten.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = emscripten.gypi; path = ../config/emscripten.gypi; sourceTree = "<group>"; };
 		9AC225220FBDC04B0452B34E /* emscripten-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "emscripten-settings.gypi"; path = "../config/emscripten-settings.gypi"; sourceTree = "<group>"; };
-		9B4E6744974E9103E5B1D376 /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/x86_64/libicutu.a; sourceTree = "<group>"; };
 		9D297C1BDF86C59B6FC09DD9 /* test-kernel-development */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "test-kernel-development"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A29C98C7B9A914189546C622 /* kernel-mode-template.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; path = "kernel-mode-template.gypi"; sourceTree = "<group>"; };
 		A363C8BBFC552F365F4F1EF8 /* crosscompile.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = crosscompile.gypi; path = ../config/crosscompile.gypi; sourceTree = "<group>"; };
-		A366C8AB30E4517E3242AFBB /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/x86_64/libicui18n.a; sourceTree = "<group>"; };
 		A4A988EFF1DB78AEFCDE0A49 /* linux-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "linux-settings.gypi"; path = "../config/linux-settings.gypi"; sourceTree = "<group>"; };
 		AA7E647E6E942AEA52C72072 /* parseerrors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parseerrors.h; sourceTree = "<group>"; };
 		AF297423FC1371524460D7C7 /* thirdparty.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = thirdparty.gypi; path = ../config/thirdparty.gypi; sourceTree = "<group>"; };
@@ -896,7 +894,9 @@
 		DE675E8D447CC7B007A36033 /* bsdiff.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bsdiff.h; sourceTree = "<group>"; };
 		E26E1E07C3CD990D72610F19 /* libffi.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libffi.xcodeproj; path = "../build-mac/livecode/thirdparty/libffi/libffi.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		E2FC94A78F21E419F6179870 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		E7A08C34821897AFA26D37A6 /* libicutu.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicutu.a; path = ../prebuilt/lib/mac/libicutu.a; sourceTree = "<group>"; };
 		E8FA8FCD32B9A6D89B392E82 /* test_new.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test_new.cpp; sourceTree = "<group>"; };
+		EEDE675220F1A06C0B8559B8 /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = ../prebuilt/lib/mac/libicui18n.a; sourceTree = "<group>"; };
 		F25D6BB131D276A9504D58B7 /* deploy_sign.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = deploy_sign.cpp; sourceTree = "<group>"; };
 		F27DEA8850FA411F2151F821 /* internal_development.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = internal_development.cpp; sourceTree = "<group>"; };
 		F45A0B8DF6F4931D48D8A2F7 /* ide.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ide.h; sourceTree = "<group>"; };
@@ -918,9 +918,7 @@
 				3D5FFEE519EE2D7576BF4B3E /* libFoundation.a in Frameworks */,
 				1F77E9B77486F56A80360372 /* libGraphics.a in Frameworks */,
 				A4C77D9FE02356254B0919E5 /* libkernel.a in Frameworks */,
-				2E431EEDC4B71F0CFF651671 /* libz.a in Frameworks */,
-				DE9341D303FB91141B7D2BB5 /* libffi.a in Frameworks */,
-				670089FF8281363D457AF624 /* libgif.a in Frameworks */,
+				2E431EEDC4B71F0CFF651671 /* libz.a in Frameworks */,				670089FF8281363D457AF624 /* libgif.a in Frameworks */,
 				D250594CA74357B5813D8588 /* libpng.a in Frameworks */,
 				AEC8C9201E487245ED340472 /* libjpeg.a in Frameworks */,
 				6B20C24BA8EFB50AA383A3F7 /* libskia.a in Frameworks */,
@@ -953,11 +951,11 @@
 				0C204DAE12FED8C713C703ED /* CoreGraphics.framework in Frameworks */,
 				55564CE986F611DB074EB578 /* CoreText.framework in Frameworks */,
 				62CD4E46ABBDB0F97645BD82 /* Foundation.framework in Frameworks */,
-				EFB4217A8F2538DD2B6B8162 /* libicui18n.a in Frameworks */,
-				4287FDE632C48F42B9FA9A45 /* libicuio.a in Frameworks */,
-				10EB16C5B9757B9166433C77 /* libicutu.a in Frameworks */,
-				B3ABFBAE85CCA5480FEB05C6 /* libicuuc.a in Frameworks */,
-				ECFAB7F81A461441FC769FC1 /* libicudata.a in Frameworks */,
+				FB7C38D3701447669CD7E42B /* libicui18n.a in Frameworks */,
+				485ED3D9B553CBBA0AEC12FB /* libicuio.a in Frameworks */,
+				0BBC9F2C810E2B1F60B6A274 /* libicutu.a in Frameworks */,
+				79107306D0B63019E7211723 /* libicuuc.a in Frameworks */,
+				76E06787AAD74B78FBB25070 /* libicudata.a in Frameworks */,
 				3938809757F343DC43AA1770 /* libffi.a in Frameworks */,
 				C8CD2D890E935A0FA7EBBEAA /* WebKit.framework in Frameworks */,
 				504E4F95D84A77DDF5116AE9 /* JavaScriptCore.framework in Frameworks */,
@@ -1349,11 +1347,11 @@
 				1BED9B45E577A5576D5BAC73 /* WebKit.framework */,
 				416ECCBCE466CABFF9A23F4C /* libcups.dylib */,
 				6E327B7E2EB15D74DB7CE20A /* libffi.a */,
-				5462F52F819799AFA9973585 /* libicudata.a */,
-				A366C8AB30E4517E3242AFBB /* libicui18n.a */,
-				72AC813199D391BDA134912E /* libicuio.a */,
-				9B4E6744974E9103E5B1D376 /* libicutu.a */,
-				7CCF2BB0C441A6DA8929DC07 /* libicuuc.a */,
+				93DD8D9045B5883D30E58C23 /* libicudata.a */,
+				EEDE675220F1A06C0B8559B8 /* libicui18n.a */,
+				9372CDCB3826751B3DFA3891 /* libicuio.a */,
+				E7A08C34821897AFA26D37A6 /* libicutu.a */,
+				387B8B9744C95D65DC364A3F /* libicuuc.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2618,7 +2616,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -3079,7 +3076,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (
@@ -3480,7 +3476,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(SDKROOT)/System/Library/Frameworks",
-					../prebuilt/lib/mac/x86_64,
 					../prebuilt/lib/mac,
 				);
 				OTHER_LDFLAGS = (

@@ -5,6 +5,11 @@
   All toolbar/window operations go through the ObjC glue dylib via c: bindings.
 */
 
+/**
+Title: macOS Toolbar
+Type: library
+Summary: Creates and manages native macOS NSToolbar instances.
+*/
 library com.hyperxtalk.macostoolbar
 
 metadata version is "2.0.0"

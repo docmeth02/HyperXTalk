@@ -1,10 +1,10 @@
-Library: com.hyperxtalk.library.animationengine
+Library: com.livecode.library.animationengine
 
 Type: library
 
 Title: AnimationEngine
 
-Version: 2.9
+Version: 6.0.1
 
 Author: derbrill Multimedia
 
