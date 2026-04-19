@@ -5382,11 +5382,12 @@ on aeChangeBackColor
    put item 1 of theValue into tControl
    if item 2 of theValue is a color and item 2 of theValue is not a number then
       -- we got no RGB values here
-      set the backcolor of grc "testColor" of stack "animationEngine" to item 2 of theValue
-      
-      set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-      
-      put the backcolor of grc "testColor" of stack "animationEngine" into tBackColor
+      set the backColor of the templateGraphic to (item 2 of theValue)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tBackColor
+      #set the backcolor of grc "testColor" of stack "animationEngine" to item 2 of theValue
+      #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+      #put the backcolor of grc "testColor" of stack "animationEngine" into tBackColor
       
       put item 3 of theValue into tDuration
       put item 4 of theValue into tMethod
@@ -5399,9 +5400,12 @@ on aeChangeBackColor
    if tBackColor is not a color then return "error:"&&tBackColor&&"is not a valid color"
    if tduration is not a number then return "error:"&&tDuration&&"is not a valid duration"
    if tMethod is not among the items of "in,out,inout,bounce,overshoot," then return "error:"&&tMethod&&"is not a valid easing method. Must be in,out or inOut"
-   set the backcolor of grc "testColor" of stack "animationEngine" to the effective backcolor of tControl
-   set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-   put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentBackColor   
+   set the backColor of the templateGraphic to (the effective backColor of tControl)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tCurrentBackColor
+   #set the backcolor of grc "testColor" of stack "animationEngine" to the effective backcolor of tControl
+   #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+   #put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentBackColor   
    if not sAELockBackColorChanging then
       put tBackColor,tDuration,tMethod,tCurrentBackColor,the milliseconds into tAeChangeBackColor[the long id of tControl]
       if "aeChangingBackColor" is not in the pendingmessages then
@@ -5551,9 +5555,12 @@ on aeChangeforeColor
    put item 1 of theValue into tControl
    if item 2 of theValue is a color and item 2 of theValue is not a number then
       -- we got no RGB values here
-      set the backcolor of grc "testColor" of stack "animationEngine" to item 2 of theValue
-      set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-      put the backcolor of grc "testColor" of stack "animationEngine" into tforeColor
+      set the backColor of the templateGraphic to (item 2 of theValue)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tForeColor
+      #set the backcolor of grc "testColor" of stack "animationEngine" to item 2 of theValue
+      #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+      #put the backcolor of grc "testColor" of stack "animationEngine" into tforeColor
       put item 3 of theValue into tDuration
       put item 4 of theValue into tMethod
    else
@@ -5565,9 +5572,12 @@ on aeChangeforeColor
    if tforeColor is not a color then return "error:"&&tforeColor&&"is not a valid color"
    if tduration is not a number then return "error:"&&tDuration&&"is not a valid duration"
    if tMethod is not among the items of "in,out,inout,bounce,overshoot," then return "error:"&&tMethod&&"is not a valid easing method. Must be in,out or inOut"
-   set the backcolor of grc "testColor" of stack "animationEngine" to the effective forecolor of tControl
-   set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-   put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentforeColor   
+   set the backColor of the templateGraphic to (the effective foreColor of tControl)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tCurrentForeColor
+   #set the backcolor of grc "testColor" of stack "animationEngine" to the effective forecolor of tControl
+   #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+   #put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentforeColor   
    if not sAELockforeColorChanging then
       put tforeColor,tDuration,tMethod,tCurrentforeColor,the milliseconds into tAeChangeforeColor[the long id of tControl]
       if "aeChangingforeColor" is not in the pendingmessages then
@@ -5864,11 +5874,12 @@ on aeChangeBackColorOfChunk
    end if
    if item 3 of theValue is a color and item 2 of theValue is not a number then
       -- we got no RGB values here
-      set the backcolor of grc "testColor" of stack "animationEngine" to item 3 of theValue
-      
-      set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-      
-      put the backcolor of grc "testColor" of stack "animationEngine" into tBackColorOfChunk
+      set the backColor of the templateGraphic to (item 3 of theValue)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tBackColorOfChunk
+      #set the backcolor of grc "testColor" of stack "animationEngine" to item 3 of theValue
+      #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+      #put the backcolor of grc "testColor" of stack "animationEngine" into tBackColorOfChunk
       
       put item 4 of theValue into tDuration
       put item 5 of theValue into tMethod
@@ -5881,9 +5892,12 @@ on aeChangeBackColorOfChunk
    if tBackColorOfChunk is not a color then return "error:"&&tBackColorOfChunk&&"is not a valid color"
    if tduration is not a number then return "error:"&&tDuration&&"is not a valid duration"
    if tMethod is not among the items of "in,out,inout,bounce,overshoot," then return "error:"&&tMethod&&"is not a valid easing method. Must be in,out or inOut"
-   set the backcolor of grc "testColor" of stack "animationEngine" to the effective backcolor of tTest2
-   set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-   put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentBackColorOfChunk   
+   set the backColor of the templateGraphic to (the effective backColor of tTest2)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tCurrentBackColorOfChunk
+   #set the backcolor of grc "testColor" of stack "animationEngine" to the effective backcolor of tTest2
+   #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+   #put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentBackColorOfChunk   
    local tKey
    put (tControl&","&tChunk) into tKey
    if not sAELockBackColorOfChunkChanging then
@@ -6055,11 +6069,12 @@ on aeChangeforecolorOfChunk
    end if
    if item 3 of theValue is a color and item 2 of theValue is not a number then
       -- we got no RGB values here
-      set the backcolor of grc "testColor" of stack "animationEngine" to item 3 of theValue
-      
-      set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-      
-      put the backcolor of grc "testColor" of stack "animationEngine" into tforecolorOfChunk
+      set the backColor of the templateGraphic to (item 3 of theValue)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tForeColorOfChunk
+      #set the backcolor of grc "testColor" of stack "animationEngine" to item 3 of theValue
+      #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+      #put the backcolor of grc "testColor" of stack "animationEngine" into tforecolorOfChunk
       
       put item 4 of theValue into tDuration
       put item 5 of theValue into tMethod
@@ -6072,9 +6087,12 @@ on aeChangeforecolorOfChunk
    if tforecolorOfChunk is not a color then return "error:"&&tforecolorOfChunk&&"is not a valid color"
    if tduration is not a number then return "error:"&&tDuration&&"is not a valid duration"
    if tMethod is not among the items of "in,out,inout,bounce,overshoot," then return "error:"&&tMethod&&"is not a valid easing method. Must be in,out or inOut"
-   set the backcolor of grc "testColor" of stack "animationEngine" to the effective forecolor of tTest2
-   set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
-   put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentforecolorOfChunk  
+   set the backColor of the templateGraphic to (the effective foreColor ot tTest2)
+      set the backPixel of the templateGraphic to (the effective backPixel of the templateGraphic)
+      put the backColor of the templateGraphic into tCurrentForeColorOfChunk
+   #set the backcolor of grc "testColor" of stack "animationEngine" to the effective forecolor of tTest2
+   #set the backpixel of grc "testColor" of stack "animationEngine" to the effective backpixel of grc "testColor" of stack "animationEngine"
+   #put the backcolor of grc "testColor" of stack "animationEngine" into tCurrentforecolorOfChunk  
    local tKey
    put (tControl&","&tChunk) into tKey
    if not sAELockforecolorOfChunkChanging then
