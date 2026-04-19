@@ -61,9 +61,11 @@ private on setupDevelopmentMenu
    local tPluginMenuText
    repeat for each line tPlugin in tPlugins
       if tPluginMenuText is empty then
-         put tab & tPlugin into tPluginMenuText
+         --         put tab & tPlugin into tPluginMenuText  // HXT
+         put tPlugin into tPluginMenuText
       else
-         put return & tab & tPlugin after tPluginMenuText
+         --         put return & tab & tPlugin after tPluginMenuText  // HXT
+         put return & tPlugin after tPluginMenuText
       end if
    end repeat
    put tPluginMenuText into sPluginMenuText
@@ -1249,7 +1251,7 @@ on revRestoreHilite
 end revRestoreHilite
 */
 function revMenubarMenus
-   return "File,Edit,Tools,Object,Text,Development,View,Window,Help"
+   return "File,Edit,Tools,Object,Text,Development,Plugins,View,Window,Help"
 end revMenubarMenus
 
 on highlightMenuItem pMenu, pSubMenus
@@ -1284,20 +1286,21 @@ command revMenubarBuildMenus
       enable button tMenu of group "revMenuBar"
    end repeat
    
-   if revIDETutorialInProgress() is not empty then
-      repeat for each item tMenu in revMenubarMenus()
-         # Don't disable the help menu during tutorials
-         if tMenu is "Help" then
-            next repeat
-         end if
-         disable button tMenu of group "revMenuBar" of me
-      end repeat
-      
-      repeat for each key tMenu in sMenuHighlight
-         enable button tMenu of group "revMenuBar" of me
-         highlightMenuItem tMenu, sMenuHighlight[tMenu]
-      end repeat
-   end if
+   // HXT
+   --   if revIDETutorialInProgress() is not empty then
+   --      repeat for each item tMenu in revMenubarMenus()
+   --         # Don't disable the help menu during tutorials
+   --         if tMenu is "Help" then
+   --            next repeat
+   --         end if
+   --         disable button tMenu of group "revMenuBar" of me
+   --      end repeat
+   
+   --      repeat for each key tMenu in sMenuHighlight
+   --         enable button tMenu of group "revMenuBar" of me
+   --         highlightMenuItem tMenu, sMenuHighlight[tMenu]
+   --      end repeat
+   --   end if
    unlock menus
    unlock messages
    unlock screen
@@ -1317,6 +1320,8 @@ function revMenubarBuildMenu pMenu, pContext
          return revMenubarTextMenu(pContext)
       case "Development"         
          return revMenubarDevelopmentMenu(pContext)
+      case "Plugins"
+         return hxtMenubarPluginsMenu(pContext)
       case "View"
          return revMenubarViewMenu(pContext)
       case "Window"
@@ -2028,6 +2033,21 @@ end revMenubarViewMenu
 
 ################################################################################
 
+private function hxtMenubarPluginsMenu pContext
+   global gREVSuppressErrors, gREVSuppressMessages
+   
+   local tIsUserTarget
+   put not revIDEStackIsIDEStack(the topstack) into tIsUserTarget
+   
+   local tPlugins
+   if sPluginMenuText is not empty then
+      put sPluginMenuText & return after tPlugins
+   end if
+   
+   return modifyMenu("Plugins", tPlugins)
+end hxtMenubarPluginsMenu
+
+
 private function revMenubarDevelopmentMenu pContext
    global gREVSuppressErrors, gREVSuppressMessages
    
@@ -2037,10 +2057,11 @@ private function revMenubarDevelopmentMenu pContext
    local tDevelopment
    put "Object Library" & return after tDevelopment
    put "Image Library" & return after tDevelopment
-   put "Plugins" & return after tDevelopment
-   if sPluginMenuText is not empty then
-      put sPluginMenuText & return after tDevelopment
-   end if
+   // HXT
+   --   put "Plugins" & return after tDevelopment
+   --   if sPluginMenuText is not empty then
+   --      put sPluginMenuText & return after tDevelopment
+   --   end if
    put tab & "-" & return after tDevelopment
    put tab & "Plugin Settings" & return after tDevelopment
    put "-" & return after tDevelopment
