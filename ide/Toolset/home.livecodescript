@@ -765,7 +765,7 @@ command revInternal__ResetPreferences
    put "22" into tPropsArray["cMenuHeight"]
    put "1067,251,1882,827" into tPropsArray["cRevDocsRect"]
    put "Gray88" into tPropsArray["cBackDropColor"]
-   put "Gray88" into tPropsArray["cBackdrop"]
+   put "none" into tPropsArray["cBackdrop"]
    put "false" into tPropsArray["cREVMsgShowUIFrontScripts"]
    put "false" into tPropsArray["revstack"]
    put "100" into tPropsArray["cMacOSProgressScrollbarWidth"]
