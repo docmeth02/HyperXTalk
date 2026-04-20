@@ -1904,8 +1904,8 @@ function revEnvironmentEditionProperty pProp, pEdition
                return 173,208,54
             case "pb_line_selected_color"
                return 226,238,185
-            case "revonline_hilite_color"
-               return 156,199,45
+               --            case "revonline_hilite_color"
+               --               return 156,199,45
             case "revabout_hilite_color"
                return 106,139,15
             case "revsplash_text_color"
@@ -1942,8 +1942,8 @@ function revEnvironmentEditionProperty pProp, pEdition
                return 49,163,102
             case "pb_line_selected_color"
                return 226,238,185
-            case "revonline_hilite_color"
-               return 49,163,102
+               --            case "revonline_hilite_color"
+               --               return 49,163,102
             case "revabout_hilite_color"
                return 49,163,102
             case "revsplash_text_color"
@@ -1981,8 +1981,8 @@ function revEnvironmentEditionProperty pProp, pEdition
                return 28,154,206
             case "pb_line_selected_color"
                return 222,243,255
-            case "revonline_hilite_color"
-               return 124,193,222
+               --            case "revonline_hilite_color"
+               --               return 124,193,222
             case "revabout_hilite_color"
                return 44,113,170
             case "revsplash_text_color"
@@ -2020,8 +2020,8 @@ function revEnvironmentEditionProperty pProp, pEdition
                return 82,82,82
             case "pb_line_selected_color"
                return 222,243,255
-            case "revonline_hilite_color"
-               return 124,193,222
+               --            case "revonline_hilite_color"
+               --               return 124,193,222
             case "revabout_hilite_color"
                return 44,113,170
             case "revsplash_text_color"
