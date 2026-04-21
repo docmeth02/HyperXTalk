@@ -49,7 +49,7 @@
 			[
 				'kernel.gyp:kernel',
 
-				'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
+				# libopenssl_stubs only on non-macOS; see kernel.gyp for rationale.
 #				'../prebuilt/thirdparty.gyp:thirdparty_prebuilt_z',
 				'../thirdparty/libz/libz.gyp:libz',
 			],
@@ -65,6 +65,15 @@
 					'mobile != 0',
 					{
 						'type': 'none',
+					},
+				],
+				[
+					'OS != "mac"',
+					{
+						'dependencies':
+						[
+							'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
+						],
 					},
 				],
 			],

@@ -112,7 +112,6 @@
 		DE9341D303FB91141B7D2BB5 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B2E1760568834DDEFEAEF35 /* libffi.a */; };
 		E122E53B28FF0418D482B610 /* deploy_macosx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 07930F813B683392EA29B286 /* deploy_macosx.cpp */; };
 		E509B90E11B2E69E9D2B907B /* deploy_dmg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6C5BC1077FC09ED2470D2E0F /* deploy_dmg.cpp */; };
-		E65DF8B95DFC691C7C549E38 /* libopenssl_stubs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2D3CF9CE99FE02C98DF0D0C /* libopenssl_stubs.a */; };
 		EA9A1E3AD6D6D885BF6B5A53 /* encodederrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 022AEC2BE67E41AA75AFFF8E /* encodederrors.cpp */; };
 		F1062E5903D1563C806E7AC4 /* deploysecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B0A0EAB13EACF12B71B4BF2 /* deploysecurity.cpp */; };
 		F58A04545F4C3523A68B45DD /* deploy_file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BDE466EC1E93D4D34DCC1E72 /* deploy_file.cpp */; };
@@ -423,26 +422,12 @@
 			remoteGlobalIDString = BC3ECB62D5BC7E33B008826B;
 			remoteInfo = "kernel-development";
 		};
-		6B22AEF7C059BC05F76EADA2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 7F31033BA37DB57E32A81D01;
-			remoteInfo = libopenssl_stubs;
-		};
 		6D52F0B96E1DB46BDD0C79DC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BBEC2A751C5FE7DF04A184FC /* libgif.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 7C337A9763975A7E903559B4;
 			remoteInfo = "libgif (host)";
-		};
-		6DC1A3D92CF0FFE5D7C4CDBA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8CEB79D217913334C8567E5B;
-			remoteInfo = libopenssl_stubs;
 		};
 		6F138626427E2A6FB8111F81 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -710,13 +695,6 @@
 			remoteGlobalIDString = AE0E83B8DECD5B9AC0C6312F;
 			remoteInfo = "security-community";
 		};
-		E227F04C5536C2FF914AA4B0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D7872EDD503BA3C35CF3AB25;
-			remoteInfo = revsecurity;
-		};
 		EA2216522F4763199C42F0E3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 740F1C297C967875DE788A46 /* perfect.xcodeproj */;
@@ -901,7 +879,6 @@
 		F27DEA8850FA411F2151F821 /* internal_development.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = internal_development.cpp; sourceTree = "<group>"; };
 		F45A0B8DF6F4931D48D8A2F7 /* ide.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ide.h; sourceTree = "<group>"; };
 		F4C2AC0AFB9E6BF483E9F6B8 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
-		F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libopenssl.xcodeproj; path = "../build-mac/livecode/thirdparty/libopenssl/libopenssl.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		F9B8E3FE0958B15F002610F5 /* kernel-development.gyp */ = {isa = PBXFileReference; explicitFileType = sourcecode; path = "kernel-development.gyp"; sourceTree = "<group>"; };
 		FB0562933F6DEB2391421CBB /* libz.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libz.xcodeproj; path = "../build-mac/livecode/thirdparty/libz/libz.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		FE88137A08A6ABE72298EB8D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -918,7 +895,9 @@
 				3D5FFEE519EE2D7576BF4B3E /* libFoundation.a in Frameworks */,
 				1F77E9B77486F56A80360372 /* libGraphics.a in Frameworks */,
 				A4C77D9FE02356254B0919E5 /* libkernel.a in Frameworks */,
-				2E431EEDC4B71F0CFF651671 /* libz.a in Frameworks */,				670089FF8281363D457AF624 /* libgif.a in Frameworks */,
+				2E431EEDC4B71F0CFF651671 /* libz.a in Frameworks */,
+				DE9341D303FB91141B7D2BB5 /* libffi.a in Frameworks */,
+				670089FF8281363D457AF624 /* libgif.a in Frameworks */,
 				D250594CA74357B5813D8588 /* libpng.a in Frameworks */,
 				AEC8C9201E487245ED340472 /* libjpeg.a in Frameworks */,
 				6B20C24BA8EFB50AA383A3F7 /* libskia.a in Frameworks */,
@@ -933,7 +912,6 @@
 				DB01AD2F21128DFFFCEBE71A /* libScript.a in Frameworks */,
 				22FE57BE1FB94A5E9E79CD0D /* stdscript.a in Frameworks */,
 				C2ADB5B49F8C79CFDCCB0941 /* libbrowser.a in Frameworks */,
-				E65DF8B95DFC691C7C549E38 /* libopenssl_stubs.a in Frameworks */,
 				3D023FCEA40A9CD496D26ED8 /* libpcre.a in Frameworks */,
 				6D3DFB9BD084C481B68CDE8A /* AudioToolbox.framework in Frameworks */,
 				B281F57A34B0876F51EB6E92 /* CoreFoundation.framework in Frameworks */,
@@ -1027,15 +1005,6 @@
 			children = (
 				D96B0663562D675E04740995 /* libbrowser.a */,
 				49DE313A6C95F165875CF898 /* libbrowser (host).a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		387A2EF5112F175ABEAC05C9 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A2D3CF9CE99FE02C98DF0D0C /* libopenssl_stubs.a */,
-				32AECC839B35870C51FD0445 /* revsecurity.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1137,7 +1106,7 @@
 			children = (
 				A3F71D7F407B84249A592547 /* Source */,
 				A279CB3E2DB4112823D050FA /* Intermediates */,
-				A0DFB087EC48C6D675D07627 /* Projects */,
+				976076DC077AFF962EEB93CC /* Projects */,
 				FC0BA92E0B3C564C114C09C0 /* Frameworks */,
 				2D7D08888E74C63E856A03DA /* Products */,
 				3A10B58E69405B8A6CD032DA /* Build */,
@@ -1153,6 +1122,33 @@
 				B01F63B061FFDC4E15737C6D /* test_rgb.cpp */,
 			);
 			path = test;
+			sourceTree = "<group>";
+		};
+		976076DC077AFF962EEB93CC /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				408D427A79F773D223356398 /* engine-common.xcodeproj */,
+				393271C7E75C3A6F0410C5A3 /* fetch.xcodeproj */,
+				C047A3B6D76E220E6274E959 /* kernel.xcodeproj */,
+				565A71D3B95373D7B2C08727 /* libbrowser.xcodeproj */,
+				026DE7CFA0483DF5985A7EAA /* libcpptest.xcodeproj */,
+				DC31C2BE60169ABBC02E1799 /* libexpat.xcodeproj */,
+				E26E1E07C3CD990D72610F19 /* libffi.xcodeproj */,
+				DA38375A3F6E3005FF0D27BA /* libfoundation.xcodeproj */,
+				BBEC2A751C5FE7DF04A184FC /* libgif.xcodeproj */,
+				845487E510673B13DFA18A00 /* libgraphics.xcodeproj */,
+				8A6F5E6A2A4BC3A1317BD163 /* libicu.xcodeproj */,
+				7C9B1972FB3A12D6E70EE17D /* libjpeg.xcodeproj */,
+				52C0A4CD5C327BEC40C921A9 /* libopenssl.xcodeproj */,
+				1ADF8C5FB0034D896D44E87B /* libpcre.xcodeproj */,
+				D0933ABE0BEC644238769C35 /* libpng.xcodeproj */,
+				1B14253C81A6E888C05FE528 /* libscript.xcodeproj */,
+				9969652178861332EC19F0DE /* libskia.xcodeproj */,
+				FB0562933F6DEB2391421CBB /* libz.xcodeproj */,
+				740F1C297C967875DE788A46 /* perfect.xcodeproj */,
+				76998B324DAFBE2BE50CBD78 /* thirdparty.xcodeproj */,
+			);
+			name = Projects;
 			sourceTree = "<group>";
 		};
 		9B0B92D49413F8BF081A39B3 /* Products */ = {
@@ -1198,34 +1194,6 @@
 			children = (
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A0DFB087EC48C6D675D07627 /* Projects */ = {
-			isa = PBXGroup;
-			children = (
-				408D427A79F773D223356398 /* engine-common.xcodeproj */,
-				393271C7E75C3A6F0410C5A3 /* fetch.xcodeproj */,
-				C047A3B6D76E220E6274E959 /* kernel.xcodeproj */,
-				565A71D3B95373D7B2C08727 /* libbrowser.xcodeproj */,
-				026DE7CFA0483DF5985A7EAA /* libcpptest.xcodeproj */,
-				DC31C2BE60169ABBC02E1799 /* libexpat.xcodeproj */,
-				E26E1E07C3CD990D72610F19 /* libffi.xcodeproj */,
-				DA38375A3F6E3005FF0D27BA /* libfoundation.xcodeproj */,
-				BBEC2A751C5FE7DF04A184FC /* libgif.xcodeproj */,
-				845487E510673B13DFA18A00 /* libgraphics.xcodeproj */,
-				8A6F5E6A2A4BC3A1317BD163 /* libicu.xcodeproj */,
-				7C9B1972FB3A12D6E70EE17D /* libjpeg.xcodeproj */,
-				F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */,
-				52C0A4CD5C327BEC40C921A9 /* libopenssl.xcodeproj */,
-				1ADF8C5FB0034D896D44E87B /* libpcre.xcodeproj */,
-				D0933ABE0BEC644238769C35 /* libpng.xcodeproj */,
-				1B14253C81A6E888C05FE528 /* libscript.xcodeproj */,
-				9969652178861332EC19F0DE /* libskia.xcodeproj */,
-				FB0562933F6DEB2391421CBB /* libz.xcodeproj */,
-				740F1C297C967875DE788A46 /* perfect.xcodeproj */,
-				76998B324DAFBE2BE50CBD78 /* thirdparty.xcodeproj */,
-			);
-			name = Projects;
 			sourceTree = "<group>";
 		};
 		A279CB3E2DB4112823D050FA /* Intermediates */ = {
@@ -1403,7 +1371,6 @@
 				CA912FF3F81E29740B8F6140 /* PBXTargetDependency */,
 				BAFED8BC5ADB17CEFADBABB7 /* PBXTargetDependency */,
 				8BAF061690622806BF5D7887 /* PBXTargetDependency */,
-				4F275CDBAA462BEE54A1090D /* PBXTargetDependency */,
 				DE9684C84D4A93A91A0480EF /* PBXTargetDependency */,
 				1708874E805A9FD68BFDDF2B /* PBXTargetDependency */,
 				8D5C791D5618308E72FDF903 /* PBXTargetDependency */,
@@ -1495,10 +1462,6 @@
 				{
 					ProductGroup = 5FD9CB606B77A8F845CDCBAA /* Products */;
 					ProjectRef = 7C9B1972FB3A12D6E70EE17D /* libjpeg.xcodeproj */;
-				},
-				{
-					ProductGroup = 387A2EF5112F175ABEAC05C9 /* Products */;
-					ProjectRef = F976E9215B54BCF60B66FFAA /* libopenssl.xcodeproj */;
 				},
 				{
 					ProductGroup = 9EDD144F68EA68FAA3282EA2 /* Products */;
@@ -1643,13 +1606,6 @@
 			remoteRef = E125165AA471152AE8FA5895 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		32AECC839B35870C51FD0445 /* revsecurity.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			path = revsecurity.dylib;
-			remoteRef = E227F04C5536C2FF914AA4B0 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		3AB464EC45095D9FF729950A /* libGraphics (host).a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1781,13 +1737,6 @@
 			fileType = "compiled.mach-o.executable";
 			path = "perfect-target";
 			remoteRef = EA2216522F4763199C42F0E3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		A2D3CF9CE99FE02C98DF0D0C /* libopenssl_stubs.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libopenssl_stubs.a;
-			remoteRef = 6DC1A3D92CF0FFE5D7C4CDBA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		BE273839F3EA5791D7AE2668 /* libgif (host).a */ = {
@@ -2045,11 +1994,6 @@
 			name = libz;
 			targetProxy = F09DCC84ECC7A38CE1365B4B /* PBXContainerItemProxy */;
 		};
-		4F275CDBAA462BEE54A1090D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libopenssl_stubs;
-			targetProxy = 6B22AEF7C059BC05F76EADA2 /* PBXContainerItemProxy */;
-		};
 		56446D93EC486060DF356EDD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = libskia_opt_sse42;
@@ -2259,7 +2203,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -2676,7 +2619,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -2835,7 +2777,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -2931,7 +2872,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -3132,7 +3072,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -3322,7 +3261,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,

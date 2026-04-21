@@ -20,7 +20,14 @@
 
 				'../libbrowser/libbrowser.gyp:libbrowser',
 
-				'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
+				# libopenssl_stubs generates dlopen("revsecurity") wrappers for all
+				# OpenSSL symbols.  On macOS, OpenSSL is statically linked via
+				# libcustomssl.a / libcustomcrypto.a — there is no revsecurity.dylib,
+				# so the stubs fail to load and SSL never initialises.  On macOS we
+				# use openssl3_static_stubs.cpp instead (no-op initialise_weak_link_*
+				# functions); the direct OpenSSL symbols resolve at link time.
+				# On all other platforms keep the dynamic-loader stubs as before.
+				# (dependency moved into conditions below)
 
 				'../prebuilt/libopenssl.gyp:libopenssl_headers',
 
@@ -126,6 +133,25 @@
 							# dispatch methods as it helps catch certain errors at
 							# compile time rather than run time.
 							'OBJC_OLD_DISPATCH_PROTOTYPES=0',
+						],
+
+						# On macOS, OpenSSL is statically linked — no revsecurity.dylib
+						# exists, so libopenssl_stubs would fail to dlopen it.  Instead,
+						# we supply no-op initialise/finalise_weak_link_* stubs here and
+						# let the linker resolve all OpenSSL symbols from libcustomssl.a /
+						# libcustomcrypto.a directly.
+						'sources':
+						[
+							'src/openssl3_static_stubs.cpp',
+						],
+					},
+				],
+				[
+					'OS != "mac"',
+					{
+						'dependencies':
+						[
+							'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
 						],
 					},
 				],

@@ -82,19 +82,41 @@
 		{
 			'target_name': 'security-community',
 			'type': 'static_library',
-			
+
 			'dependencies':
 			[
-				'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
-
 				# Because our headers are so messed up...
 				'../libfoundation/libfoundation.gyp:libFoundation',
 				'../libgraphics/libgraphics.gyp:libGraphics',
 			],
-			
+
 			'sources':
 			[
 				'<@(engine_security_source_files)',
+			],
+
+			'conditions':
+			[
+				[
+					'OS == "mac"',
+					{
+						# macOS: OpenSSL is statically linked; supply no-op stubs so
+						# initialise_weak_link_* resolve without dlopen("revsecurity").
+						'sources':
+						[
+							'src/openssl3_static_stubs.cpp',
+						],
+					},
+				],
+				[
+					'OS != "mac"',
+					{
+						'dependencies':
+						[
+							'../thirdparty/libopenssl/libopenssl.gyp:libopenssl_stubs',
+						],
+					},
+				],
 			],
 		},
 

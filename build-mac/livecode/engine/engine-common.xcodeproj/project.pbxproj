@@ -69,7 +69,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		8CC0833BEC5FD537A33AC553 /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */; };
+		336C5DB9B1DC47138AA5FDDD /* openssl3_static_stubs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */; };
+		CD12BA9D63B92C1F5603481B /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +116,7 @@
 		1BE98DD5D753C475795D58B2 /* crosscompile.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = crosscompile.gypi; path = ../config/crosscompile.gypi; sourceTree = "<group>"; };
 		1EADC1118B5E9BE3AB877DF6 /* exclusions.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = exclusions.gypi; path = ../config/exclusions.gypi; sourceTree = "<group>"; };
 		25A2344DEE21501A7B73ADBE /* ios.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = ios.gypi; path = ../config/ios.gypi; sourceTree = "<group>"; };
+		28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = openssl3_static_stubs.cpp; sourceTree = "<group>"; };
 		2BE76DBEB08284AA3213064D /* emscripten-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "emscripten-settings.gypi"; path = "../config/emscripten-settings.gypi"; sourceTree = "<group>"; };
 		5768E85A3E229CC1A81BC930 /* revbuild.h.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = revbuild.h.in; sourceTree = "<group>"; };
 		5FF35810A5965AA66217D086 /* stacksecurity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stacksecurity.h; sourceTree = "<group>"; };
@@ -189,12 +191,23 @@
 			path = util;
 			sourceTree = "<group>";
 		};
+		41B33B1F1738D5C9B95D9B97 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */,
+				6288E60A28F32B430E1511B0 /* quicktime.stubs */,
+				95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */,
+				5FF35810A5965AA66217D086 /* stacksecurity.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		6163E3DEE878164531AEB59C /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				95FDD66906CFE7B46EA35F58 /* .. */,
 				C006D2D13C5C91FE94FED74C /* include */,
-				9E4CC89BF5C8A6828EA2765D /* src */,
+				41B33B1F1738D5C9B95D9B97 /* src */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -242,16 +255,6 @@
 				6A223934E6E9B1DA742B198A /* version */,
 			);
 			path = ..;
-			sourceTree = "<group>";
-		};
-		9E4CC89BF5C8A6828EA2765D /* src */ = {
-			isa = PBXGroup;
-			children = (
-				6288E60A28F32B430E1511B0 /* quicktime.stubs */,
-				95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */,
-				5FF35810A5965AA66217D086 /* stacksecurity.h */,
-			);
-			path = src;
 			sourceTree = "<group>";
 		};
 		C006D2D13C5C91FE94FED74C /* include */ = {
@@ -352,7 +355,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec perl ../util/encode_version.pl -5b3c8cd7ad11a754d91b7a81bb9b72febade47ff . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
+			shellScript = "exec perl ../util/encode_version.pl -6b23b32163c196e3a3c1bc1b10f9c503c7b9597a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
 			showEnvVarsInLog = 0;
 		};
 		5979130A0D81773A45CFF55F /* Action "encode_version" */ = {
@@ -371,7 +374,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec perl ../util/encode_version.pl -5b3c8cd7ad11a754d91b7a81bb9b72febade47ff . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
+			shellScript = "exec perl ../util/encode_version.pl -6b23b32163c196e3a3c1bc1b10f9c503c7b9597a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
 			showEnvVarsInLog = 0;
 		};
 		FB45D465600427BE1263DCF1 /* Action "quicktime_stubs" */ = {
@@ -399,7 +402,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8CC0833BEC5FD537A33AC553 /* stacksecurity.cpp in Sources */,
+				CD12BA9D63B92C1F5603481B /* stacksecurity.cpp in Sources */,
+				336C5DB9B1DC47138AA5FDDD /* openssl3_static_stubs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -457,7 +461,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -635,7 +638,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,
@@ -1308,7 +1310,6 @@
 					SK_SUPPORT_LEGACY_CLIP_REGIONOPS,
 					SK_SUPPORT_LEGACY_GETDEVICE,
 					"SK_SUPPORT_GPU=0",
-					"OPENSSL_API_COMPAT=0x30400000L",
 					CROSS_COMPILE_TARGET,
 					TARGET_PLATFORM_MACOS_X,
 					_MACOSX,

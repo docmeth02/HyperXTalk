@@ -503,14 +503,9 @@ on ulGetFormat pUrl,pCount
       exit "ulGetFormat"
    end try
    
-   if tPre is "https" and char 1 to 3 of the version < 2.6  then
-      put "https protocol not supported in this version" into laUrlErrorStatus[pUrl]
-      if laLoadReq[pUrl] then
-         put "error" into laUrlLoadStatus[pUrl]
-         delete local laLoadingUrls[pUrl]
-      end if
-      exit "ulGetFormat"
-   end if
+   -- Version guard removed: HyperXTalk version strings begin with "0.9"
+   -- which numerically < 2.6, causing this check to incorrectly block HTTPS.
+   -- OpenSSL is built in; HTTPS is always supported.
    
    ##set connection IP
    switch tPre

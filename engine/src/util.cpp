@@ -3278,12 +3278,12 @@ void *MCSupportLibraryLoad(const char *p_name_cstr)
             &t_module = MCU_library_load(*t_relative_filename);
         }
     }
-    
+
     if (!t_module.IsSet())
     {
         return nullptr;
     }
-    
+
     return t_module.Take();
 }
 
@@ -3330,7 +3330,7 @@ void *MCSupportLibraryLookupSymbol(void *p_handle,
     {
         return nullptr;
     }
- 
+
     return MCU_library_lookup(static_cast<MCSLibraryRef>(p_handle),
                               *t_symbol);
 }
