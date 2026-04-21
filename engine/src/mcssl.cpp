@@ -951,49 +951,41 @@ bool ssl_set_default_certificates(SSL_CTX *p_ssl_ctx)
 bool export_system_root_cert_stack(STACK_OF(X509) *&r_x509_stack)
 {
 	bool t_success = true;
-	
+
 	CFArrayRef t_anchors = NULL;
 	STACK_OF(X509) *t_stack = NULL;
-	
+
 	t_success = noErr == SecTrustCopyAnchorCertificates(&t_anchors);
-	
+
 	t_stack = sk_X509_new(NULL);
 	if (t_success)
 	{
-		UInt32 t_anchor_count = CFArrayGetCount(t_anchors);
-		for (UInt32 i = 0; t_success && i < t_anchor_count; i++)
+		CFIndex t_anchor_count = CFArrayGetCount(t_anchors);
+		for (CFIndex i = 0; i < t_anchor_count; i++)
 		{
-			X509 *t_x509 = NULL;
-			const unsigned char* t_data_ptr = NULL;
-			UInt32 t_data_len = 0;
-			
-			CSSM_DATA t_cert_data;
-			t_success = noErr == SecCertificateGetData((SecCertificateRef)CFArrayGetValueAtIndex(t_anchors, i), &t_cert_data);
-			
-			if (t_success)
-			{
-//				const unsigned char* t_cert_data_ptr = CFDataGetBytePtr(t_cert_data_ref);
-//				CFIndex t_cert_data_len = CFDataGetLength(t_cert_data_ref);
-//				t_success = NULL != (t_x509 = d2i_X509(NULL, &t_cert_data_ptr, t_cert_data_len));
-//				CFRelease(t_cert_data_ref);
+			SecCertificateRef t_cert_ref =
+				(SecCertificateRef)CFArrayGetValueAtIndex(t_anchors, i);
 
-				t_data_ptr = t_cert_data.Data;
-				t_data_len = t_cert_data.Length;
-				t_success = NULL != (t_x509 = d2i_X509(NULL, &t_data_ptr, t_data_len));
-			}
-			if (t_success)
-				t_success = 0 != sk_X509_push(t_stack, t_x509);
+			// Use the modern CFData API — the old CSSM SecCertificateGetData
+			// API was removed on macOS ARM64 / macOS 12+.
+			CFDataRef t_cert_data = SecCertificateCopyData(t_cert_ref);
+			if (t_cert_data == NULL)
+				continue;
+
+			const unsigned char *t_data_ptr = CFDataGetBytePtr(t_cert_data);
+			CFIndex t_data_len = CFDataGetLength(t_cert_data);
+			X509 *t_x509 = d2i_X509(NULL, &t_data_ptr, (long)t_data_len);
+			CFRelease(t_cert_data);
+
+			if (t_x509 != NULL)
+				sk_X509_push(t_stack, t_x509);
 		}
 	}
-	
+
 	if (t_anchors != NULL)
 		CFRelease(t_anchors);
-	
-	if (t_success)
-		r_x509_stack = t_stack;
-	else if (t_stack != NULL)
-		free_x509_stack(t_stack);
 
+	r_x509_stack = t_stack;
 	return t_success;
 }
 
