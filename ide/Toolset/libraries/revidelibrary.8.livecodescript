@@ -3399,7 +3399,10 @@ on revIDECreateObject pObjectTypeID, pTarget, pLoc
          
          local tSize
          put revIDEExtensionProperty(pObjectTypeID, "preferredsize") into tSize
-         if tSize is not empty then
+         if (pObjectTypeID = "com.livecode.widget.iconpicker") then  // HXT
+            put 300 into tObjPropsA["width"]["default"]
+            put 180 into tObjPropsA["height"]["default"]
+         else if tSize is not empty then
             put item 1 of tSize into tObjPropsA["width"]["default"]
             put item 2 of tSize into tObjPropsA["height"]["default"]
          end if
