@@ -357,6 +357,13 @@
 			remoteGlobalIDString = 7DEACFB1A1F4306E1B5FECB7;
 			remoteInfo = "kernel-java";
 		};
+		BA494099546EB558515F9F1D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 81EDD5D1381CD520284AE382 /* libopenssl.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 69241D02BBB0F91E794CA7C3;
+			remoteInfo = libopenssl;
+		};
 		F0E475EBADC923E112F82B0E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 966A46EE98F1983261653F4C /* engine-common.xcodeproj */;
@@ -2159,6 +2166,7 @@
 				C9078CD3DD34A261B397390C /* PBXTargetDependency */,
 				66DBF6EB3C25FA906A9BB7C1 /* PBXTargetDependency */,
 				70C4EDA792F3D4A1FACBF658 /* PBXTargetDependency */,
+				4AEEA7D5C25702A429426198 /* PBXTargetDependency */,
 			);
 			name = kernel;
 			productName = kernel;
@@ -2510,6 +2518,11 @@
 			isa = PBXTargetDependency;
 			target = 7DEACFB1A1F4306E1B5FECB7 /* kernel-java */;
 			targetProxy = 62A9BC1A5621616FC86DF328 /* PBXContainerItemProxy */;
+		};
+		4AEEA7D5C25702A429426198 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libopenssl;
+			targetProxy = BA494099546EB558515F9F1D /* PBXContainerItemProxy */;
 		};
 		66DBF6EB3C25FA906A9BB7C1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

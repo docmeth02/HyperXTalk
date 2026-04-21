@@ -69,8 +69,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		336C5DB9B1DC47138AA5FDDD /* openssl3_static_stubs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */; };
-		CD12BA9D63B92C1F5603481B /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */; };
+		10113DAB3018601C03B1FCD9 /* openssl3_static_stubs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */; };
+		CE73E52DC3ABC1E67F19F205 /* stacksecurity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 95020C4D02CC2E1B96A80E37 /* stacksecurity.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +80,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = EA219835D8369B5DC8BC871E;
 			remoteInfo = "encode_version (host)";
+		};
+		5D688D01A19B3771FCF68285 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27E813F41E5007357B4F06B4 /* libopenssl.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 69241D02BBB0F91E794CA7C3;
+			remoteInfo = libopenssl;
 		};
 		ADBF6F328B6D7DC134EEC055 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -116,6 +123,7 @@
 		1BE98DD5D753C475795D58B2 /* crosscompile.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = crosscompile.gypi; path = ../config/crosscompile.gypi; sourceTree = "<group>"; };
 		1EADC1118B5E9BE3AB877DF6 /* exclusions.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = exclusions.gypi; path = ../config/exclusions.gypi; sourceTree = "<group>"; };
 		25A2344DEE21501A7B73ADBE /* ios.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = ios.gypi; path = ../config/ios.gypi; sourceTree = "<group>"; };
+		27E813F41E5007357B4F06B4 /* libopenssl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libopenssl.xcodeproj; path = "../build-mac/livecode/prebuilt/libopenssl.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		28935F0F52B5B1B2555E74B5 /* openssl3_static_stubs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = openssl3_static_stubs.cpp; sourceTree = "<group>"; };
 		2BE76DBEB08284AA3213064D /* emscripten-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "emscripten-settings.gypi"; path = "../config/emscripten-settings.gypi"; sourceTree = "<group>"; };
 		5768E85A3E229CC1A81BC930 /* revbuild.h.in */ = {isa = PBXFileReference; lastKnownFileType = text; path = revbuild.h.in; sourceTree = "<group>"; };
@@ -202,6 +210,17 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		530C7B5D746D68DE0FB49EA9 = {
+			isa = PBXGroup;
+			children = (
+				6163E3DEE878164531AEB59C /* Source */,
+				02252DA958F273B05B63A47F /* Intermediates */,
+				86561D9C926042B18B41C690 /* Projects */,
+				83525F4E7AD597002F2DA9A4 /* Products */,
+				6BA8CB94B62C067144479A38 /* Build */,
+			);
+			sourceTree = "<group>";
+		};
 		6163E3DEE878164531AEB59C /* Source */ = {
 			isa = PBXGroup;
 			children = (
@@ -248,6 +267,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		86561D9C926042B18B41C690 /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				27E813F41E5007357B4F06B4 /* libopenssl.xcodeproj */,
+			);
+			name = Projects;
+			sourceTree = "<group>";
+		};
 		95FDD66906CFE7B46EA35F58 /* .. */ = {
 			isa = PBXGroup;
 			children = (
@@ -257,22 +284,19 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
+		9BCEB09A5E04CB404F45DFBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		C006D2D13C5C91FE94FED74C /* include */ = {
 			isa = PBXGroup;
 			children = (
 				5768E85A3E229CC1A81BC930 /* revbuild.h.in */,
 			);
 			path = include;
-			sourceTree = "<group>";
-		};
-		DFCF94C7E2A1E1F4026D4A78 = {
-			isa = PBXGroup;
-			children = (
-				6163E3DEE878164531AEB59C /* Source */,
-				02252DA958F273B05B63A47F /* Intermediates */,
-				83525F4E7AD597002F2DA9A4 /* Products */,
-				6BA8CB94B62C067144479A38 /* Build */,
-			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,6 +312,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				35608F30C927A09409BFFFC6 /* PBXTargetDependency */,
 			);
 			name = "security-community";
 			productName = "security-community";
@@ -306,8 +331,14 @@
 			buildConfigurationList = C4368CBB9595D34C2E68B6DF /* Build configuration list for PBXProject "engine-common" */;
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 1;
-			mainGroup = DFCF94C7E2A1E1F4026D4A78;
+			mainGroup = 530C7B5D746D68DE0FB49EA9;
 			projectDirPath = ../../../engine;
+			projectReferences = (
+				{
+					ProductGroup = 9BCEB09A5E04CB404F45DFBB /* Products */;
+					ProjectRef = 27E813F41E5007357B4F06B4 /* libopenssl.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				189ECD91D398DC06C5650D1F /* All */,
@@ -355,7 +386,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec perl ../util/encode_version.pl -6b23b32163c196e3a3c1bc1b10f9c503c7b9597a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
+			shellScript = "exec perl ../util/encode_version.pl -ce9b0553c8876138c24fdea5f21e4fadec7de57a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
 			showEnvVarsInLog = 0;
 		};
 		5979130A0D81773A45CFF55F /* Action "encode_version" */ = {
@@ -374,7 +405,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec perl ../util/encode_version.pl -6b23b32163c196e3a3c1bc1b10f9c503c7b9597a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
+			shellScript = "exec perl ../util/encode_version.pl -ce9b0553c8876138c24fdea5f21e4fadec7de57a . \"${SHARED_INTERMEDIATE_DIR}\"\nexit 1\n";
 			showEnvVarsInLog = 0;
 		};
 		FB45D465600427BE1263DCF1 /* Action "quicktime_stubs" */ = {
@@ -402,8 +433,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CD12BA9D63B92C1F5603481B /* stacksecurity.cpp in Sources */,
-				336C5DB9B1DC47138AA5FDDD /* openssl3_static_stubs.cpp in Sources */,
+				CE73E52DC3ABC1E67F19F205 /* stacksecurity.cpp in Sources */,
+				10113DAB3018601C03B1FCD9 /* openssl3_static_stubs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,6 +450,11 @@
 			isa = PBXTargetDependency;
 			target = BE13AE89CAF8762C216B4582 /* encode_version */;
 			targetProxy = BDC27F81A6F160A1D2DC4540 /* PBXContainerItemProxy */;
+		};
+		35608F30C927A09409BFFFC6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libopenssl;
+			targetProxy = 5D688D01A19B3771FCF68285 /* PBXContainerItemProxy */;
 		};
 		8CDDD9F34CB20C90CEA9A5CC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
