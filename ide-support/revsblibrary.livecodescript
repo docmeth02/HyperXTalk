@@ -867,7 +867,7 @@ on revSBDefaultStandaloneSettings pStack, @xSettingsA
       if revEnvironmentIsInstalled() then
          put revEnvironmentResourcesPath() & "/Sample Icons" into tName
       else
-         put revEnvironmentRuntimePath() & "/Windows/x86-32/Support/Sample Icons" into tName
+         put revEnvironmentRuntimePath() & "/Windows/x86-64/Support/Sample Icons" into tName
       end if
       if xSettingsA["Windows,iconFile"] = "" then put tName & "/genericapp.ico" into xSettingsA["Windows,iconFile"]
       if xSettingsA["Windows,documenticonFile"] = "" then put tName & "/genericdoc.ico" into xSettingsA["Windows,documenticonFile"]
