@@ -220,11 +220,8 @@ on revInternal__openStack
       end if
       
       if tSuccess and not revEnvironmentIsInstalled() then
-         -- HXT: Run BuildDictionary asynchronously so it doesn't block IDE startup.
-         -- On first run revIDEGenerateDistributedDocs can take several minutes; deferring
-         -- it means the IDE window opens immediately and docs finish building in the background.
-         hxtInternal__setSplashStatus "Building Dictionary (background)..."
-         send "revInternal__BuildDictionary" to me in 0 milliseconds
+         hxtInternal__setSplashStatus "Building Dictionary..."
+         revInternal__BuildDictionary
          put true into tSuccess
       end if
       
@@ -250,14 +247,14 @@ on revInternal__openStack
          modal stack "revFileAssociations"
       end if
    end if
-
-      close stack "revSplash"
-      
-      revInternal__Log "Leave", "revInternal__openStack"
-      revInternal__Log "End"
-      
-      -- Now the home stack has loaded, we can allow interrupts..
-      set the allowInterrupts to true
+   
+   close stack "revSplash"
+   
+   revInternal__Log "Leave", "revInternal__openStack"
+   revInternal__Log "End"
+   
+   -- Now the home stack has loaded, we can allow interrupts..
+   set the allowInterrupts to true
 end revInternal__openStack
 
 on hxtInternal__setSplashStatus pMessage
