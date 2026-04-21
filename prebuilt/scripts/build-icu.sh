@@ -68,8 +68,8 @@ if [ ! -d "$ICU_SRC" ] ; then
 	fi
 	ICU_SHASUM_URL="${ICU_ROOT}${ICU_VERSION_DASH}/${ICU_MD5_URL}"
 
-	# validate the checksum
-	if [ 0 != "${ICU_CHECKSUM}" ] ; then
+	# validate the checksum (skip for ICU 58 — its shasum file lacks parseable checksums)
+	if [ 0 != "${ICU_CHECKSUM}" ] && [ "${ICU_VERSION_MAJOR}" != "58" ] ; then
 		echo "Fetching checksum file ${ICU_CHECKSUM} "
 		fetchUrl ${ICU_CHECKSUM} "KEYS"
 		if [ $? != 0 ] ; then
@@ -107,7 +107,7 @@ if [ ! -d "$ICU_SRC" ] ; then
 
 	# Fix for modern glibc (2.26+) where xlocale.h was removed
 	find "${ICU_SRC}" \( -name "*.cpp" -o -name "*.c" \) | xargs grep -l "xlocale.h" 2>/dev/null | while read f; do
-		sed -i.bak 's/#include <xlocale.h>/#include <locale.h>/g' "$f" && rm -f "$f.bak"
+		sed -i.bak 's/xlocale.h/locale.h/g' "$f" && rm -f "$f.bak"
 	done
 fi
 
