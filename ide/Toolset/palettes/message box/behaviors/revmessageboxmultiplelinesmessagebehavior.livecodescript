@@ -29,12 +29,6 @@ on commandKeyDown pKey
    end if
    if pKey is "V" then
       put clipboardData["text"] into the selectedChunk
-      scriptFormat "script"
-      // HXT dark mode: scriptFormat bakes 0,0,0 per-char colors; clear them
-      // so the field's foregroundColor (set by __UpdateMessageColors) shows.
-      if the systemAppearance is "dark" and the number of chars of me > 0 then
-         set the foregroundColor of char 1 to -1 of me to empty
-      end if
    else
       pass commandKeyDown
    end if
@@ -68,12 +62,6 @@ command revInitialise
    else
       put 0 into lHistoryIndex
    end if
-   scriptFormat "script"
-   // HXT dark mode: scriptFormat bakes 0,0,0 per-char colors; clear them
-   // so the field's foregroundColor (set by __UpdateMessageColors) shows.
-   if the systemAppearance is "dark" and the number of chars of me > 0 then
-      set the foregroundColor of char 1 to -1 of me to empty
-   end if
 end revInitialise
 
 command revNextLine
@@ -83,11 +71,6 @@ command revNextLine
    put line lHistoryIndex of lHistory into tMessage
    replace "\n" with return in tMessage
    set the text of me to tMessage
-   scriptFormat "script"
-   // HXT dark mode: clear per-char colors baked by scriptFormat
-   if the systemAppearance is "dark" and the number of chars of me > 0 then
-      set the foregroundColor of char 1 to -1 of me to empty
-   end if
 end revNextLine
 
 command revPrevLine
@@ -97,9 +80,4 @@ command revPrevLine
    put line lHistoryIndex of lHistory into tMessage
    replace "\n" with return in tMessage
    set the text of me to tMessage
-   scriptFormat "script"
-   // HXT dark mode: clear per-char colors baked by scriptFormat
-   if the systemAppearance is "dark" and the number of chars of me > 0 then
-      set the foregroundColor of char 1 to -1 of me to empty
-   end if
 end revPrevLine
