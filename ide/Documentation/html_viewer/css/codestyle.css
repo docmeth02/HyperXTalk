@@ -1,13 +1,13 @@
-/* LiveCode dictionary code theme */
+/* HyperXTalk dictionary code theme — dark */
 .hljs-comment {
-  color: #15901F;
-  font-weight: bold;
+  color: #6A9955;  /* muted green */
+  font-style: italic;
 }
 
 .hljs-attribute,
 .hljs-tag,
 .hljs-regexp {
-  color: #cc6666;
+  color: #F47067;  /* soft red */
 }
 
 .hljs-preprocessor,
@@ -17,43 +17,50 @@
 .hljs-function,
 .hljs-operator,
 .hljs-keyword {
-  color: #932192;
+  color: #C792EA;  /* lavender */
 }
 
 .hljs-literal,
 .hljs-string,
-.hljs-number,
 .hljs-value,
 .hljs-inheritance,
 .hljs-header,
 .ruby .hljs-symbol,
 .xml .hljs-cdata {
-  color: #011892;
+  color: #F78C6C;  /* warm orange — strings */
+}
+
+.hljs-number {
+  color: #F78C6C;  /* same warm orange */
 }
 
 .hljs-command {
-  color: #918F00;
+  color: #82AAFF;  /* light blue */
   font-weight: bold;
 }
 
 .hljs-control_st {
-  color: #000000;
+  color: #C792EA;  /* lavender — matches keyword */
   font-weight: bold;
 }
 
 .hljs-property {
-  color: #009092;
+  color: #89DDFF;  /* sky blue */
 }
 
 .hljs-variable {
-  color: #000000;	
+  color: #EEFFFF;  /* near-white */
 }
 
 .hljs {
   display: block;
   overflow-x: auto;
-  color: #000000;
-  padding: 0.5em;
+  background: #1A1A2E;  /* deep navy-black */
+  color: #EEFFFF;       /* near-white default text */
+  padding: 0.75em 1em;
+  border-radius: 5px;
+  font-size: 0.92em;
+  line-height: 1.5;
   -webkit-text-size-adjust: none;
 }
 
