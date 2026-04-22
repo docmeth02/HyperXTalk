@@ -796,3 +796,22 @@ end revCheckStackCollision
 private command log pMessage
   put pMessage & return after msg
 end log
+
+on revHookBuildScriptEditorContextMenu pLongIDOfCurrentObject, pSelectedText, pText, @pModifiedText
+   put pText into pModifiedText
+   put "-" & return after pModifiedText
+   put "Comment Selection" & return after pModifiedText
+   put "Uncomment Selection" & return after pModifiedText
+end revHookBuildScriptEditorContextMenu
+
+on revHookScriptEditorContextMenuPick pWhich
+   switch pWhich
+      case "Comment Selection"
+         send "scriptComment" to the target
+         break
+         
+      case "Uncomment Selection"
+         send "scriptUncomment" to the target
+         break
+   end switch
+end revHookScriptEditorContextMenuPick
