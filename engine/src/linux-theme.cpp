@@ -153,7 +153,7 @@ static GtkWidget* getWidgetForControlType(MCPlatformControlType p_type, MCPlatfo
             break;
             
         case kMCPlatformControlTypeScrollBar:
-            t_the_widget = gtk_vscrollbar_new(NULL);
+            t_the_widget = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, NULL);
             break;
             
         case kMCPlatformControlTypeSlider:

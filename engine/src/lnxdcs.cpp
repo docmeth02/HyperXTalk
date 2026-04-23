@@ -1437,5 +1437,5 @@ void MCScreenDC::destroybackdrop()
 
 Bool MCScreenDC::is_composite_wm ( int screen_id ) 
 {
-    return gdk_display_supports_composite(dpy);
+    return gdk_screen_is_composited(gdk_display_get_default_screen(dpy));
 }
