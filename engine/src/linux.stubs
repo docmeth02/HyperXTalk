@@ -143,7 +143,6 @@ gdk libgdk-3.so.0
 	gdk_visual_get_system: () -> (pointer)
 	gdk_visual_get_best: () -> (pointer)
 	gdk_init: (integer, pointer) -> ()
-	gdk_set_allowed_backends: (pointer) -> ()
 	gdk_window_hide: (pointer) -> ()
 	gdk_window_destroy: (pointer) -> ()
 	gdk_window_register_dnd: (pointer) -> ()

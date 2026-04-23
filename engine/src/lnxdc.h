@@ -28,7 +28,6 @@ GdkWindow *gdk_x11_window_lookup_for_display(GdkDisplay *, unsigned long);
 GdkWindow *gdk_x11_window_foreign_new_for_display(GdkDisplay *, unsigned long);
 void gdk_x11_ungrab_server(void);
 void gdk_x11_grab_server(void);
-char *gdk_get_display(void);
 }
 #include "lnxflst.h"
 #include "lnx-clipboard.h"
