@@ -200,9 +200,8 @@ Boolean MCScreenDC::open()
     initialise_required_weak_link_gdk();
     initialise_required_weak_link_gdk_pixbuf();
     initialise_required_weak_link_cairo();
-    
+
     gdk_init(0, NULL);
-    //gdk_threads_init();
     
     // Check to see if we are in a UTF8 locale
 	// TS : Changed 2008-01-08 as a more relaible way of testing for UTF-8

@@ -143,6 +143,7 @@ gdk libgdk-3.so.0
 	gdk_visual_get_system: () -> (pointer)
 	gdk_visual_get_best: () -> (pointer)
 	gdk_init: (integer, pointer) -> ()
+	gdk_set_allowed_backends: (pointer) -> ()
 	gdk_window_hide: (pointer) -> ()
 	gdk_window_destroy: (pointer) -> ()
 	gdk_window_register_dnd: (pointer) -> ()
@@ -411,9 +412,6 @@ gtk libgtk-3.so.0
 	gtk_window_set_modal: (pointer, integer) -> ()
 	gtk_window_get_type: () -> (integer)
 	gtk_widget_get_parent_window: (pointer) -> (pointer)
-	gdk_window_foreign_new: (pointer) -> (pointer)
-
-	
 	#gtk_rc_get_style_by_paths: (pointer, pointer, pointer, integer) -> (pointer)
 
 	gtk_im_context_filter_keypress: (pointer, pointer) -> (integer)

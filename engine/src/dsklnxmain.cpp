@@ -46,6 +46,9 @@ void X_main_loop(void)
 
 int platform_main(int argc, char *argv[], char *envp[])
 {
+	// Force X11 backend — engine uses X11-specific APIs throughout
+	setenv("GDK_BACKEND", "x11", 1);
+
 	// On Linux, the argv and envp could be in pretty much any format. The
 	// safest thing to do is let the C library's iconv convert to a known
 	// format. To do this, the system locale needs to be retrieved.
