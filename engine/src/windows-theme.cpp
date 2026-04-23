@@ -202,11 +202,21 @@ bool MCPlatformGetControlThemePropColor(MCPlatformControlType p_type, MCPlatform
                     case kMCPlatformControlTypeList:
                     case kMCPlatformControlTypeComboBox:
                     case kMCPlatformControlTypeOptionMenu:
-                        // Doesn't seem to have a colour index - use white
-                        r_color.red = r_color.green = r_color.blue = 65535;
+                        // In dark mode return the surface colour; in light mode use
+                        // white (there is no suitable COLOR_* index for these controls).
+                        if (MCplatformIsDarkMode())
+                            r_color = MCscreen->getbg();
+                        else
+                            r_color.red = r_color.green = r_color.blue = 65535;
                         return true;
                         
                     case kMCPlatformControlTypeMenuItem:
+                        // GetSysColor(COLOR_MENU) never reflects dark mode.
+                        if (MCplatformIsDarkMode())
+                        {
+                            r_color = MCscreen->getbg();
+                            return true;
+                        }
                         t_color = COLOR_MENU;
                         break;
                         
