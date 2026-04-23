@@ -44,8 +44,18 @@
 #include "desktop-dc.h"
 #include "param.h"
 
-#if defined(_MACOSX) && (defined(__arm64__) || defined(__aarch64__))
-// Weak fallbacks — overridden by the real implementations in mac-stubs-arm64.mm.
+// Flush the HITheme background-pattern cache in osxmisc.mm when the system
+// appearance changes.  A no-op stub is provided for non-Mac builds.
+#if defined(_MAC_DESKTOP)
+extern void MCMacFlushThemeBackgroundPatterns(void);
+#else
+static inline void MCMacFlushThemeBackgroundPatterns(void) {}
+#endif
+
+#if defined(_MACOSX)
+// Weak fallbacks — overridden by the real implementations in mac-stubs-arm64.mm
+// (arm64) and osxmisc.mm (Intel/x86_64).  The weak attribute ensures the linker
+// picks the strong definition from whichever .mm file provides it.
 extern "C" __attribute__((weak)) bool MCplatformIsDarkMode(void) { return false; }
 extern "C" __attribute__((weak)) void MCplatformGetWindowBackgroundColor(char *, size_t) {}
 extern "C" __attribute__((weak)) void MCplatformGetLabelColor(char *, size_t) {}
@@ -195,7 +205,66 @@ void MCPlatformHandleSystemAppearanceChanged(void)
     //    without an explicit colour immediately uses the new system colours.
     //    This must happen before delaymessage so that the first redraw
     //    triggered by queuing the message already uses the updated values.
+    //
+    //    Snapshot the OLD background_pixel first.  Any stack or card whose
+    //    stored DI_BACK colour exactly matches the old value was set via
+    //    "set the backColor of me to the systemWindowColor" (or equivalent)
+    //    and should follow the system automatically.  We update those stored
+    //    colours to the new value below so that the very next repaint—before
+    //    any script handler runs—already shows the correct appearance.
+    MCColor t_old_bg = static_cast<MCScreenDC *>(MCscreen)->background_pixel;
     static_cast<MCScreenDC *>(MCscreen)->updatesystemcolors();
+    MCColor t_new_bg = static_cast<MCScreenDC *>(MCscreen)->background_pixel;
+
+    // Walk every open stack and its current card.  Where the stored DI_BACK
+    // colour matches the old system background (i.e. was tracking the system),
+    // replace it with the new system background so the next WM_PAINT uses the
+    // right colour without waiting for the script systemAppearanceChanged
+    // handler to run.
+    if (t_old_bg.red != t_new_bg.red ||
+        t_old_bg.green != t_new_bg.green ||
+        t_old_bg.blue  != t_new_bg.blue)
+    {
+        // Inline helper: update DI_BACK on p_obj if it currently holds the
+        // old system background colour.
+        auto t_maybe_update = [&](MCObject *p_obj)
+        {
+            if (p_obj == nil)
+                return;
+            uint2 t_idx;
+            if (!p_obj->getcindex(DI_BACK, t_idx))
+                return;                         // no explicit colour – already inherits
+            MCColor *t_stored = p_obj->getcolors() + t_idx;
+            if (t_stored->red   == t_old_bg.red  &&
+                t_stored->green == t_old_bg.green &&
+                t_stored->blue  == t_old_bg.blue)
+            {
+                *t_stored = t_new_bg;           // update to new system colour
+            }
+        };
+
+        MCStacknode *t_bg_node = MCstacks->topnode();
+        MCStacknode *t_bg_first = t_bg_node;
+        while (t_bg_node != NULL)
+        {
+            MCStack *t_stack = t_bg_node->getstack();
+            t_maybe_update(t_stack);
+            if (t_stack != nil)
+                t_maybe_update(t_stack->getcurcard());
+            t_bg_node = t_bg_node->next();
+            if (t_bg_node == t_bg_first)
+                break;
+        }
+    }
+
+    // 1b. On Mac (Intel/x86_64), MCMacThemeGetBackgroundPattern caches HITheme
+    //     brush bitmaps in a static array.  Those bitmaps are baked at the time
+    //     the first paint occurs and are never refreshed, so the document-area
+    //     background stays in the old light/dark colour even after an appearance
+    //     change.  Flush the cache here so the next repaint re-bakes each brush
+    //     from the current system appearance.  On arm64 Mac and all other
+    //     platforms this is a no-op inline stub.
+    MCMacFlushThemeBackgroundPatterns();
 
     // 2. Gather the new colour strings and dark-mode flag.
     //
@@ -244,6 +313,21 @@ void MCPlatformHandleSystemAppearanceChanged(void)
         if (t_stack_node == t_first_node)
             break;
     }
+
+    // Flush all dirty regions immediately so the appearance change is visible
+    // on the very next frame, without waiting for the next event-loop iteration.
+    //
+    // On Windows this is critical: MCRedrawDirtyScreen() in processdesktopchanged()
+    // is only called when the undocumented uxtheme dark-mode APIs are available
+    // (ordinals 133/135/136).  On Windows 11 22H2+ those ordinals may not be
+    // present, so that repaint is skipped.  dirtyall() above has marked every
+    // stack dirty; MCRedrawDirtyScreen() converts those dirty regions into
+    // InvalidateRgn + UpdateWindow calls so WM_PAINT arrives before we return.
+    //
+    // On Mac, calling MCRedrawDirtyScreen() here is harmless (a coalesced paint
+    // at most produces one extra frame, which the compositor discards if the
+    // window is already up to date).
+    MCRedrawDirtyScreen();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -248,12 +248,27 @@ IO_stat MCHcstak::macreadresources(void)
 
 extern bool MCMacPlatformGetImageColorSpace(CGColorSpaceRef &r_colorspace);
 
+// Flush the cached HITheme background patterns so that the next paint call
+// re-bakes them from the current system appearance.  Called from
+// MCPlatformHandleSystemAppearanceChanged() on Intel/x86_64 Mac builds.
+static MCPatternRef s_mac_bg_patterns[8] = {nil, nil, nil, nil, nil, nil, nil, nil};
+
+void MCMacFlushThemeBackgroundPatterns(void)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        MCPatternRelease(s_mac_bg_patterns[i]);
+        s_mac_bg_patterns[i] = nil;
+    }
+}
+
 #if !defined(__arm64__) && !defined(__aarch64__)
 bool MCMacThemeGetBackgroundPattern(Window_mode p_mode, bool p_active, MCPatternRef &r_pattern)
 {
 	bool t_success = true;
-	
-	static MCPatternRef s_patterns[8] = {nil, nil, nil, nil, nil, nil, nil, nil};
+
+	// Alias the module-level array (shared with MCMacFlushThemeBackgroundPatterns).
+	MCPatternRef *s_patterns = s_mac_bg_patterns;
 	
 	ThemeBrush t_themebrush = 0;
 	uint32_t t_index = 0;

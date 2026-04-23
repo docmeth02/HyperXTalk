@@ -34,6 +34,11 @@
 #include "w32dc.h"
 #endif
 
+// Forward-declare the dark-mode query function implemented in w32dcs.cpp.
+// The weak stub in desktop.cpp (for non-Windows builds) means this declaration
+// is safe on all platforms, but this file is only compiled for Windows.
+extern "C" bool MCplatformIsDarkMode(void);
+
 static bool logfont_for_control(MCPlatformControlType p_type, LOGFONTW& r_lf)
 {
 #ifndef _SERVER
@@ -206,12 +211,20 @@ bool MCPlatformGetControlThemePropColor(MCPlatformControlType p_type, MCPlatform
                         break;
                         
                     case kMCPlatformControlTypeWindow:
-                        // Use the control colour instead of the window colour
-                        //t_color = COLOR_WINDOW;
-                        //break;
-                        
+                        // Fall through to default.
+
                     default:
-                        // Message boxes are this colour instead of the window colour
+                        // GetSysColor() is oblivious to Windows dark mode and always
+                        // returns light-mode values.  When dark mode is active, return
+                        // background_pixel (already set to the dark surface colour by
+                        // updatesystemcolors()) so that stacks and cards without an
+                        // explicit backgroundColor automatically paint correctly.
+                        if (MCplatformIsDarkMode())
+                        {
+                            r_color = MCscreen->getbg();
+                            return true;
+                        }
+                        // Light mode: use the standard dialog/window face colour.
                         t_color = COLOR_3DFACE;
                         break;
                 }

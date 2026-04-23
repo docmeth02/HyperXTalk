@@ -1293,7 +1293,10 @@ function toolIconColor pMode
 end toolIconColor
 
 on systemAppearanceChanged pMode, pWindowColor, pTextColor
-   set the backgroundColor of this stack to pWindowColor
+   local tBgColor
+   put revIDEColor("palette_background") into tBgColor
+   set the backgroundColor of this stack to tBgColor
+   set the backgroundColor of this card to tBgColor
    set the foregroundColor of this stack to pTextColor
 
    -- LCB widgets sit outside the LiveCode Script message hierarchy and cannot

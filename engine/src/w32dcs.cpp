@@ -284,6 +284,13 @@ Boolean MCScreenDC::open()
 	t_profile_info . cbDataSize = strlen((char *)t_profile_info . pProfileData) + 1;
 	m_srgb_profile = OpenColorProfileA(&t_profile_info, PROFILE_READ, FILE_SHARE_READ, OPEN_EXISTING);
 
+	// Seed background_pixel / system_fore_pixel from the current Windows
+	// appearance so that stacks without explicit colours are correct from the
+	// very first draw, even if the OS is already in dark mode at startup.
+	// The legacy MenuBar-colour path above sets background_pixel to a light grey
+	// which is wrong in dark mode.
+	updatesystemcolors();
+
 	return True;
 }
 
@@ -1252,19 +1259,38 @@ void MCScreenDC::settaskbarstate(bool p_visible)
 // They are called from MCPlatformHandleSystemAppearanceChanged() to supply the
 // three parameters sent with the systemAppearanceChanged message.
 
-// Read AppsUseLightTheme from the Themes\Personalize registry key.
-// Value 0 (or absent) means dark mode; 1 (default) means light mode.
+// Read the current dark/light mode from the Themes\Personalize registry key.
+//
+// Windows 10 has TWO separate toggles in Settings → Personalisation → Colours:
+//   • "Choose your default app mode"     → AppsUseLightTheme
+//   • "Choose your default Windows mode" → SystemUsesLightTheme
+//
+// A value of 0 means dark; 1 (or absent) means light.
+//
+// We treat dark mode as active if EITHER key is 0, so that:
+//   - toggling the "Windows mode" slider (SystemUsesLightTheme) is detected, AND
+//   - toggling the "App mode" slider (AppsUseLightTheme) is detected.
+// On Windows 11 22H2+ there is a single combined slider that writes both keys,
+// so the behaviour is unchanged there.
 extern "C" bool MCplatformIsDarkMode(void)
 {
-    DWORD t_value = 1; // default: light
+    static const LPCWSTR k_subkey =
+        L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+
+    DWORD t_value = 1;
     DWORD t_size  = sizeof(t_value);
-    RegGetValueW(HKEY_CURRENT_USER,
-                 L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-                 L"AppsUseLightTheme",
-                 RRF_RT_REG_DWORD,
-                 nullptr,
-                 &t_value,
-                 &t_size);
+
+    // Check app mode first (most widely used).
+    RegGetValueW(HKEY_CURRENT_USER, k_subkey, L"AppsUseLightTheme",
+                 RRF_RT_REG_DWORD, nullptr, &t_value, &t_size);
+    if (t_value == 0)
+        return true;
+
+    // Check system/Windows mode as a fallback.
+    t_value = 1;
+    t_size  = sizeof(t_value);
+    RegGetValueW(HKEY_CURRENT_USER, k_subkey, L"SystemUsesLightTheme",
+                 RRF_RT_REG_DWORD, nullptr, &t_value, &t_size);
     return t_value == 0;
 }
 
@@ -1331,10 +1357,69 @@ void MCScreenDC::getsystemtextcolor(MCStringRef &r_color)
     /* UNCHECKED */ MCStringCreateWithCString(t_buf, r_color);
 }
 
+// Refresh background_pixel and system_fore_pixel from the current Windows
+// appearance.  Called at startup and from MCPlatformHandleSystemAppearanceChanged.
+// Mirrors the desktop-dc.cpp implementation (which is excluded from the Windows
+// build) but uses GetSysColor() directly to avoid pulling in a hex parser.
+void MCScreenDC::updatesystemcolors(void)
+{
+    // Scale an 8-bit channel to the 16-bit range LiveCode uses (×257 = 0x0101).
+    auto colorref_to_mc = [](COLORREF c, MCColor &r)
+    {
+        r.red   = (uint2)(GetRValue(c) * 257);
+        r.green = (uint2)(GetGValue(c) * 257);
+        r.blue  = (uint2)(GetBValue(c) * 257);
+    };
+
+    if (MCplatformIsDarkMode())
+    {
+        // Canonical Windows 11 dark-surface (#1e1e1e) / label (#ffffff).
+        colorref_to_mc(RGB(0x1e, 0x1e, 0x1e), background_pixel);
+        colorref_to_mc(RGB(0xff, 0xff, 0xff), system_fore_pixel);
+    }
+    else
+    {
+        colorref_to_mc(GetSysColor(COLOR_WINDOW),     background_pixel);
+        colorref_to_mc(GetSysColor(COLOR_WINDOWTEXT), system_fore_pixel);
+    }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 void MCScreenDC::processdesktopchanged(bool p_notify, bool p_update_fonts)
 {
+	// ── Dark / light mode change detection ───────────────────────────────────
+	// This is called whenever the invisible window receives WM_SETTINGCHANGE or
+	// WM_DISPLAYCHANGE.  We compare the current dark-mode state against the last
+	// known state.  If it has changed (or if this is the first call), we call
+	// MCPlatformHandleSystemAppearanceChanged() directly — no string matching,
+	// no ANSI/Unicode ambiguity.
+	//
+	// This acts as the DEFINITIVE trigger for appearance changes on Windows,
+	// overriding all the WM_SETTINGCHANGE "ImmersiveColorSet" string-matching
+	// attempts which are fragile due to ANSI/Unicode thunking.
+	{
+		static bool s_appearance_initialised = false;
+		static bool s_last_dark_mode         = false;
+
+		bool t_dark = MCplatformIsDarkMode();
+
+		if (!s_appearance_initialised || t_dark != s_last_dark_mode)
+		{
+			s_last_dark_mode         = t_dark;
+			s_appearance_initialised = true;
+
+			void MCPlatformHandleSystemAppearanceChanged(void);
+			MCPlatformHandleSystemAppearanceChanged();
+		}
+	}
+
+	// Refresh background_pixel / system_fore_pixel for any non-appearance
+	// desktop changes (DPI, display count, etc.) — MCPlatformHandleSystemAppearanceChanged
+	// already does this when dark mode changes, but we need it here too for the
+	// general case.
+	updatesystemcolors();
+
 	// IM-2014-01-28: [[ HiDPI ]] Use updatedisplayinfo() method to update & compare display details
 	bool t_changed;
 	t_changed = false;
