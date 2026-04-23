@@ -110,7 +110,7 @@ extern Boolean tripleclick;
 
 class MCScreenDC : public MCUIDC
 {
-	GdkGC* gc = nullptr;		// This is the GC in "Native" (i.e. actual screen) depth
+	cairo_t* gc = nullptr;
 	
 	bool m_application_has_focus = false; // This allows us to track if the application is at the front.
 	
@@ -130,8 +130,8 @@ class MCScreenDC : public MCUIDC
 	MCString selectiontext;
 	Boolean doubleclick = False;
 
-	GdkColormap *cmap = nullptr;			// Native colourmap
-	GdkColormap *cmap32 = nullptr;		// 32-bit colourmap
+	GdkVisual *cmap = nullptr;
+	GdkVisual *cmap32 = nullptr;
 
 	GdkVisual *vis = nullptr;		// Native visual
 	GdkVisual *vis32 = nullptr;	// 32-bit visual
@@ -291,7 +291,7 @@ public:
 
 	void setupcolors();
 	GdkScreen* getscreen();
-	GdkColormap* getcmap();
+	GdkVisual* getcmap();
 	GdkVisual* getvisual();
 	KeySym translatekeysym(KeySym sym, uint4 keycode);
 	virtual bool getkeysdown(MCListRef& r_list);
@@ -319,10 +319,10 @@ public:
 	
 	
 	// Public acccess functions get get GC's, visuals and cmaps for different depths
-	GdkGC* getgc() { return gc; }
+	cairo_t* getgc() { return gc; }
 
-	GdkColormap* getcmapnative ( void ) { return cmap ; } ;
-	GdkColormap* getcmap32 ( void ) { return cmap32 ; } ;
+	GdkVisual* getcmapnative ( void ) { return cmap ; } ;
+	GdkVisual* getcmap32 ( void ) { return cmap32 ; } ;
 
 	
 	virtual bool listprinters(MCStringRef& r_printers);
@@ -336,7 +336,7 @@ public:
     bool GetFilteredEvent(event_filter, GdkEvent* &r_event, void *, bool p_may_block = false);
     
     // Utility function - maps an X drawing operation to the GDK equivalent
-    static GdkFunction XOpToGdkOp(int op);
+    static int XOpToGdkOp(int op);
     
     // Queues an event as a pending event
     void EnqueueEvent(GdkEvent *);

@@ -40,10 +40,9 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #include <locale.h>
 
 #include <gtk/gtk.h>
+#include <gtk/gtkunixprint.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-#include <gtk/gtkpagesetupunixdialog.h>
-#include <gtk/gtkprintunixdialog.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -280,7 +279,7 @@ void make_front_widget ( GtkWidget *p_widget)
 	if ( t_window != NULL)
 	{
 		GdkWindow * gdk_window = NULL ;
-		gdk_window = GTK_WIDGET ( p_widget ) -> window ;
+		gdk_window = gtk_widget_get_window ( GTK_WIDGET ( p_widget ) ) ;
 		if ( gdk_window != NULL )
             gdk_window_set_transient_for(gdk_window, t_window);
 		else 
@@ -776,7 +775,7 @@ bool MCA_color(MCStringRef p_title, MCColor p_initial_color, bool p_as_sheet, bo
     /* UNCHECKED */ t_title.Lock(p_title);
     dialog = gtk_color_selection_dialog_new  (*t_title);
 	make_front_widget ( dialog ) ;
-	colorsel = GTK_COLOR_SELECTION ( GTK_COLOR_SELECTION_DIALOG (dialog)->colorsel );
+	colorsel = GTK_COLOR_SELECTION ( gtk_color_selection_dialog_get_color_selection ( GTK_COLOR_SELECTION_DIALOG (dialog) ) );
 
 	gtk_color_selection_set_current_color  ( colorsel, &gdk_color ) ;
 

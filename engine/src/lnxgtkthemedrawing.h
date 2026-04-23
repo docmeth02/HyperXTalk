@@ -47,10 +47,8 @@
 #ifndef _GTK_DRAWING_H_
 #define _GTK_DRAWING_H_
 
-#include <X11/Xlib.h>
-
 #include <gdk/gdk.h>
-#include <gtk/gtkstyle.h>
+#include <gtk/gtk.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -189,7 +187,7 @@ extern "C"
 	 * flags:    widget-dependant flags; see the GtkThemeWidgetType definition.
 	 */
 	gint
-	moz_gtk_widget_paint(GtkThemeWidgetType widget, GdkDrawable* drawable,
+	moz_gtk_widget_paint(GtkThemeWidgetType widget, cairo_t* cr,
 	                     GdkRectangle* rect, GdkRectangle* cliprect,
 	                     GtkWidgetState* state, gint flags);
 

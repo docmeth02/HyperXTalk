@@ -17,12 +17,11 @@
 		'_FILE_OFFSET_BITS=64',			
 	],
 	
-	# We supply some pre-packaged headers for Linux libraries
 	'include_dirs':
 	[
 		'../thirdparty/headers/linux/include',
-		'../thirdparty/libcairo/src',			# Required by the GDK headers
-		'../thirdparty/libfreetype/include',	# Required by the Pango headers
+		'../thirdparty/libcairo/src',
+		'../thirdparty/libfreetype/include',
 	],
 	
 	# Static libraries that are to be included into dynamic libraries
@@ -94,6 +93,7 @@
 		'-fPIC',
 		'-fstrict-aliasing',
 		'-fvisibility=hidden',
+		'<!@(pkg-config --cflags gtk+-3.0 gtk+-unix-print-3.0)',
 	],
 	
 	'cflags_c':

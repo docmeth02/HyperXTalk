@@ -20,34 +20,33 @@
 #include "native-layer.h"
 
 #include <gtk/gtk.h>
+#include <cairo.h>
 
-namespace x11
-{
-#include <gdk/gdkx.h>
-}
+typedef unsigned long x11Window;
+typedef struct _GtkSocket GtkSocket;
 
 class MCNativeLayerX11 : public MCNativeLayer
 {
 public:
     virtual void OnToolChanged(Tool p_new_tool);
-	
+
 	virtual bool GetCanRenderToContext();
-    
+
     virtual bool GetNativeView(void *&r_view);
-    
-    MCNativeLayerX11(MCObject *p_object, x11::Window p_view);
+
+    MCNativeLayerX11(MCObject *p_object, x11Window p_view);
     ~MCNativeLayerX11();
-    
+
 private:
-    
+
     GtkWindow* m_child_window;
-    GdkRegion* m_input_shape;
+    cairo_region_t* m_input_shape;
     GtkSocket* m_socket;
-    x11::Window m_widget_xid;
+    x11Window m_widget_xid;
 	MCRectangle m_intersect_rect;
     
     // Returns the handle for the stack containing this widget
-    x11::Window getStackX11Window();
+    x11Window getStackX11Window();
     GdkWindow* getStackGdkWindow();
     
     // Returns the GtkFixed used for layouts within the stack

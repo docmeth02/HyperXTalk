@@ -53,8 +53,17 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+extern "C" {
+void *gtk_socket_new(void);
+void gtk_socket_add_id(void *, int);
+void *gtk_socket_get_plug_window(void *);
+int gtk_socket_get_id(void *);
+int gdk_x11_drawable_get_xid(void *);
+}
+#define GTK_SOCKET(x) ((GtkSocket*)(x))
 
-MCNativeLayerX11::MCNativeLayerX11(MCObject *p_object, x11::Window p_view) :
+
+MCNativeLayerX11::MCNativeLayerX11(MCObject *p_object, x11Window p_view) :
   m_child_window(NULL),
   m_input_shape(NULL),
   m_socket(NULL),
@@ -76,7 +85,7 @@ MCNativeLayerX11::~MCNativeLayerX11()
     }
     if (m_input_shape != NULL)
     {
-        gdk_region_destroy(m_input_shape);
+        cairo_region_destroy(m_input_shape);
     }
 }
 
@@ -122,8 +131,7 @@ void MCNativeLayerX11::doAttach()
         // Show the socket (we'll control visibility at the window level)
         gtk_widget_show(GTK_WIDGET(t_socket));
         
-        // Create an empty region to act as an input mask while in edit mode
-        m_input_shape = gdk_region_new();
+        m_input_shape = cairo_region_create();
 
 		// Retain a reference to the socket
 		m_socket = GTK_SOCKET(g_object_ref(G_OBJECT(t_socket)));
@@ -208,7 +216,7 @@ void MCNativeLayerX11::doSetGeometry(const MCRectangle& p_rect)
     
     // Update the contained window too
     GdkWindow* t_remote;
-    t_remote = gtk_socket_get_plug_window(m_socket);
+    t_remote = (GdkWindow*)gtk_socket_get_plug_window(m_socket);
     if (t_remote != NULL)
         gdk_window_move_resize(t_remote, t_rect.x, t_rect.y, t_rect.width, t_rect.height);
 }
@@ -265,9 +273,9 @@ bool MCNativeLayerX11::GetNativeView(void *&r_view)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-x11::Window MCNativeLayerX11::getStackX11Window()
+x11Window MCNativeLayerX11::getStackX11Window()
 {
-    return x11::gdk_x11_drawable_get_xid(getStackGdkWindow());
+    return gdk_x11_drawable_get_xid(getStackGdkWindow());
 }
 
 GdkWindow* MCNativeLayerX11::getStackGdkWindow()
@@ -279,7 +287,7 @@ GdkWindow* MCNativeLayerX11::getStackGdkWindow()
 
 MCNativeLayer* MCNativeLayer::CreateNativeLayer(MCObject *p_object, void *p_native_view)
 {
-    return new MCNativeLayerX11(p_object, (x11::Window)p_native_view);
+    return new MCNativeLayerX11(p_object, (x11Window)p_native_view);
 }
 
 bool MCNativeLayer::CreateNativeContainer(MCObject *p_object, void *&r_view)

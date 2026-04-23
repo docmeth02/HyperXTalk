@@ -88,7 +88,7 @@ static bool MCExposeEventFilter(GdkEvent *e, void *)
     return e->type == GDK_EXPOSE || e->type == GDK_DAMAGE;
 }
 
-bool MCLinuxRegionToMCGRegion(GdkRegion*, MCGRegionRef&);
+bool MCLinuxRegionToMCGRegion(cairo_region_t*, MCGRegionRef&);
 
 void MCScreenDC::expose()
 {

@@ -769,8 +769,8 @@ typedef MCSysWindowHandle Drawable;
 #include <gdk/gdk.h>
 
 typedef GdkWindow*      Window;
-typedef GdkPixmap*      Pixmap;
-typedef GdkDrawable*    Drawable;
+typedef GdkWindow*      Pixmap;
+typedef GdkWindow*      Drawable;
 
 #else
 

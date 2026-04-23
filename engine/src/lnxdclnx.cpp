@@ -56,7 +56,7 @@ static Boolean dragclick;
 
 void MCScreenDC::setupcolors()
 {
-	ncolors = MCU_min(vis->colormap_size, MAX_CELLS);
+	ncolors = MCU_min(1 << gdk_visual_get_depth(vis), MAX_CELLS);
 	colors = new (nothrow) MCColor[ncolors];
     colornames = new (nothrow) MCStringRef[ncolors];
 	allocs = new (nothrow) int2[ncolors];
@@ -73,7 +73,7 @@ GdkScreen* MCScreenDC::getscreen()
 	return gdk_visual_get_screen(vis);
 }
 
-GdkColormap* MCScreenDC::getcmap()
+GdkVisual* MCScreenDC::getcmap()
 {
 	return cmap;
 }
@@ -771,7 +771,7 @@ Boolean MCScreenDC::handle(Boolean dispatch, Boolean anyevent, Boolean& abort, B
                 t_geom.min_height = t_stack->getminheight();
                 t_geom.max_height = t_stack->getmaxheight();
                 
-                gdk_window_constrain_size(&t_geom, t_flags,
+                gdk_window_constrain_size(&t_geom, (GdkWindowHints)t_flags,
                                          t_event->configure.width, t_event->configure.height,
                                          &t_new_width, &t_new_height);
                 
@@ -835,9 +835,8 @@ Boolean MCScreenDC::handle(Boolean dispatch, Boolean anyevent, Boolean& abort, B
                 // Note: we don't use a secondary selection
                 if (t_clipboard != NULL)
                 {
-                    // Convert the requestor window XID into a GdkWindow
                     GdkWindow *t_requestor;
-                    t_requestor = x11::gdk_x11_window_foreign_new_for_display(dpy, t_event->selection.requestor);
+                    t_requestor = t_event->selection.requestor;
                     
                     // There is a backwards-compatibility issue with the way the
                     // ICCCM deals with selections: older clients can request a
