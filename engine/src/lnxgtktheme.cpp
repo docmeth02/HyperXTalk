@@ -187,11 +187,11 @@ static GtkWidgetState getpartandstate(const MCWidgetInfo &winfo, GtkThemeWidgetT
 		moztype = MOZ_GTK_PROGRESSBAR;
 		break;
 	case WTHEME_TYPE_PROGRESSBAR_CHUNK:
-		flags = GTK_PROGRESS_LEFT_TO_RIGHT;
+		flags = 0;
 		moztype = MOZ_GTK_PROGRESS_CHUNK;
 		break;
 	case WTHEME_TYPE_PROGRESSBAR_CHUNK_VERTICAL:
-		flags = GTK_PROGRESS_BOTTOM_TO_TOP;
+		flags = 1;
 		moztype = MOZ_GTK_PROGRESS_CHUNK;
 		break;
 	case WTHEME_TYPE_LISTBOX:
@@ -325,7 +325,7 @@ void MCNativeTheme::unload()
 		
 	//unload gtk libraries at runtime and do deinit stuff
 	if (gtkpix != NULL)
-		g_object_unref(gtkpix);
+		cairo_surface_destroy(gtkpix);
 
 	//make sure that we call moz_gtk_shutdown first in case it uses gtk
 	moz_gtk_shutdown();
@@ -1230,16 +1230,16 @@ void MCNativeTheme::drawScrollbar(MCDC *dc, const MCWidgetInfo &winfo,
 }
 
 
-void MCNativeTheme::make_theme_info(MCThemeDrawInfo& ret, GtkThemeWidgetType widget, 
-									 GdkDrawable * drawable,
-                     				 GdkRectangle * rect, 
+void MCNativeTheme::make_theme_info(MCThemeDrawInfo& ret, GtkThemeWidgetType widget,
+									 cairo_surface_t * surface,
+                     				 GdkRectangle * rect,
 									 GdkRectangle * cliprect,
-                     				 GtkWidgetState state, 
+                     				 GtkWidgetState state,
 									 gint flags,
 									 MCRectangle crect )
 
 {
-	ret . pm = drawable;
+	ret . pm = surface;
 	ret . moztype = widget ;
 	ret . cliprect = *cliprect;
 	ret . drect = *rect;
@@ -1249,9 +1249,9 @@ void MCNativeTheme::make_theme_info(MCThemeDrawInfo& ret, GtkThemeWidgetType wid
 }
 
 
-void MCNativeTheme::drawTab(MCDC *t_dc, 
+void MCNativeTheme::drawTab(MCDC *t_dc,
 							const MCWidgetInfo &winfo,
-                            const MCRectangle &drect, GdkPixmap *tpix)
+                            const MCRectangle &drect, cairo_surface_t *tpix)
 {
 	int flags = 0;
 	GdkRectangle rect, cliprect;
@@ -1281,13 +1281,15 @@ void MCNativeTheme::drawTab(MCDC *t_dc,
 	else
 		flags |= MOZ_GTK_TAB_POS_TOP;
 	
+	cairo_t *t_tab_cr = cairo_create(tpix);
 	moz_gtk_widget_paint(MOZ_GTK_TAB,
 
-	                     tpix,
+	                     t_tab_cr,
 	                     &rect,
 	                     &cliprect,
 	                     &state,
 	                     flags);
+	cairo_destroy(t_tab_cr);
 }
 
 
@@ -1299,8 +1301,6 @@ void MCNativeTheme::drawTab(MCDC *t_dc,
 Boolean MCNativeTheme::drawwidget(MCDC *dc, const MCWidgetInfo & winfo,
                                   const MCRectangle & drect)
 {
-	GdkGC *gc ;
-	
 	MCThemeDrawInfo di ;
 
 	MCDC * t_dc = dc ;	
@@ -1568,97 +1568,67 @@ static GdkPixbuf* calc_alpha_from_pixbufs(GdkPixbuf *p_pb_black, GdkPixbuf *p_pb
 	return p_pb_black;
 }
 	
-static void fill_gdk_drawable(GdkDrawable *p_drawable, GdkColormap *p_colormap, int p_red, int p_green, int p_blue, int p_width, int p_height)
+static void fill_cairo_surface(cairo_surface_t *p_surface, double p_red, double p_green, double p_blue, int p_width, int p_height)
 {
-	GdkGC *t_gc;
-	t_gc = gdk_gc_new(p_drawable);
-	gdk_gc_set_colormap(t_gc, p_colormap);
-	
-	GdkColor t_color;
-	t_color . red = p_red;
-	t_color . green = p_green;
-	t_color . blue = p_blue;
-	
-	gdk_gc_set_rgb_fg_color(t_gc, &t_color);
-	gdk_draw_rectangle(p_drawable, t_gc, TRUE, 0, 0, p_width, p_height);
-	g_object_unref(t_gc);
+	cairo_t *t_cr = cairo_create(p_surface);
+	cairo_set_source_rgb(t_cr, p_red, p_green, p_blue);
+	cairo_rectangle(t_cr, 0, 0, p_width, p_height);
+	cairo_fill(t_cr);
+	cairo_destroy(t_cr);
 }
 
 static GdkPixbuf* drawtheme_calc_alpha (MCThemeDrawInfo &p_info)
 {
 	GdkPixbuf *t_pb_black;
-    GdkPixbuf *t_pb_white;
-    
-	GdkPixmap *t_black ;
-	GdkPixmap *t_white ;
+	GdkPixbuf *t_pb_white;
 
-	GdkColormap *cm ;
-	GdkVisual *best_vis ;
-	
-	uint4	t_w ;
-	uint4	t_h ;	
-		
-	t_w = p_info.drect.width ;
-	t_h = p_info.drect.height ;
+	uint4 t_w = p_info.drect.width;
+	uint4 t_h = p_info.drect.height;
 
-	// MM-2013-11-06: [[ Bug 11360 ]] Make sure we take into account the screen depth when creating pixmaps.
-	uint4 t_screen_depth;
-	t_screen_depth = ((MCScreenDC*) MCscreen) -> getdepth();
-	
-	// Create two new pixmaps
-	t_black = gdk_pixmap_new(NULL, t_w, t_h, t_screen_depth);
-	t_white = gdk_pixmap_new(NULL, t_w, t_h, t_screen_depth);
-	
-	// We need to attach a colourmap to the Drawables in GDK
-	best_vis = gdk_visual_get_best_with_depth(t_screen_depth);
-    if (best_vis == NULL)
-        return NULL;
-    
-	cm = gdk_colormap_new(best_vis, FALSE) ;
-	gdk_drawable_set_colormap(t_black, cm);
-	gdk_drawable_set_colormap(t_white, cm);
+	cairo_surface_t *t_black = cairo_image_surface_create(CAIRO_FORMAT_RGB24, t_w, t_h);
+	cairo_surface_t *t_white = cairo_image_surface_create(CAIRO_FORMAT_RGB24, t_w, t_h);
 
-	// Render solid black into one and white into the other.
-	fill_gdk_drawable(t_black, cm, 0, 0, 0, t_w, t_h);
-	fill_gdk_drawable(t_white, cm, 65535, 65535, 65535, t_w, t_h);
-	
+	fill_cairo_surface(t_black, 0.0, 0.0, 0.0, t_w, t_h);
+	fill_cairo_surface(t_white, 1.0, 1.0, 1.0, t_w, t_h);
+
 	MCThemeDrawInfo t_info;
-	
-	t_info = p_info;
-	moz_gtk_widget_paint ( p_info.moztype, t_white , &t_info.drect, &t_info.cliprect, &t_info.state, t_info.flags ) ;
-	
-	t_info = p_info;
-	moz_gtk_widget_paint ( p_info.moztype, t_black , &t_info.drect, &t_info.cliprect, &t_info.state, t_info.flags ) ;
+	cairo_t *t_cr;
 
-	gdk_flush();
-	
-    // Convert the server-side pixmaps into client-side pixbufs. The black
-    // pixbuf will need to have an alpha channel so that we can fill it in.
-    t_pb_black = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, t_w, t_h);
-    if (t_pb_black == NULL)
-        return NULL;
-        
-    t_pb_white = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, t_w, t_h);
-    if (t_pb_white == NULL)
-        return NULL;
-    
-    t_pb_black = gdk_pixbuf_get_from_drawable(t_pb_black, t_black, NULL, 0, 0, 0, 0, t_w, t_h);
-    if (t_pb_black == NULL)
-        return NULL;
-    
-    t_pb_white = gdk_pixbuf_get_from_drawable(t_pb_white, t_white, NULL, 0, 0, 0, 0, t_w, t_h);
-    if (t_pb_white == NULL)
-        return NULL;
-    
-	// Calculate the alpha from these two bitmaps --- the t_bm_black image now has full ARGB
-    // Note that this also frees the t_pb_white pixbuf
+	t_info = p_info;
+	t_cr = cairo_create(t_white);
+	moz_gtk_widget_paint(p_info.moztype, t_cr, &t_info.drect, &t_info.cliprect, &t_info.state, t_info.flags);
+	cairo_destroy(t_cr);
+
+	t_info = p_info;
+	t_cr = cairo_create(t_black);
+	moz_gtk_widget_paint(p_info.moztype, t_cr, &t_info.drect, &t_info.cliprect, &t_info.state, t_info.flags);
+	cairo_destroy(t_cr);
+
+	cairo_surface_flush(t_black);
+	cairo_surface_flush(t_white);
+
+	t_pb_black = gdk_pixbuf_get_from_surface(t_black, 0, 0, t_w, t_h);
+	if (t_pb_black == NULL)
+	{
+		cairo_surface_destroy(t_black);
+		cairo_surface_destroy(t_white);
+		return NULL;
+	}
+
+	t_pb_white = gdk_pixbuf_get_from_surface(t_white, 0, 0, t_w, t_h);
+	if (t_pb_white == NULL)
+	{
+		g_object_unref(t_pb_black);
+		cairo_surface_destroy(t_black);
+		cairo_surface_destroy(t_white);
+		return NULL;
+	}
+
 	calc_alpha_from_pixbufs(t_pb_black, t_pb_white);
-	
-	// clean up.
-	g_object_unref(t_black);
-	g_object_unref(t_white);
-	g_object_unref(cm);
-		
+
+	cairo_surface_destroy(t_black);
+	cairo_surface_destroy(t_white);
+
 	return t_pb_black;
 }
 

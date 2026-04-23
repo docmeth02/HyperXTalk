@@ -24,7 +24,7 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 struct MCThemeDrawInfo
 {
 	GtkThemeWidgetType moztype ;
-	GdkWindow *pm ;
+	cairo_surface_t *pm ;
 	GdkRectangle drect ;
 	GdkRectangle cliprect ;
 	GtkWidgetState state ;
@@ -52,8 +52,8 @@ public:
 	virtual uint32_t getthemedrawinfosize(void);
 
 protected:
-	void make_theme_info(MCThemeDrawInfo& ret, GtkThemeWidgetType widget, 
-						 cairo_t * cr,
+	void make_theme_info(MCThemeDrawInfo& ret, GtkThemeWidgetType widget,
+						 cairo_surface_t * surface,
 						 GdkRectangle * rect, 
 						 GdkRectangle * cliprect,
 						 GtkWidgetState state, 
@@ -62,7 +62,7 @@ protected:
 	
 	
 	void drawTab(MCDC* t_dc, const MCWidgetInfo &winfo, const MCRectangle &drect,
-	             GdkWindow *pix);
+	             cairo_surface_t *pix);
 	void drawScrollbar(MCDC *dc, const MCWidgetInfo &winfo, const MCRectangle &drect);
 	void drawSlider(MCDC *dc, const MCWidgetInfo &winfo, const MCRectangle &drect);
 	void getscrollbarrects(const MCWidgetInfo &winfo,
@@ -78,7 +78,7 @@ protected:
 	
 private:
 	Boolean mNeedNewGC;
-	GdkWindow *gtkpix;
+	cairo_surface_t *gtkpix;
 };
 
 #endif

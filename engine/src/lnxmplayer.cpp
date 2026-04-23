@@ -228,7 +228,6 @@ bool MPlayer::init(const char * p_filename, MCStack *p_stack, MCRectangle p_rect
 		return false ;
 	
     GdkWindowAttr t_wa;
-    t_wa.colormap = ((MCScreenDC*)MCscreen)->getcmapnative();
     t_wa.x = p_rect.x;
     t_wa.y = p_rect.y;
     t_wa.width = p_rect.width;
