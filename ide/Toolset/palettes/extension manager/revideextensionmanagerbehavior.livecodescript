@@ -1,4 +1,4 @@
-﻿script "revIDEExtensionManagerBehavior"
+﻿script "revIDEExtensionManagerBehavior" with behavior "revPaletteBehavior"
 on preOpenStack
    lock screen
    dispatch "setAsBehavior" to revIDEFrameBehavior() with the long id of this me
@@ -12,12 +12,12 @@ on preOpenStack
    # Navigation
    addFrameItem "widget","header", "navigation", "Widgets", "", "","showList", the long id of me,"widget"
    addFrameItem "library","header", "navigation", "Libraries", "", "","showList", the long id of me,"library"
-   addFrameItem "sample","header", "navigation", "Sample Stacks", "", "","showList", the long id of me,"sample"
-   addFrameItem "snippet","header", "navigation", "Snippets", "", "","showList", the long id of me,"snippet"
-   addFrameItem "store","header", "navigation", "Store", "", "","showExtensionStore", the long id of me,"store"
+   --   addFrameItem "sample","header", "navigation", "Sample Stacks", "", "","showList", the long id of me,"sample"
+   --   addFrameItem "snippet","header", "navigation", "Snippets", "", "","showList", the long id of me,"snippet"
+   --   addFrameItem "store","header", "navigation", "Store", "", "","showExtensionStore", the long id of me,"store"
    addFrameItem "install", "header", "action", "Install extension", "plus", "","installNew", the long id of me
    
-   set the hilitedTabColor of me to "255,255,255"
+   set the hilitedTabColor of me to (the systemWindowColor)  //"255,255,255"
    set the navigationDisplayStyle of me to "names"
    unlock screen
 end preOpenStack
