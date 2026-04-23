@@ -128,7 +128,7 @@ lcms liblcms2.so.2
 	cmsBuildGamma: (integer, double) -> (pointer)
 	cmsFreeToneCurve: (pointer) -> ()
 
-gdk libgdk-x11-2.0.so.0
+gdk libgdk-3.so.0
 	gdk_drawable_get_image: (pointer, integer, integer, integer, integer) -> (pointer)
 	gdk_draw_rectangle: (pointer, pointer, integer, integer, integer, integer, integer) -> ()
 	gdk_gc_set_ts_origin: (pointer, integer, integer) -> ()
@@ -328,6 +328,12 @@ gdk libgdk-x11-2.0.so.0
 	gdk_cairo_set_source_window: (pointer, pointer, double, double) -> ()
 	gdk_window_input_shape_combine_region: (pointer, pointer, integer, integer) -> ()
 	gdk_window_get_frame_extents: (pointer, pointer) -> ()
+	gdk_window_get_visual: (pointer) -> (pointer)
+	gdk_window_set_background_rgba: (pointer, pointer) -> ()
+	gdk_window_process_updates: (pointer, integer) -> ()
+	gdk_window_shape_combine_region: (pointer, pointer, integer, integer) -> ()
+	gdk_pixbuf_get_from_window: (pointer, integer, integer, integer, integer) -> (pointer)
+	gdk_pixbuf_get_from_surface: (pointer, integer, integer, integer, integer) -> (pointer)
 
 gdk_pixbuf libgdk_pixbuf-2.0.so.0
 	gdk_pixbuf_get_pixels: (pointer) -> (pointer)
@@ -341,14 +347,28 @@ gdk_pixbuf libgdk_pixbuf-2.0.so.0
 
 cairo libcairo.so.2
 	cairo_set_operator: (pointer, integer) -> ()
+	cairo_create: (pointer) -> (pointer)
 	cairo_destroy: (pointer) -> ()
-	cairo_set_source_rgba: (pointer, integer, integer, integer) -> ()
+	cairo_save: (pointer) -> ()
+	cairo_restore: (pointer) -> ()
+	cairo_set_source_rgba: (pointer, double, double, double, double) -> ()
+	cairo_set_source_rgb: (pointer, double, double, double) -> ()
+	cairo_set_line_width: (pointer, double) -> ()
 	cairo_clip: (pointer) -> ()
 	cairo_paint: (pointer) -> ()
-	cairo_rectangle: (pointer, integer, integer, integer, integer) -> ()
+	cairo_rectangle: (pointer, double, double, double, double) -> ()
 	cairo_fill: (pointer) -> ()
+	cairo_stroke: (pointer) -> ()
+	cairo_image_surface_create: (integer, integer, integer) -> (pointer)
+	cairo_surface_destroy: (pointer) -> ()
+	cairo_surface_flush: (pointer) -> ()
+	cairo_region_create: () -> (pointer)
+	cairo_region_destroy: (pointer) -> ()
+	cairo_region_union_rectangle: (pointer, pointer) -> (integer)
+	cairo_region_num_rectangles: (pointer) -> (integer)
+	cairo_region_get_rectangle: (pointer, integer, pointer) -> ()
 
-gtk libgtk-x11-2.0.so.0
+gtk libgtk-3.so.0
 	#@ gtk_major_version
 	#@ gtk_minor_version
 	
@@ -528,7 +548,27 @@ gtk libgtk-x11-2.0.so.0
 	@ gtk_message_dialog_new
 	@ gtk_message_dialog_format_secondary_text
 
-gtk_print_dialog libgtk-x11-2.0.so.0
+	gtk_widget_get_style_context: (pointer) -> (pointer)
+	gtk_style_context_save: (pointer) -> ()
+	gtk_style_context_restore: (pointer) -> ()
+	gtk_style_context_set_state: (pointer, integer) -> ()
+	gtk_style_context_get_state: (pointer) -> (integer)
+	gtk_style_context_get_border: (pointer, integer, pointer) -> ()
+	gtk_style_context_get_background_color: (pointer, integer, pointer) -> ()
+	gtk_render_background: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_frame: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_check: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_option: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_arrow: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_focus: (pointer, pointer, double, double, double, double) -> ()
+	gtk_render_slider: (pointer, pointer, double, double, double, double, integer) -> ()
+	gtk_render_activity: (pointer, pointer, double, double, double, double) -> ()
+	gtk_scrollbar_new: (integer, pointer) -> (pointer)
+	gtk_scale_new: (integer, pointer) -> (pointer)
+	gtk_combo_box_text_new: () -> (pointer)
+	gtk_color_selection_dialog_get_color_selection: (pointer) -> (pointer)
+
+gtk_print_dialog libgtk-3.so.0
 	gtk_print_unix_dialog_new: (pointer, pointer) -> (pointer)
 	gtk_print_unix_dialog_get_selected_printer: (pointer) -> (pointer)
 	gtk_print_unix_dialog_set_settings: (pointer, pointer) -> ()
@@ -567,7 +607,7 @@ gtk_print_dialog libgtk-x11-2.0.so.0
 	gtk_print_settings_get_page_ranges: (pointer, pointer) -> (pointer)
 	gtk_print_unix_dialog_set_manual_capabilities:(pointer,integer)->()
 
-gtk_file_dialog libgtk-x11-2.0.so.0
+gtk_file_dialog libgtk-3.so.0
 	gtk_file_filter_new: () -> (pointer)
 	gtk_file_filter_set_name: (pointer, pointer) -> ()
 	gtk_file_filter_add_pattern: (pointer, pointer) -> ()
@@ -589,7 +629,7 @@ gtk_file_dialog libgtk-x11-2.0.so.0
 
 	gtk_file_chooser_get_type: () -> (integer)
 
-gtk_color_dialog libgtk-x11-2.0.so.0
+gtk_color_dialog libgtk-3.so.0
 	gtk_color_selection_dialog_new: (pointer) -> (pointer)
 	gtk_color_selection_set_current_color: (pointer, pointer) -> ()
 	gtk_color_selection_get_current_color: (pointer, pointer) -> ()

@@ -88,8 +88,7 @@ extern "C"
 
 	} GtkTabFlags;
 
-	/* function type for moz_gtk_enable_style_props */
-	typedef gint (*style_prop_t)(GtkStyle*, const gchar*, gint);
+	typedef gint (*style_prop_t)(void*, const gchar*, gint);
 
 	/*** result/error codes ***/
 #define MOZ_GTK_SUCCESS 0
@@ -260,7 +259,7 @@ extern "C"
 	                          GdkRectangle &framerect, GdkRectangle &btnrect);
 
 	void moz_gtk_get_widget_color(GtkStateType widgettype,
-	                              uint2 &red,uint2 &blue,uint2 &green);
+	                              uint2 &red, uint2 &green, uint2 &blue);
 
 #ifdef __cplusplus
 }

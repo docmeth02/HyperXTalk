@@ -124,7 +124,6 @@ void MCStack::realize()
         gdkwa.wclass = GDK_INPUT_OUTPUT;
         gdkwa.window_type = GDK_WINDOW_TOPLEVEL;
         gdkwa.visual = screen->getvisual();
-        gdkwa.colormap = screen->getcmap();
         gdkwa.event_mask = GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK;
         
         window = gdk_window_new(screen->getroot(), &gdkwa, gdk_valid_wa);
@@ -142,7 +141,7 @@ void MCStack::realize()
         
 		loadwindowshape();
 		if (m_window_shape != nil && m_window_shape -> is_sharp)
-            gdk_window_shape_combine_mask(window, (GdkPixmap*)m_window_shape->handle, 0, 0);
+            gdk_window_shape_combine_region(window, (cairo_region_t*)m_window_shape->handle, 0, 0);
         
         // At least one window has been created so startup is complete
         gdk_notify_startup_complete();
@@ -464,10 +463,10 @@ void MCStack::destroywindowshape()
 	// shape. Otherwise it is nil.
 	if (m_window_shape -> is_sharp)
 	{
-		GdkPixmap *t_pixmap;
-		t_pixmap = (GdkPixmap*)m_window_shape -> handle;
-		if (t_pixmap != nil)
-			((MCScreenDC*)MCscreen) -> freepixmap(t_pixmap);
+		cairo_region_t *t_region;
+		t_region = (cairo_region_t*)m_window_shape -> handle;
+		if (t_region != nil)
+			cairo_region_destroy(t_region);
 	}
 
 	delete m_window_shape;
@@ -722,7 +721,7 @@ static inline MCRectangle MCGRectangleToMCRectangle(const MCGRectangle &p_rect)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void MCX11PutImage(GdkDisplay *p_dpy, GdkDrawable* d, GdkRegion* p_clip_region, GdkPixbuf *source, int2 sx, int2 sy,
+void MCX11PutImage(GdkDisplay *p_dpy, GdkWindow* d, cairo_region_t* p_clip_region, GdkPixbuf *source, int2 sx, int2 sy,
                           int2 dx, int2 dy, uint2 w, uint2 h)
 {
 	if (d == nil)
@@ -740,8 +739,8 @@ void MCX11PutImage(GdkDisplay *p_dpy, GdkDrawable* d, GdkRegion* p_clip_region, 
     cairo_destroy(t_cr);
 }
 
-bool MCLinuxMCGRegionToRegion(MCGRegionRef p_region, GdkRegion* &r_region);
-void MCLinuxRegionDestroy(GdkRegion* p_region);
+bool MCLinuxMCGRegionToRegion(MCGRegionRef p_region, cairo_region_t* &r_region);
+void MCLinuxRegionDestroy(cairo_region_t* p_region);
 
 //////////
 
@@ -832,7 +831,7 @@ public:
 				surface_merge_with_alpha(m_raster.pixels, m_raster.stride, t_src_ptr, t_mask -> stride, t_width, t_height);
 			}
 
-			GdkRegion* t_region;
+			cairo_region_t* t_region;
 			t_region = nil;
 			
 			/* UNCHECKED */ MCLinuxMCGRegionToRegion(m_region, t_region);
