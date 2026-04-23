@@ -152,11 +152,11 @@ bool MCX11GetWindowWorkarea(GdkDisplay *p_display, Window p_window, MCRectangle 
 	unsigned long t_count, t_after;
 	unsigned long *t_workarea = nil;
 
-    x11::Atom XA_CARDINAL = x11::gdk_x11_atom_to_xatom_for_display(p_display, gdk_atom_intern_static_string("CARDINAL"));
+    x11::Atom XA_CARDINAL = gdk_x11_atom_to_xatom_for_display(p_display, gdk_atom_intern_static_string("CARDINAL"));
     
-    t_status = x11::XGetWindowProperty(x11::gdk_x11_display_get_xdisplay(p_display),
+    t_status = x11::XGetWindowProperty((x11::Display*)gdk_x11_display_get_xdisplay(p_display),
                                        gdk_x11_window_get_xid(p_window),
-                                       x11::gdk_x11_atom_to_xatom_for_display(p_display, MCworkareaatom),
+                                       gdk_x11_atom_to_xatom_for_display(p_display, MCworkareaatom),
                                        0, 4, False, XA_CARDINAL, &t_ret, &t_format, &t_count, &t_after,
                                        (unsigned char**)&t_workarea);
 	
@@ -203,12 +203,12 @@ bool MCScreenDC::apply_partial_struts(MCDisplay *p_displays, uint32_t p_display_
     x11::Window *t_clients = nil;
 	unsigned long t_client_count, t_after;
 	
-    x11::Atom XA_WINDOW = x11::gdk_x11_atom_to_xatom_for_display(dpy, gdk_atom_intern_static_string("WINDOW"));
-    x11::Atom XA_CARDINAL = x11::gdk_x11_atom_to_xatom_for_display(dpy, gdk_atom_intern_static_string("CARDINAL"));
+    x11::Atom XA_WINDOW = gdk_x11_atom_to_xatom_for_display(dpy, gdk_atom_intern_static_string("WINDOW"));
+    x11::Atom XA_CARDINAL = gdk_x11_atom_to_xatom_for_display(dpy, gdk_atom_intern_static_string("CARDINAL"));
     
-    t_status = x11::XGetWindowProperty(x11::gdk_x11_display_get_xdisplay(dpy),
+    t_status = x11::XGetWindowProperty((x11::Display*)gdk_x11_display_get_xdisplay(dpy),
                                        gdk_x11_window_get_xid(getroot()),
-                                       x11::gdk_x11_atom_to_xatom_for_display(dpy, MCclientlistatom),
+                                       gdk_x11_atom_to_xatom_for_display(dpy, MCclientlistatom),
                                        0, -1, False,XA_WINDOW, &t_ret, &t_format, &t_client_count, &t_after,
                                        (unsigned char **)&t_clients);
     
@@ -224,9 +224,9 @@ bool MCScreenDC::apply_partial_struts(MCDisplay *p_displays, uint32_t p_display_
 			unsigned long t_strut_count;
 			unsigned long *t_struts = nil;
 			
-            t_status = x11::XGetWindowProperty(x11::gdk_x11_display_get_xdisplay(dpy),
+            t_status = x11::XGetWindowProperty((x11::Display*)gdk_x11_display_get_xdisplay(dpy),
                                                t_clients[i],
-                                               x11::gdk_x11_atom_to_xatom_for_display(dpy, MCstrutpartialatom),
+                                               gdk_x11_atom_to_xatom_for_display(dpy, MCstrutpartialatom),
                                                0, 12, False, XA_CARDINAL, &t_ret, &t_format, &t_strut_count, &t_after,
                                                (unsigned char **)&t_struts);
 
@@ -413,7 +413,7 @@ MCRectangle MCScreenDC::screentologicalrect(const MCRectangle &p_rect)
 
 bool MCScreenDC::platform_get_display_handle(void *&r_display)
 {
-	r_display = x11::gdk_x11_display_get_xdisplay(getDisplay());
+	r_display = (x11::Display*)gdk_x11_display_get_xdisplay(getDisplay());
 	
 	return true;
 }

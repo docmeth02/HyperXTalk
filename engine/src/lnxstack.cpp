@@ -333,7 +333,7 @@ void MCStack::sethints()
 	{
 		chints.res_name = (char*)*t_app_name_cstr;
 		chints.res_class = (char*)*t_app_name_cstr;
-    	x11::XSetClassHint(x11::gdk_x11_display_get_xdisplay(MCdpy), gdk_x11_window_get_xid(window), &chints);
+    	x11::XSetClassHint((x11::Display*)gdk_x11_display_get_xdisplay(MCdpy), gdk_x11_window_get_xid(window), &chints);
 	}
 
     // TODO: is this just another way of ensuring on-top-ness?

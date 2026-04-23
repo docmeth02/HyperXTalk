@@ -19,7 +19,17 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 #include "uidc.h"
 
-extern "C" int gdk_x11_window_get_xid(void *);
+extern "C" {
+unsigned long gdk_x11_window_get_xid(GdkWindow *);
+void *gdk_x11_display_get_xdisplay(GdkDisplay *);
+unsigned long gdk_x11_atom_to_xatom_for_display(GdkDisplay *, GdkAtom);
+GdkVisual *gdk_x11_screen_lookup_visual(GdkScreen *, unsigned long);
+GdkWindow *gdk_x11_window_lookup_for_display(GdkDisplay *, unsigned long);
+GdkWindow *gdk_x11_window_foreign_new_for_display(GdkDisplay *, unsigned long);
+void gdk_x11_ungrab_server(void);
+void gdk_x11_grab_server(void);
+char *gdk_get_display(void);
+}
 #include "lnxflst.h"
 #include "lnx-clipboard.h"
 

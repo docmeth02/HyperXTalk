@@ -242,7 +242,7 @@ Boolean MCScreenDC::open()
     gdk_event_handler_set(&gdk_event_fn, gpointer(this), &gdk_event_fn_lost);
     
     x11::Display* XDisplay;
-    XDisplay = x11::gdk_x11_display_get_xdisplay(dpy);
+    XDisplay = (x11::Display*)gdk_x11_display_get_xdisplay(dpy);
     
     GdkScreen *t_screen;
     t_screen = gdk_display_get_default_screen(dpy);
@@ -284,7 +284,7 @@ Boolean MCScreenDC::open()
     if (MCvisualid)
     {
         // An explicit visual ID was specified on the command line. Get it.
-        vis = x11::gdk_x11_screen_lookup_visual(t_screen, MCvisualid);
+        vis = gdk_x11_screen_lookup_visual(t_screen, MCvisualid);
         
         if (vis == NULL)
         {
@@ -638,7 +638,7 @@ uint2 MCScreenDC::getheightmm()
 //   so use the XMaxRequestSize() call instead
 uint2 MCScreenDC::getmaxpoints()
 {
-	return MCU_min(x11::XMaxRequestSize(x11::gdk_x11_display_get_xdisplay(dpy)) - REQUEST_SIZE, MAX_POINTS);
+	return MCU_min(x11::XMaxRequestSize((x11::Display*)gdk_x11_display_get_xdisplay(dpy)) - REQUEST_SIZE, MAX_POINTS);
 }
 
 uint2 MCScreenDC::getvclass()
@@ -888,7 +888,7 @@ uintptr_t MCScreenDC::dtouint(Drawable d)
 Boolean MCScreenDC::uinttowindow(uintptr_t id, Window &w)
 {
     // Look up the XID in GDK's window table
-    w = x11::gdk_x11_window_lookup_for_display(dpy, id);
+    w = gdk_x11_window_lookup_for_display(dpy, id);
 	return True;
 }
 
@@ -896,7 +896,7 @@ void MCScreenDC::getbeep(uint4 which, int4& r_value)
 {
     // There doesn't seem to be a way to do this with GDK...
     x11::XKeyboardState values;
-    x11::XGetKeyboardControl(x11::gdk_x11_display_get_xdisplay(dpy), &values);
+    x11::XGetKeyboardControl((x11::Display*)gdk_x11_display_get_xdisplay(dpy), &values);
 	switch (which)
 	{
 	case P_BEEP_LOUDNESS:
@@ -921,15 +921,15 @@ void MCScreenDC::setbeep(uint4 which, int4 beep)
 	case P_BEEP_LOUDNESS:
 		beep = MCU_min(beep, 100);
 		control.bell_percent = beep;
-        x11::XChangeKeyboardControl(x11::gdk_x11_display_get_xdisplay(dpy), KBBellPercent, &control);
+        x11::XChangeKeyboardControl((x11::Display*)gdk_x11_display_get_xdisplay(dpy), KBBellPercent, &control);
 		break;
 	case P_BEEP_PITCH:
 		control.bell_pitch = beep;
-		x11::XChangeKeyboardControl(x11::gdk_x11_display_get_xdisplay(dpy), KBBellPitch, &control);
+		x11::XChangeKeyboardControl((x11::Display*)gdk_x11_display_get_xdisplay(dpy), KBBellPitch, &control);
 		break;
 	case P_BEEP_DURATION:
 		control.bell_duration = beep;
-		x11::XChangeKeyboardControl(x11::gdk_x11_display_get_xdisplay(dpy), KBBellDuration, &control);
+		x11::XChangeKeyboardControl((x11::Display*)gdk_x11_display_get_xdisplay(dpy), KBBellDuration, &control);
 
 		break;
 	}
@@ -1054,7 +1054,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                         {
                             // Draw the selection rectangle and release the server
                             cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
-                            x11::gdk_x11_ungrab_server();
+                            gdk_x11_ungrab_server();
                         }
                         
                         // End the selection
@@ -1074,7 +1074,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                     break;
                     
                 case GDK_BUTTON_PRESS:
-                    x11::gdk_x11_grab_server();
+                    gdk_x11_grab_server();
                     MCeventtime = gdk_event_get_time(t_event);
                     t_start_x = t_event_button->x;
                     t_start_y = t_event_button->y;
@@ -1090,7 +1090,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                     r = MCU_compute_rect(t_start_x, t_start_y, t_event_button->x, t_event_button->y);
                     if (r.width < 4 && r.height < 4)
                         r.width = r.height = 0;
-                    x11::gdk_x11_ungrab_server();
+                    gdk_x11_ungrab_server();
                     t_done = true;
                     break;
                     
@@ -1128,7 +1128,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
             // equivalents in GDK (it can only return windows beloning to this
             // application when mapping coordinates to a window).
             x11::Display* dpy;
-            dpy = x11::gdk_x11_display_get_xdisplay(t_display);
+            dpy = (x11::Display*)gdk_x11_display_get_xdisplay(t_display);
             x11::Window root;
             root = gdk_x11_window_get_xid(t_root);
             
@@ -1164,7 +1164,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
 			}
             
             // Convert the X11 window to a GDK window
-            t_child = x11::gdk_x11_window_foreign_new_for_display(t_display, child);
+            t_child = gdk_x11_window_foreign_new_for_display(t_display, child);
             
             // Restore the pointer location and ungrab the server
             x11::XWarpPointer(dpy, None, gdk_x11_window_get_xid(getroot()), 0, 0, 0, 0, oldx, oldy);
@@ -1173,7 +1173,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
         else
         {
             // Convert the X11 window to a GDK window
-            t_child = x11::gdk_x11_window_foreign_new_for_display(t_display, window);
+            t_child = gdk_x11_window_foreign_new_for_display(t_display, window);
         }
         
         // Get the position and dimensions of the window

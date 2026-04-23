@@ -149,7 +149,7 @@ bool MCScreenDC::getkeysdown(MCListRef& r_list)
     // directly if we want to get the key state from X11.
 	char km[32];
 	MCmodifierstate = querymods();
-    x11::XQueryKeymap(x11::gdk_x11_display_get_xdisplay(dpy), km);
+    x11::XQueryKeymap((x11::Display*)gdk_x11_display_get_xdisplay(dpy), km);
     
     // Translate the engine modifiers to GDK modifiers
     gint t_mods = 0;
@@ -342,12 +342,12 @@ Boolean MCScreenDC::handle(Boolean dispatch, Boolean anyevent, Boolean& abort, B
                     {
                         // GDK doesn't let us get the focus window so we have
                         // to use Xlib to get it. Sigh.
-                        x11::XGetInputFocus(x11::gdk_x11_display_get_xdisplay(dpy), &t_return_window, &t_return_revert_window);
+                        x11::XGetInputFocus((x11::Display*)gdk_x11_display_get_xdisplay(dpy), &t_return_window, &t_return_revert_window);
                         
                         // Look up the X11 window XID in GDK's window table. If
                         // it isn't found, it definitely isn't one of ours.
                         GdkWindow *t_window;
-                        if ((t_window = x11::gdk_x11_window_lookup_for_display(dpy, t_return_window)) == NULL)
+                        if ((t_window = gdk_x11_window_lookup_for_display(dpy, t_return_window)) == NULL)
                             t_lostfocus = true;
                         
                         // Even if we found it, it may not be ours. This is very

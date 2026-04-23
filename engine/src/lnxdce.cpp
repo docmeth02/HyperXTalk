@@ -422,7 +422,7 @@ Boolean MCScreenDC::wait(real8 duration, Boolean dispatch, Boolean anyevent)
                 t_sleep = MCMin(t_sleep, 0.01);
             
             gdk_display_sync(dpy);
-            done = MCS_poll(donepending ? 0 : t_sleep, x11::XConnectionNumber(x11::gdk_x11_display_get_xdisplay(dpy)));
+            done = MCS_poll(donepending ? 0 : t_sleep, x11::XConnectionNumber((x11::Display*)gdk_x11_display_get_xdisplay(dpy)));
         }
 		curtime = MCS_time();
 	}
