@@ -16,6 +16,7 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 #include "globdefs.h"
 
+#define GLIB_VERSION_MIN_REQUIRED ((2 << 16 | 68 << 8))
 #include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
