@@ -8,7 +8,7 @@
 		'exe_suffix': '',
 		'debug_info_suffix': '.dbg',
 
-		'c++_std': '<!(echo ${CXX_STD:-c++11})',
+		'c++_std': '<!(echo ${CXX_STD:-c++14})',
 	},
 	
 	'defines':

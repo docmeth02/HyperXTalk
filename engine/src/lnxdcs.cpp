@@ -301,14 +301,14 @@ Boolean MCScreenDC::open()
                 case GDK_VISUAL_STATIC_GRAY:
                 case GDK_VISUAL_STATIC_COLOR:
                 {
-                    cmap = gdk_colormap_new(vis, FALSE);
+                    cmap = vis;
                     setupcolors();
                     break;
                 }
                     
                 case GDK_VISUAL_TRUE_COLOR:
                 {
-                    cmap = gdk_colormap_new(vis, FALSE);
+                    cmap = vis;
                     
                     gint t_redshift, t_greenshift, t_blueshift;
                     gint t_redbits, t_greenbits, t_bluebits;
@@ -328,7 +328,7 @@ Boolean MCScreenDC::open()
                 case GDK_VISUAL_DIRECT_COLOR:
                 {
                     GdkColor defs[256];
-                    cmap = gdk_colormap_new(vis, TRUE);
+                    cmap = vis;
                     guint32 t_redmask, t_greenmask, t_bluemask;
                     gint t_redshift, t_greenshift, t_blueshift;
                     gint t_redbits, t_greenbits, t_bluebits;
@@ -357,13 +357,13 @@ Boolean MCScreenDC::open()
 						defs[i].green = (i & gmsk) * g_scale;
 						defs[i].blue  = (i & bmsk) * b_scale;
 					}
-                    gdk_colors_store(cmap, defs, gdk_visual_get_colormap_size(vis));
+                    // gdk_colors_store removed in GTK 3 — colormap manipulation no longer needed
                 }
                     
                 case GDK_VISUAL_GRAYSCALE:
                 {
                     // Create a grayscale colormap with a linear ramp
-                    cmap = gdk_colormap_new(vis, TRUE);
+                    cmap = vis;
                     setupcolors();
                     GdkColor *t_colors;
                     if (!MCMemoryNewArray(ncolors, t_colors))
@@ -377,7 +377,7 @@ Boolean MCScreenDC::open()
                         t_colors[i].red = t_colors[i].green = t_colors[i].blue = i * MAXUINT2 / ncolors;
                         t_colors[i].pixel = i;
                     }
-                    gdk_colors_store(cmap, t_colors, ncolors);
+                    // gdk_colors_store removed in GTK 3
                     MCMemoryDelete(t_colors);
                     break;
                 }
@@ -385,7 +385,7 @@ Boolean MCScreenDC::open()
                 case GDK_VISUAL_PSEUDO_COLOR:
                 {
                     // Each stack uses its own colormap
-                    cmap = gdk_colormap_new(vis, FALSE);
+                    cmap = vis;
                     setupcolors();
                     MCuseprivatecmap = true;
                     break;
@@ -404,7 +404,7 @@ Boolean MCScreenDC::open()
 			fprintf(stderr, "Composite window manager detected. Trying to use RGBA visual.\n");
 #endif
             vis = gdk_screen_get_rgba_visual(t_screen);
-            cmap = gdk_screen_get_rgba_colormap(t_screen);
+            cmap = vis;
         }
         
         // If getting the RGBA visual fails, or we are not composited, then
@@ -413,14 +413,14 @@ Boolean MCScreenDC::open()
         {
             // Get the default visual and colormap
             vis = gdk_screen_get_system_visual(t_screen);
-            cmap = gdk_screen_get_system_colormap(t_screen);
+            cmap = vis;
         }
         
         // If getting the system visual fails then use the rgb visual.
         if (vis == nullptr)
         {
-            vis = gdk_screen_get_rgb_visual(t_screen);
-            cmap = gdk_screen_get_rgb_colormap(t_screen);
+            vis = gdk_screen_get_system_visual(t_screen);
+            cmap = vis;
         }
 
 		if (gdk_visual_get_visual_type(vis) == GDK_VISUAL_TRUE_COLOR)
@@ -448,25 +448,12 @@ Boolean MCScreenDC::open()
     gdkwa.event_mask = GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK;
     gdkwa.x = gdkwa.y = gdkwa.width = gdkwa.height = 8;
     gdkwa.visual = vis;
-    gdkwa.colormap = cmap;
     gdkwa.wclass = GDK_INPUT_OUTPUT;
     gdkwa.window_type = GDK_WINDOW_TOPLEVEL;
-    
-    GdkWindow *w = gdk_window_new(gdk_screen_get_root_window(t_screen),
-                                  &gdkwa,
-                                  GDK_WA_X|GDK_WA_Y|GDK_WA_VISUAL);
-    gc = gdk_gc_new(w);
-    gdk_window_destroy(w);
-    
-    // Create the NULL window
+
     NULLWindow = gdk_window_new(gdk_screen_get_root_window(t_screen),
                                 &gdkwa,
                                 GDK_WA_X|GDK_WA_Y|GDK_WA_VISUAL);
-
-    GdkColor t_color;
-    t_color.pixel = 0;
-    gdk_gc_set_exposures(gc, FALSE);
-    gdk_gc_set_background(gc, &t_color);
 
 	black_pixel.red = black_pixel.green = black_pixel.blue = 0;
 	white_pixel.red = white_pixel.green = white_pixel.blue = MAXUINT2;
@@ -564,7 +551,6 @@ Boolean MCScreenDC::close(Boolean force)
     gdk_window_destroy(NULLWindow);
     
     gdk_display_flush(dpy);
-    g_object_unref(gc);
 
 	//XDND
 	MCLinuxDragAndDropFinalize();
@@ -590,17 +576,18 @@ MCNameRef MCScreenDC::getdisplayname()
 
 uint2 MCScreenDC::getrealdepth(void)
 {
-	return vis -> depth ;
+	return gdk_visual_get_depth(vis);
 }
 
 
 
 uint2 MCScreenDC::getdepth(void)
 {
-	if (vis -> depth < 24)
+	gint t_depth = gdk_visual_get_depth(vis);
+	if (t_depth < 24)
 		return 32;
-	
-	return ( vis -> depth ) ;
+
+	return t_depth;
 }
 
 void MCScreenDC::grabpointer(Window w)
@@ -770,9 +757,15 @@ Pixmap MCScreenDC::createpixmap(uint2 width, uint2 height,
 			depth = 32;
 	}
 	
-    GdkPixmap *pm = gdk_pixmap_new(getroot(), width, height, depth);
+    GdkWindowAttr t_attr;
+    t_attr.width = width;
+    t_attr.height = height;
+    t_attr.wclass = GDK_INPUT_OUTPUT;
+    t_attr.window_type = GDK_WINDOW_OFFSCREEN;
+    t_attr.visual = vis;
+    GdkWindow *pm = gdk_window_new(getroot(), &t_attr, GDK_WA_VISUAL);
 	assert ( pm != DNULL ) ;
-	
+
 	return pm;
 }
 
@@ -788,7 +781,7 @@ bool MCScreenDC::device_getwindowgeometry(Window w, MCRectangle &drect)
 	gint x, y;
 	gint width, height;
     
-    gdk_window_get_geometry(w, NULL, NULL, &width, &height, NULL);
+    gdk_window_get_geometry(w, NULL, NULL, &width, &height);
     gdk_window_get_origin(w, &x, &y);
     
 	MCU_set_rect(drect, x, y, width, height);
@@ -799,75 +792,22 @@ bool MCScreenDC::device_getwindowgeometry(Window w, MCRectangle &drect)
 Boolean MCScreenDC::getpixmapgeometry(Pixmap p, uint2 &w, uint2 &h, uint2 &d)
 {
     gint width, height;
-    gdk_pixmap_get_size(p, &width, &height);
-    
+    gdk_window_get_geometry(p, NULL, NULL, &width, &height);
+
     w = width;
     h = height;
-    d = gdk_drawable_get_depth(p);
-    
+    d = gdk_visual_get_depth(gdk_window_get_visual(p));
+
 	return True;
 }
 
 void MCScreenDC::setgraphicsexposures(Boolean on, MCStack *sptr)
 {
-	gdk_gc_set_exposures(gc, TRUE);
 }
 
-GdkFunction MCScreenDC::XOpToGdkOp(int op)
+int MCScreenDC::XOpToGdkOp(int op)
 {
-    switch (op)
-    {
-        case GXcopy:
-            return GDK_COPY;
-            
-        case GXinvert:
-            return GDK_INVERT;
-            
-        case GXxor:
-            return GDK_XOR;
-            
-        case GXclear:
-            return GDK_CLEAR;
-            
-        case GXand:
-            return GDK_AND;
-            
-        case GXandReverse:
-            return GDK_AND_REVERSE;
-            
-        case GXandInverted:
-            return GDK_AND_INVERT;
-            
-        case GXnoop:
-            return GDK_NOOP;
-            
-        case GXor:
-            return GDK_OR;
-            
-        case GXequiv:
-            return GDK_EQUIV;
-            
-        case GXorReverse:
-            return GDK_OR_REVERSE;
-            
-        case GXcopyInverted:
-            return GDK_COPY_INVERT;
-            
-        case GXorInverted:
-            return GDK_OR_INVERT;
-            
-        case GXnand:
-            return GDK_NAND;
-            
-        case GXnor:
-            return GDK_NOR;
-            
-        case GXset:
-            return GDK_SET;
-    }
-    
-    MCAssert(false);
-    return GDK_COPY;
+    return op;
 }
 
 void MCScreenDC::copyarea(Drawable s, Drawable d, int2 depth,
@@ -876,21 +816,12 @@ void MCScreenDC::copyarea(Drawable s, Drawable d, int2 depth,
 {
 	if (s == nil || d == nil)
 		return;
-	
-    GdkGC *t_gc;
-    t_gc = gdk_gc_new(d);
-    
-    assert(rop <= GXset);
-    
-    if (rop != GXcopy)
-        gdk_gc_set_function(t_gc, XOpToGdkOp(rop));
-    
-    gdk_draw_drawable(d, t_gc, s, sx, sy, dx, dy, sw, sh);
-    
-    if (rop != GXcopy)
-        gdk_gc_set_function(t_gc, GDK_COPY);
 
-    g_object_unref(t_gc);
+    cairo_t *t_cr = gdk_cairo_create(d);
+    gdk_cairo_set_source_window(t_cr, s, dx - sx, dy - sy);
+    cairo_rectangle(t_cr, dx, dy, sw, sh);
+    cairo_fill(t_cr);
+    cairo_destroy(t_cr);
 }
 
 MCBitmap *MCScreenDC::createimage(uint16_t depth, uint16_t width, uint16_t height, bool set, uint8_t value)
@@ -935,7 +866,7 @@ void MCScreenDC::putimage(Drawable d, MCBitmap *source, int2 sx, int2 sy,
 MCBitmap *MCScreenDC::getimage(Drawable d, int2 x, int2 y, uint2 w, uint2 h)
 {
 	GdkPixbuf *t_image;
-    t_image = gdk_pixbuf_get_from_drawable(NULL, d, NULL, x, y, 0, 0, w, h);
+    t_image = gdk_pixbuf_get_from_window(d, x, y, w, h);
     return (MCBitmap*)t_image;
 }
 
@@ -946,14 +877,12 @@ void MCScreenDC::flipimage(MCBitmap *image, int2 byte_order, int2 bit_order)
 
 void MCScreenDC::setfunction(uint4 rop)
 {
-	if (rop < 0x10)
-        gdk_gc_set_function(getgc(), XOpToGdkOp(rop));
 }
 
 uintptr_t MCScreenDC::dtouint(Drawable d)
 {
 	// Return the XID
-    return d != DNULL ? x11::gdk_x11_drawable_get_xid(d) : 0;
+    return d != DNULL ? gdk_x11_window_get_xid(d) : 0;
 }
 
 Boolean MCScreenDC::uinttowindow(uintptr_t id, Window &w)
@@ -1068,14 +997,11 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
             return NULL;
         }
         
-        // Prepare for drawing the selection rectangle
         MCRectangle t_rect(kMCEmptyRectangle);
-        GdkColor t_color;
-        t_color.pixel = ~0;
-        GdkGC *t_gc = gdk_gc_new(t_root);
-        gdk_gc_set_function(t_gc, GDK_XOR);
-        gdk_gc_set_foreground(t_gc, &t_color);
-        gdk_gc_set_subwindow(t_gc, GDK_INCLUDE_INFERIORS);
+        cairo_t *t_gc = gdk_cairo_create(t_root);
+        cairo_set_operator(t_gc, CAIRO_OPERATOR_DIFFERENCE);
+        cairo_set_source_rgb(t_gc, 1.0, 1.0, 1.0);
+        cairo_set_line_width(t_gc, 1.0);
         int16_t t_start_x = 0;
         int16_t t_start_y = 0;
         bool t_drawing = false;
@@ -1127,7 +1053,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                         if (t_drawing)
                         {
                             // Draw the selection rectangle and release the server
-                            gdk_draw_rectangle(t_root, t_gc, FALSE, t_rect.x, t_rect.y, t_rect.width - 1, t_rect.height - 1);
+                            cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
                             x11::gdk_x11_ungrab_server();
                         }
                         
@@ -1141,9 +1067,9 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                     if (t_drawing)
                     {
                         // Update the selection rectangle
-                        gdk_draw_rectangle(t_root, t_gc, FALSE, t_rect.x, t_rect.y, t_rect.width - 1, t_rect.height - 1);
+                        cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
                         t_rect = MCU_compute_rect(t_start_x, t_start_y, t_event_motion->x, t_event_motion->y);
-                        gdk_draw_rectangle(t_root, t_gc, FALSE, t_rect.x, t_rect.y, t_rect.width - 1, t_rect.height - 1);
+                        cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
                     }
                     break;
                     
@@ -1153,14 +1079,14 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                     t_start_x = t_event_button->x;
                     t_start_y = t_event_button->y;
                     t_rect = MCU_compute_rect(t_start_x, t_start_y, t_start_x, t_start_y);
-                    gdk_draw_rectangle(t_root, t_gc, FALSE, t_rect.x, t_rect.y, t_rect.width - 1, t_rect.height - 1);
+                    cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
                     t_drawing = true;
                     break;
                     
                 case GDK_BUTTON_RELEASE:
                     MCeventtime = gdk_event_get_time(t_event);
                     setmods(t_event_button->state, 0, t_event_button->button, True);
-                    gdk_draw_rectangle(t_root, t_gc, FALSE, t_rect.x, t_rect.y, t_rect.width - 1, t_rect.height - 1);
+                    cairo_rectangle(t_gc, t_rect.x + 0.5, t_rect.y + 0.5, t_rect.width - 1, t_rect.height - 1); cairo_stroke(t_gc);
                     r = MCU_compute_rect(t_start_x, t_start_y, t_event_button->x, t_event_button->y);
                     if (r.width < 4 && r.height < 4)
                         r.width = r.height = 0;
@@ -1184,7 +1110,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
         // Release the grabs and other resources that were acquired
         gdk_display_pointer_ungrab(dpy, GDK_CURRENT_TIME);
         gdk_cursor_unref(t_cursor);
-        g_object_unref(t_gc);
+        cairo_destroy(t_gc);
         gdk_display_flush(t_display);
     }
     if (r.x == -32768)
@@ -1204,7 +1130,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
             x11::Display* dpy;
             dpy = x11::gdk_x11_display_get_xdisplay(t_display);
             x11::Window root;
-            root = x11::gdk_x11_drawable_get_xid(t_root);
+            root = gdk_x11_window_get_xid(t_root);
             
             // Grab the server to prevent pointer movement during this operation
             x11::XGrabServer(dpy);
@@ -1217,7 +1143,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
             // the child window at that point
 			int2 oldx = rx;
 			int2 oldy = ry;
-            x11::XWarpPointer(dpy, None, x11::gdk_x11_drawable_get_xid(getroot()), 0, 0, 0, 0, r.x, r.y);
+            x11::XWarpPointer(dpy, None, gdk_x11_window_get_xid(getroot()), 0, 0, 0, 0, r.x, r.y);
             x11::XQueryPointer(dpy, root, &troot, &child, &rx, &ry, &wx, &wy, &kb);
 			
             // If no child window, use the screen's root window instead
@@ -1241,7 +1167,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
             t_child = x11::gdk_x11_window_foreign_new_for_display(t_display, child);
             
             // Restore the pointer location and ungrab the server
-            x11::XWarpPointer(dpy, None, x11::gdk_x11_drawable_get_xid(getroot()), 0, 0, 0, 0, oldx, oldy);
+            x11::XWarpPointer(dpy, None, gdk_x11_window_get_xid(getroot()), 0, 0, 0, 0, oldx, oldy);
             x11::XUngrabServer(dpy);
         }
         else
@@ -1286,8 +1212,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
     // FG-2014-08-05: [[ Bugfix 13032 ]]
     // We need to pre-create the pixbuf to ensure we get one with alpha.
     GdkPixbuf *t_image;
-    t_image = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, r.width, r.height);
-    t_image = gdk_pixbuf_get_from_drawable(t_image, t_root, NULL, r.x, r.y, 0, 0, r.width, r.height);
+    t_image = gdk_pixbuf_get_from_window(t_root, r.x, r.y, r.width, r.height);
     
     // Abort if the pixbuf could not be captured
     if (t_image == NULL)
@@ -1350,9 +1275,8 @@ void MCScreenDC::createbackdrop_window(void)
     gdkwa.width = gdkwa.height = 100;
     gdkwa.wclass = GDK_INPUT_OUTPUT;
     gdkwa.visual = getvisual();
-    gdkwa.colormap = getcmap();
     gdkwa.window_type = GDK_WINDOW_TOPLEVEL;
-    
+
     backdrop = gdk_window_new(getroot(), &gdkwa, GDK_WA_VISUAL);
     gdk_display_sync(MCdpy);
 }
@@ -1442,19 +1366,20 @@ void MCScreenDC::configurebackdrop(const MCColor& p_colour, MCPatternRef p_patte
     
 	if (m_backdrop_pixmap != DNULL)
 	{
-		gdk_window_set_back_pixmap(backdrop, m_backdrop_pixmap, FALSE);
+		// TODO: pixmap backdrop pattern not yet supported in GTK 3
 	}
 	else
 	{
-		GdkColor t_colour;
-        t_colour.red = p_colour.red;
-        t_colour.green = p_colour.green;
-        t_colour.blue = p_colour.blue;
-        gdk_rgb_find_color(gdk_drawable_get_colormap(backdrop), &t_colour);
-        gdk_window_set_background(backdrop, &t_colour);
+		GdkRGBA t_rgba;
+		t_rgba.red = p_colour.red / 65535.0;
+		t_rgba.green = p_colour.green / 65535.0;
+		t_rgba.blue = p_colour.blue / 65535.0;
+		t_rgba.alpha = 1.0;
+		gdk_window_set_background_rgba(backdrop, &t_rgba);
 	}
-    
-    gdk_window_clear(backdrop);
+
+	gdk_window_invalidate_rect(backdrop, NULL, FALSE);
+	gdk_window_process_updates(backdrop, FALSE);
 
 	MCstacks -> refresh();
 }
@@ -1494,21 +1419,6 @@ void MCScreenDC::createbackdrop(MCStringRef color)
     
     backdrop = gdk_window_new(NULL, &t_wa, GDK_WA_X|GDK_WA_Y|GDK_WA_VISUAL);
     
-	if (m_backdrop_pixmap != DNULL)
-	{
-		gdk_window_set_back_pixmap(backdrop, m_backdrop_pixmap, FALSE);
-	}
-	else
-	{
-		GdkColor t_colour;
-        t_colour.red = backdropcolor.red;
-        t_colour.green = backdropcolor.green;
-        t_colour.blue = backdropcolor.blue;
-        gdk_rgb_find_color(gdk_drawable_get_colormap(backdrop), &t_colour);
-        gdk_window_set_background(backdrop, &t_colour);
-	}
-    
-    gdk_window_show_unraised(backdrop);
 }*/
 
 

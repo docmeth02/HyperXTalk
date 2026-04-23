@@ -39,8 +39,6 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
 #include "lnxdc.h"
 
-extern "C" int gdk_x11_drawable_get_xid(void *);
-
 #include "lnxpsprinter.h"
 
 #include "mctheme.h"
@@ -157,7 +155,7 @@ bool MCX11GetWindowWorkarea(GdkDisplay *p_display, Window p_window, MCRectangle 
     x11::Atom XA_CARDINAL = x11::gdk_x11_atom_to_xatom_for_display(p_display, gdk_atom_intern_static_string("CARDINAL"));
     
     t_status = x11::XGetWindowProperty(x11::gdk_x11_display_get_xdisplay(p_display),
-                                       gdk_x11_drawable_get_xid(p_window),
+                                       gdk_x11_window_get_xid(p_window),
                                        x11::gdk_x11_atom_to_xatom_for_display(p_display, MCworkareaatom),
                                        0, 4, False, XA_CARDINAL, &t_ret, &t_format, &t_count, &t_after,
                                        (unsigned char**)&t_workarea);
@@ -209,7 +207,7 @@ bool MCScreenDC::apply_partial_struts(MCDisplay *p_displays, uint32_t p_display_
     x11::Atom XA_CARDINAL = x11::gdk_x11_atom_to_xatom_for_display(dpy, gdk_atom_intern_static_string("CARDINAL"));
     
     t_status = x11::XGetWindowProperty(x11::gdk_x11_display_get_xdisplay(dpy),
-                                       gdk_x11_drawable_get_xid(getroot()),
+                                       gdk_x11_window_get_xid(getroot()),
                                        x11::gdk_x11_atom_to_xatom_for_display(dpy, MCclientlistatom),
                                        0, -1, False,XA_WINDOW, &t_ret, &t_format, &t_client_count, &t_after,
                                        (unsigned char **)&t_clients);

@@ -58,7 +58,6 @@ void *gtk_socket_new(void);
 void gtk_socket_add_id(void *, int);
 void *gtk_socket_get_plug_window(void *);
 int gtk_socket_get_id(void *);
-int gdk_x11_drawable_get_xid(void *);
 }
 #define GTK_SOCKET(x) ((GtkSocket*)(x))
 
@@ -275,7 +274,7 @@ bool MCNativeLayerX11::GetNativeView(void *&r_view)
 
 x11Window MCNativeLayerX11::getStackX11Window()
 {
-    return gdk_x11_drawable_get_xid(getStackGdkWindow());
+    return gdk_x11_window_get_xid(getStackGdkWindow());
 }
 
 GdkWindow* MCNativeLayerX11::getStackGdkWindow()

@@ -18,6 +18,8 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #define	XDC_H
 
 #include "uidc.h"
+
+extern "C" int gdk_x11_window_get_xid(void *);
 #include "lnxflst.h"
 #include "lnx-clipboard.h"
 
@@ -110,7 +112,7 @@ extern Boolean tripleclick;
 
 class MCScreenDC : public MCUIDC
 {
-	cairo_t* gc = nullptr;
+	cairo_t* gc = nullptr; // unused legacy, kept for ABI compatibility
 	
 	bool m_application_has_focus = false; // This allows us to track if the application is at the front.
 	

@@ -137,7 +137,7 @@ gdk libgdk-x11-2.0.so.0
 	gdk_window_is_visible: (pointer) -> (integer)
 	gdk_window_set_back_pixmap: (pointer, pointer, integer) -> ()
 	gdk_display_get_default: () -> (pointer)
-	gdk_x11_drawable_get_xid: (pointer) -> (integer)
+	gdk_x11_window_get_xid: (pointer) -> (integer)
 	gdk_x11_image_get_ximage: (pointer) -> (pointer)
 	gdk_x11_display_get_xdisplay: (pointer) -> (pointer)
 	gdk_error_trap_push: () -> ()
