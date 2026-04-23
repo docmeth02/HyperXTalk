@@ -1292,13 +1292,7 @@ function toolIconColor pMode
    end if
 end toolIconColor
 
-on systemAppearanceChanged pMode, pWindowColor, pTextColor
-   local tBgColor
-   put revIDEColor("palette_background") into tBgColor
-   set the backgroundColor of this stack to tBgColor
-   set the backgroundColor of this card to tBgColor
-   set the foregroundColor of this stack to pTextColor
-
+on systemAppearanceChanged pMode, pWindowColor, pTextColor   
    -- LCB widgets sit outside the LiveCode Script message hierarchy and cannot
    -- receive SystemAppearanceChanged themselves.  Drive the appearance change
    -- by updating the foregroundColor of every SVG path widget in the palette;
