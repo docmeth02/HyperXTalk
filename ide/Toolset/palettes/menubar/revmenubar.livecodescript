@@ -2044,6 +2044,8 @@ private function hxtMenubarPluginsMenu pContext
    if sPluginMenuText is not empty then
       put sPluginMenuText & return after tPlugins
    end if
+   put "-" & return after tPlugins
+   put "Plugin Settings" & return after tPlugins
    
    return modifyMenu("Plugins", tPlugins)
 end hxtMenubarPluginsMenu
@@ -2074,8 +2076,8 @@ private function revMenubarDevelopmentMenu pContext
    --   if sPluginMenuText is not empty then
    --      put sPluginMenuText & return after tDevelopment
    --   end if
-   put tab & "-" & return after tDevelopment
-   put tab & "Plugin Settings" & return after tDevelopment
+   --   put tab & "-" & return after tDevelopment
+   --   put tab & "Plugin Settings" & return after tDevelopment
    put "-" & return after tDevelopment
    
    if revEnvironmentEditionProperty("script_profiler") then
