@@ -446,6 +446,8 @@ gtk libgtk-3.so.0
 	gtk_plug_new: (integer) -> (pointer)
 	gtk_plug_get_type: () -> (integer)
 	gtk_plug_get_id: (pointer) -> (integer)
+	gtk_widget_get_allocation: (pointer, pointer) -> ()
+	gtk_widget_is_sensitive: (pointer) -> (integer)
 	gtk_widget_unparent: (pointer) -> ()
 	gtk_widget_get_style: (pointer) -> (pointer)
 	gtk_check_button_new: () -> (pointer)
@@ -562,6 +564,7 @@ libxcursor	libXcursor.so.1
 
 gobject libgobject-2.0.so.0
 	g_signal_connect_data: (pointer, pointer, pointer, pointer, pointer, integer) -> (integer)
+	g_signal_handler_disconnect: (pointer, integer) -> ()
 	g_malloc: (integer) -> (pointer)
 	g_free: (pointer) -> ()
 	g_object_ref: (pointer) -> (pointer)

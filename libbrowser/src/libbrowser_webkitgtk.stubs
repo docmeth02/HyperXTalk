@@ -1,0 +1,57 @@
+webkit2gtk libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0
+
+	# WebKitWebView
+	webkit_web_view_new_with_user_content_manager: (pointer) -> (pointer)
+	webkit_web_view_load_uri: (pointer, pointer) -> ()
+	webkit_web_view_load_html: (pointer, pointer, pointer) -> ()
+	webkit_web_view_go_back: (pointer) -> ()
+	webkit_web_view_go_forward: (pointer) -> ()
+	webkit_web_view_can_go_back: (pointer) -> (integer)
+	webkit_web_view_can_go_forward: (pointer) -> (integer)
+	webkit_web_view_stop_loading: (pointer) -> ()
+	webkit_web_view_reload: (pointer) -> ()
+	webkit_web_view_get_uri: (pointer) -> (pointer)
+	webkit_web_view_get_settings: (pointer) -> (pointer)
+	webkit_web_view_get_estimated_load_progress: (pointer) -> (double)
+	webkit_web_view_get_user_content_manager: (pointer) -> (pointer)
+	webkit_web_view_get_tls_info: (pointer, pointer, pointer) -> (integer)
+	webkit_web_view_evaluate_javascript: (pointer, pointer, intsize, pointer, pointer, pointer, pointer, pointer) -> ()
+	webkit_web_view_evaluate_javascript_finish: (pointer, pointer, pointer) -> (pointer)
+
+	# WebKitSettings
+	webkit_settings_new: () -> (pointer)
+	webkit_settings_get_user_agent: (pointer) -> (pointer)
+	webkit_settings_set_user_agent: (pointer, pointer) -> ()
+
+	# WebKitUserContentManager
+	webkit_user_content_manager_new: () -> (pointer)
+	webkit_user_content_manager_register_script_message_handler: (pointer, pointer) -> (integer)
+	webkit_user_content_manager_unregister_script_message_handler: (pointer, pointer) -> ()
+	webkit_user_content_manager_add_script: (pointer, pointer) -> ()
+	webkit_user_content_manager_remove_all_scripts: (pointer) -> ()
+
+	# WebKitUserScript
+	webkit_user_script_new: (pointer, integer, integer, pointer, pointer) -> (pointer)
+	webkit_user_script_unref: (pointer) -> ()
+
+	# WebKitPolicyDecision
+	webkit_policy_decision_use: (pointer) -> ()
+	webkit_policy_decision_ignore: (pointer) -> ()
+
+	# WebKitNavigationPolicyDecision
+	webkit_navigation_policy_decision_get_navigation_action: (pointer) -> (pointer)
+
+	# WebKitNavigationAction
+	webkit_navigation_action_get_request: (pointer) -> (pointer)
+	webkit_navigation_action_get_navigation_type: (pointer) -> (integer)
+
+	# WebKitURIRequest
+	webkit_uri_request_get_uri: (pointer) -> (pointer)
+
+javascriptcoregtk libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0
+
+	# JSCValue
+	jsc_value_to_string: (pointer) -> (pointer)
+	jsc_value_is_string: (pointer) -> (integer)
+	jsc_value_is_undefined: (pointer) -> (integer)
+	jsc_value_is_null: (pointer) -> (integer)

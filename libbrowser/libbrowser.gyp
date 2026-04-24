@@ -52,7 +52,10 @@
 				'src/libbrowser_nsvalue.mm',
 				
 				'src/libbrowser_android.cpp',
-				
+
+				'src/libbrowser_webkitgtk.h',
+				'src/libbrowser_webkitgtk.cpp',
+
 				'src/libbrowser_lnx_factories.cpp',
 				'src/libbrowser_win_factories.cpp',
 				'src/libbrowser_osx_factories.cpp',
@@ -62,13 +65,25 @@
 			'target_conditions':
 			[
 				## Exclusions
-				# Only use CEF on desktop platforms
+				# Only use CEF on Windows
 				[
-					'not (toolset_os == "win" or (toolset_os == "linux" and toolset_arch in ("x86", "x86_64")))',
+					'toolset_os != "win"',
 					{
 						'sources!':
 						[
 							'src/libbrowser_cef.cpp',
+						],
+					},
+				],
+
+				# WebKitGTK is Linux only
+				[
+					'toolset_os != "linux"',
+					{
+						'sources!':
+						[
+							'src/libbrowser_webkitgtk.h',
+							'src/libbrowser_webkitgtk.cpp',
 						],
 					},
 				],
@@ -117,16 +132,16 @@
 					{
 						'sources!':
 						[
-							'src/libbrowser_cef_lnx.cpp',
 							'src/signal_restore_posix.cpp',
-							
+
 							'src/libbrowser_lnx_factories.cpp',
 						],
 					},
 				],
 
+				# CEF Linux files are replaced by WebKitGTK
 				[
-					'toolset_os == "linux" and not toolset_arch in ("x86", "x86_64")',
+					'toolset_os == "linux"',
 					{
 						'sources!':
 						[
@@ -198,8 +213,8 @@
 			'conditions':
 			[
 				[
-					# Only the CEF platforms need libbrowser-cefprocess
-					'OS in ("linux", "win") or host_os in ("linux", "win")',
+					# Only Windows needs CEF
+					'OS == "win" or host_os == "win"',
 					{
 						'dependencies':
 						[
@@ -208,6 +223,21 @@
 							'../prebuilt/libicu.gyp:libicu',
 							'../thirdparty/libcef/libcef.gyp:libcef_library_wrapper',
 							'../thirdparty/libcef/libcef.gyp:libcef_stubs',
+						],
+					},
+				],
+
+				[
+					# Linux uses WebKitGTK
+					'OS == "linux" or host_os == "linux"',
+					{
+						'dependencies':
+						[
+							'libbrowser_webkitgtk_stubs.gyp:libwebkitgtk_stubs',
+						],
+						'cflags':
+						[
+							'<!@(pkg-config --cflags webkit2gtk-4.1)',
 						],
 					},
 				],
@@ -263,7 +293,7 @@
     'conditions':
     [
         [
-            'OS in ("linux", "win") or host_os in ("linux", "win")',
+            'OS == "win" or host_os == "win"',
             {
                 'targets':
                 [
