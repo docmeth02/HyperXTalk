@@ -33,18 +33,17 @@ on SystemAppearanceChanged pMode, pWindowColor, pTextColor
    -- graphic directly, so we must set backgroundColor on the group and the
    -- internal dvBackground graphic too (same pattern as the Project Browser).
    if there is a card "list" of me then
-      local tRowColor, tList
+      local tRowColor
       put revIDEColor("dataView_rowColor") into tRowColor
-      put group "extensionList" of card "list" of me into tList
-      if there is a tList then
-         set the backgroundColor of tList to tRowColor
+      if there is a group "extensionList" of card "list" then
+         set the backgroundColor of group "extensionList" of card "list" to tRowColor
          try
-            set the backgroundColor of graphic "dvBackground" of tList to tRowColor
+            set the backgroundColor of graphic "dvBackground" of group "extensionList" of card "list" to tRowColor
          end try
-         set the viewProp["row color"] of tList to tRowColor
-         set the viewProp["alternate row color"] of tList to revIDEColor("dataView_rowAlternateColor")
-         set the viewProp["hilite color"] of tList to ideColorGet("pb_line_selected")
-         send "renderView" to tList
+         set the viewProp["row color"] of group "extensionList" of card "list" to tRowColor
+         set the viewProp["alternate row color"] of group "extensionList" of card "list" to revIDEColor("dataView_rowAlternateColor")
+         set the viewProp["hilite color"] of group "extensionList" of card "list" to ideColorGet("pb_line_selected")
+         send "renderView" to group "extensionList" of card "list"
       end if
    end if
    pass SystemAppearanceChanged
