@@ -20,6 +20,7 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include <stdio.h>
 #include <float.h>
+#include <time.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -125,6 +126,20 @@ MCPDFPrintingDevice::MCPDFPrintingDevice()
 	m_option_values = nil;
 
 	m_bookmark_depth = 1;
+	for (uint32_t i = 0; i < kMaxOutlineDepth; i++)
+		m_outline_id_stack[i] = CAIRO_PDF_OUTLINE_ROOT;
+}
+
+// Cross-platform: format the current UTC time as ISO 8601 for cairo 1.18's
+// cairo_pdf_surface_set_metadata(CAIRO_PDF_METADATA_CREATE_DATE, ...) call.
+bool MCPDFPrintingDevice::get_iso8601_datetime_now(char *r_buf, size_t p_buf_size)
+{
+	time_t t_now = time(NULL);
+	struct tm *t_tm = gmtime(&t_now);
+	if (t_tm == NULL)
+		return false;
+	size_t t_len = strftime(r_buf, p_buf_size, "%Y-%m-%dT%H:%M:%SZ", t_tm);
+	return t_len > 0;
 }
 
 //////////
@@ -256,8 +271,6 @@ bool MCPDFPrintingDevice::BeginDocument(const MCCustomPrinterDocument& p_documen
 
 	if (t_success)
 	{
-		cairo_pdf_value_t t_value;
-		t_value.type = CAIRO_PDF_VALUE_TYPE_STRING;
 		if (p_document.option_count > 0)
 		{
 			t_success = MCMemoryNewArray(p_document.option_count, m_option_keys);
@@ -277,14 +290,14 @@ bool MCPDFPrintingDevice::BeginDocument(const MCCustomPrinterDocument& p_documen
 							t_key = s_known_did_keys[j];
 							break;
 						}
-					
+
 					t_success = MCCStringClone(t_key, m_option_keys[i]) &&
 								MCCStringClone(p_document.option_values[i], m_option_values[i]);
 					if (t_success)
 					{
-						t_value.string.data = m_option_values[i];
-						t_value.string.length = MCCStringLength(m_option_values[i]);
-						cairo_pdf_surface_set_metadata(m_surface, m_option_keys[i], &t_value);
+						// cairo 1.18: custom metadata uses set_custom_metadata(name, value)
+						cairo_pdf_surface_set_custom_metadata(m_surface,
+							m_option_keys[i], m_option_values[i]);
 					}
 				}
 			}
@@ -293,11 +306,10 @@ bool MCPDFPrintingDevice::BeginDocument(const MCCustomPrinterDocument& p_documen
 
 	if (t_success)
 	{
-		cairo_pdf_value_t t_date_object;
-		t_date_object.type = CAIRO_PDF_VALUE_TYPE_DATE;
-		t_success = set_cairo_pdf_datetime_to_now(t_date_object.date);
-		if (t_success)
-			cairo_pdf_surface_set_metadata(m_surface, "CreationDate", &t_date_object);
+		// cairo 1.18: creation date is an ISO 8601 string passed to set_metadata
+		char t_date_str[32];
+		if (get_iso8601_datetime_now(t_date_str, sizeof(t_date_str)))
+			cairo_pdf_surface_set_metadata(m_surface, CAIRO_PDF_METADATA_CREATE_DATE, t_date_str);
 	}
 
 	if (t_success)
@@ -305,7 +317,8 @@ bool MCPDFPrintingDevice::BeginDocument(const MCCustomPrinterDocument& p_documen
 
 	if (t_success)
 	{
-		cairo_pdf_surface_set_premultiplied_alpha(m_surface, false);
+		// cairo_pdf_surface_set_premultiplied_alpha removed in 1.18; premultiplied
+		// alpha handling is now done internally by cairo.
 		m_context = cairo_create(m_surface);
 		t_success = (m_status = cairo_status(m_context)) == CAIRO_STATUS_SUCCESS;
 	}
@@ -673,7 +686,12 @@ bool MCPDFPrintingDevice::MakeAnchor(const MCCustomPrinterPoint& position, const
 	{
 		t_dest -> is_defined = true;
 
-		cairo_pdf_surface_add_destination(m_surface, t_dest->name, position.x, position.y);
+		// cairo 1.18: named destinations use cairo_tag_begin/end on the context
+		char t_attribs[512];
+		snprintf(t_attribs, sizeof(t_attribs), "name='%s' x=%g y=%g",
+		         t_dest->name, position.x, position.y);
+		cairo_tag_begin(m_context, CAIRO_TAG_DEST, t_attribs);
+		cairo_tag_end(m_context, CAIRO_TAG_DEST);
 		t_success = (m_status = cairo_status(m_context)) == CAIRO_STATUS_SUCCESS;
 	}
 
@@ -694,18 +712,26 @@ bool MCPDFPrintingDevice::MakeLink(const MCCustomPrinterRectangle& area, const c
 	{
 		t_dest -> is_referenced = true;
 
-		cairo_rectangle_t t_rect;
-		t_rect.x = area.left;
-		t_rect.y = area.top;
-		t_rect.width = area.right - area.left;
-		t_rect.height = area.bottom - area.top;
+		double t_x = area.left;
+		double t_y = area.top;
+		double t_w = area.right - area.left;
+		double t_h = area.bottom - area.top;
 
 		if (p_type == kMCCustomPrinterLinkUnspecified)
 			p_type = t_dest->is_url ? kMCCustomPrinterLinkURI : kMCCustomPrinterLinkAnchor;
+
+		// cairo 1.18: links use cairo_tag_begin/end with CAIRO_TAG_LINK
+		char t_attribs[1024];
 		if (p_type == kMCCustomPrinterLinkURI)
-			cairo_pdf_surface_add_uri_link(m_surface, t_rect, t_dest->name);
+			snprintf(t_attribs, sizeof(t_attribs),
+			         "uri='%s' rect=[%g %g %g %g]",
+			         t_dest->name, t_x, t_y, t_w, t_h);
 		else
-			cairo_pdf_surface_add_goto_link(m_surface, t_rect, t_dest->name);
+			snprintf(t_attribs, sizeof(t_attribs),
+			         "dest='%s' rect=[%g %g %g %g]",
+			         t_dest->name, t_x, t_y, t_w, t_h);
+		cairo_tag_begin(m_context, CAIRO_TAG_LINK, t_attribs);
+		cairo_tag_end(m_context, CAIRO_TAG_LINK);
 		t_success = (m_status = cairo_status(m_context)) == CAIRO_STATUS_SUCCESS;
 	}
 
@@ -721,7 +747,33 @@ bool MCPDFPrintingDevice::MakeBookmark(const MCCustomPrinterPoint &position, con
 	else
 		m_bookmark_depth = depth;
 
-	cairo_pdf_surface_add_outline_entry(m_surface, title, position.x, position.y, depth, closed);
+	// cairo 1.18: use cairo_pdf_surface_add_outline with a named dest tag.
+	// Create a named destination at the bookmark position, then reference it.
+	char t_dest_name[512];
+	snprintf(t_dest_name, sizeof(t_dest_name), "bm_%p_%s", (void*)this, title);
+
+	char t_dest_attribs[768];
+	snprintf(t_dest_attribs, sizeof(t_dest_attribs),
+	         "name='%s' x=%g y=%g", t_dest_name, position.x, position.y);
+	cairo_tag_begin(m_context, CAIRO_TAG_DEST, t_dest_attribs);
+	cairo_tag_end(m_context, CAIRO_TAG_DEST);
+
+	cairo_pdf_outline_flags_t t_flags = closed
+	    ? (cairo_pdf_outline_flags_t)0
+	    : CAIRO_PDF_OUTLINE_FLAG_OPEN;
+	uint32_t t_level = (depth > 0) ? depth - 1 : 0;
+	int t_parent_id = (t_level == 0)
+	    ? CAIRO_PDF_OUTLINE_ROOT
+	    : m_outline_id_stack[t_level - 1];
+
+	char t_link_attribs[512];
+	snprintf(t_link_attribs, sizeof(t_link_attribs), "dest='%s'", t_dest_name);
+	int t_outline_id = cairo_pdf_surface_add_outline(
+	    m_surface, t_parent_id, title, t_link_attribs, t_flags);
+
+	if (t_level < kMaxOutlineDepth)
+		m_outline_id_stack[t_level] = t_outline_id;
+
 	t_success = (m_status = cairo_status(m_context)) == CAIRO_STATUS_SUCCESS;
 
 	return t_success;
