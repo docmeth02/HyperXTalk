@@ -18,5 +18,5 @@ buildSrcLibrary
 # copy config.h
 cp -u ${BUILDDIR}/${ARCHIVE_DESTINATION}/build/*.h ${INCLUDE_DIRECTORY}
 # copy cairo-features.h
-cp -u ${BUILDDIR}/${ARCHIVE_DESTINATION}/build/src/*.h ${INCLUDE_DIRECTORY}
+# cp -u ${BUILDDIR}/${ARCHIVE_DESTINATION}/build/src/*.h ${INCLUDE_DIRECTORY}
 
