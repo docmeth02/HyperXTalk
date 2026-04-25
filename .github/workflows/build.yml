@@ -133,6 +133,11 @@ jobs:
         run: |
           scoop install mysql postgresql
 
+      - name: Restore NuGet packages (WebView2)
+        shell: pwsh
+        run: |
+          nuget install Microsoft.Web.WebView2 -Version 1.0.3912.50 -OutputDirectory packages
+
       - name: Configure (GYP → Visual Studio projects)
         shell: cmd
         run: configure.bat
