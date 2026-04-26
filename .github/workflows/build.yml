@@ -210,6 +210,9 @@ jobs:
           }
           $atlDir = $atl.DirectoryName
           Write-Host "ATL headers found at: $atlDir"
+          # Also locate atls.lib for the linker (same atlmfc tree, lib\x64 subdir)
+          $atlLib = Join-Path (Split-Path $atlDir -Parent) "lib\x64"
+          Write-Host "ATL lib dir: $atlLib"
           $propsPath = "${{ github.workspace }}\atl-include.props"
           Set-Content -Path $propsPath -Value @"
           <?xml version="1.0" encoding="utf-8"?>
@@ -218,6 +221,12 @@ jobs:
               <ClCompile>
                 <AdditionalIncludeDirectories>$atlDir;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
               </ClCompile>
+              <Link>
+                <AdditionalLibraryDirectories>$atlLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+              </Link>
+              <Lib>
+                <AdditionalLibraryDirectories>$atlLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+              </Lib>
             </ItemDefinitionGroup>
           </Project>
           "@
