@@ -1524,7 +1524,7 @@ static GdkPixbuf* calc_alpha_from_pixbufs(GdkPixbuf *p_pb_black, GdkPixbuf *p_pb
     
     t_black_channels = gdk_pixbuf_get_n_channels(p_pb_black);
     t_white_channels = gdk_pixbuf_get_n_channels(p_pb_white);
-	
+
 	/*
 		Formula for calculating the alpha of the source, by 
 		rendering it twice - once against black, the second time
@@ -1585,8 +1585,12 @@ static GdkPixbuf* drawtheme_calc_alpha (MCThemeDrawInfo &p_info)
 	uint4 t_w = p_info.drect.width;
 	uint4 t_h = p_info.drect.height;
 
-	cairo_surface_t *t_black = cairo_image_surface_create(CAIRO_FORMAT_RGB24, t_w, t_h);
-	cairo_surface_t *t_white = cairo_image_surface_create(CAIRO_FORMAT_RGB24, t_w, t_h);
+	// Allocate surfaces with 1 extra row of padding to prevent SIMD overrun
+	// from pixman/GTK/Skia operations writing slightly past the last valid pixel.
+	// The gdk_pixbuf_get_from_surface calls below use (0,0,t_w,t_h) so the extra
+	// row is ignored in the output.
+	cairo_surface_t *t_black = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, t_w, t_h + 1);
+	cairo_surface_t *t_white = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, t_w, t_h + 1);
 
 	fill_cairo_surface(t_black, 0.0, 0.0, 0.0, t_w, t_h);
 	fill_cairo_surface(t_white, 1.0, 1.0, 1.0, t_w, t_h);
