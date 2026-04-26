@@ -139,6 +139,7 @@ gdk libgdk-3.so.0
 	gdk_event_get: () -> (pointer)
 	gdk_visual_get_best_with_depth: (integer) -> (pointer)
 	gdk_rectangle_intersect: (pointer, pointer, pointer) -> (integer)
+	gdk_window_get_type: () -> (integer)
 	gdk_window_new: (pointer, pointer, integer) -> (pointer)
 	gdk_visual_get_system: () -> (pointer)
 	gdk_visual_get_best: () -> (pointer)
@@ -400,7 +401,8 @@ gtk libgtk-3.so.0
 	@ gtk_widget_style_get
 
 	gtk_window_new: (integer) -> (pointer)
-	
+	gtk_window_move: (pointer, integer, integer) -> ()
+
 	gtk_main_do_event: (pointer) -> ()
 
 	gtk_dialog_run: (pointer) -> (integer)
@@ -431,6 +433,7 @@ gtk libgtk-3.so.0
 	gtk_widget_hide: (pointer) -> ()
 	gtk_widget_show: (pointer) -> ()
 	gtk_widget_show_all: (pointer) -> ()
+	gtk_widget_get_visible: (pointer) -> (integer)
 	gtk_fixed_move: (pointer, pointer, integer, integer) -> ()
 	gtk_fixed_get_type: () -> (integer)
 	gtk_bin_get_child: (pointer) -> (pointer)

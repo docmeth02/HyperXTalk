@@ -96,52 +96,80 @@ void MCNativeLayerX11::OnToolChanged(Tool p_new_tool)
 
 void MCNativeLayerX11::updateInputShape()
 {
+    GdkWindow *t_socket_window;
+    t_socket_window = m_socket != NULL ? gtk_widget_get_window(GTK_WIDGET(m_socket)) : NULL;
+    if (t_socket_window == NULL)
+        return;
+
     if (!m_show_for_tool)
         // In edit mode. Mask out all input events
-        gdk_window_input_shape_combine_region(gtk_widget_get_window(GTK_WIDGET(m_child_window)), m_input_shape, 0, 0);
+        gdk_window_input_shape_combine_region(t_socket_window, m_input_shape, 0, 0);
     else
         // In run mode. Unset the input event mask
-        gdk_window_input_shape_combine_region(gtk_widget_get_window(GTK_WIDGET(m_child_window)), NULL, 0, 0);
+        gdk_window_input_shape_combine_region(t_socket_window, NULL, 0, 0);
 }
 
 void MCNativeLayerX11::doAttach()
 {
+    GdkWindow *t_stack_window = getStackGdkWindow();
+
+    if (t_stack_window == NULL || !GDK_IS_WINDOW(t_stack_window))
+        return;
+
     if (m_socket == NULL)
     {
-        // Create a new GTK socket to deal with the XEMBED protocol
         GtkSocket *t_socket;
-		t_socket = GTK_SOCKET(gtk_socket_new());
-        
-        // Create a new GTK window to hold the socket
+        GdkWindow *t_socket_window;
         MCRectangle t_rect;
-        t_rect = m_object->getrect();
-        m_child_window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_POPUP));
-        gtk_widget_set_parent_window(GTK_WIDGET(m_child_window), getStackGdkWindow());
-        gtk_widget_realize(GTK_WIDGET(m_child_window));
-        gdk_window_reparent(gtk_widget_get_window(GTK_WIDGET(m_child_window)), getStackGdkWindow(), t_rect.x, t_rect.y);
-        
-        // Add the socket to the window
-        gtk_container_add(GTK_CONTAINER(m_child_window), GTK_WIDGET(t_socket));
-        
-        // The socket needs to be realised before going any further or any
-        // operations on it will fail.
-        gtk_widget_realize(GTK_WIDGET(t_socket));
-        
-        // Show the socket (we'll control visibility at the window level)
-        gtk_widget_show(GTK_WIDGET(t_socket));
-        
-        m_input_shape = cairo_region_create();
 
-		// Retain a reference to the socket
-		m_socket = GTK_SOCKET(g_object_ref(G_OBJECT(t_socket)));
+        t_socket = GTK_SOCKET(gtk_socket_new());
+        t_rect = m_object->getrect();
+
+        // GTK3 requires the GtkSocket to be anchored (part of a shown widget
+        // tree) before gtk_socket_add_id() can be called.  Use an offscreen
+        // window as the anchor — it can be realized without being mapped
+        // on-screen, satisfying the anchoring requirement.
+        m_child_window = GTK_WINDOW(gtk_offscreen_window_new());
+        gtk_container_add(GTK_CONTAINER(m_child_window), GTK_WIDGET(t_socket));
+        gtk_widget_show_all(GTK_WIDGET(m_child_window));
+
+        t_socket_window = gtk_widget_get_window(GTK_WIDGET(t_socket));
+
+        if (t_socket_window == NULL)
+        {
+            // Fallback: place a POPUP window far off-screen so it can be shown
+            // (which anchors and realizes the socket) without being visible.
+            gtk_widget_destroy(GTK_WIDGET(m_child_window));
+            m_child_window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_POPUP));
+            gtk_window_move(m_child_window, -10000, -10000);
+            gtk_container_add(GTK_CONTAINER(m_child_window), GTK_WIDGET(t_socket));
+            gtk_widget_show_all(GTK_WIDGET(m_child_window));
+            t_socket_window = gtk_widget_get_window(GTK_WIDGET(t_socket));
+        }
+
+        if (t_socket_window == NULL)
+        {
+            gtk_widget_destroy(GTK_WIDGET(m_child_window));
+            m_child_window = NULL;
+            return;
+        }
+
+        // Reparent the socket's GdkWindow (not the anchor's) into the stack
+        // window.  The socket stays anchored/realized via the offscreen
+        // container while its underlying X window lives under the stack.
+        gdk_window_reparent(t_socket_window, t_stack_window, t_rect.x, t_rect.y);
+
+        m_input_shape = cairo_region_create();
+        m_socket = GTK_SOCKET(g_object_ref(G_OBJECT(t_socket)));
     }
-    
-    // Attach the X11 window to this socket
+    else if (!gtk_widget_get_visible(GTK_WIDGET(m_child_window)))
+    {
+        gtk_widget_show(GTK_WIDGET(m_child_window));
+    }
+
     if (gtk_socket_get_plug_window(m_socket) == NULL)
         gtk_socket_add_id(m_socket, m_widget_xid);
-    //fprintf(stderr, "XID: %u\n", gtk_socket_get_id(m_socket));
-    
-    // Act as if there were a re-layer to put the widget in the right place
+
     doRelayer();
     doSetViewportGeometry(m_viewport_rect);
     doSetGeometry(m_rect);
@@ -151,7 +179,10 @@ void MCNativeLayerX11::doAttach()
 void MCNativeLayerX11::doDetach()
 {
     // We don't really detach; just stop showing the socket
-    gtk_widget_hide(GTK_WIDGET(m_child_window));
+    if (m_socket != NULL)
+        gtk_widget_hide(GTK_WIDGET(m_socket));
+    if (m_child_window != NULL)
+        gtk_widget_hide(GTK_WIDGET(m_child_window));
 }
 
 // We can't get a snapshot of X11 windows so override this to return false
@@ -167,18 +198,25 @@ bool MCNativeLayerX11::doPaint(MCGContextRef p_context)
 
 void MCNativeLayerX11::updateContainerGeometry()
 {
-	m_intersect_rect = MCU_intersect_rect(m_viewport_rect, m_rect);
+    GdkWindow *t_socket_window;
 
-    // Clear any minimum size parameters for the GTK widgets
-    gtk_widget_set_size_request(GTK_WIDGET(m_child_window), -1, -1);
+    m_intersect_rect = MCU_intersect_rect(m_viewport_rect, m_rect);
 
-    // Resize by adjusting the widget's containing GtkWindow
-    gdk_window_move_resize(gtk_widget_get_window(GTK_WIDGET(m_child_window)), m_intersect_rect.x, m_intersect_rect.y, m_intersect_rect.width, m_intersect_rect.height);
+    if (m_child_window != NULL)
+        gtk_widget_set_size_request(GTK_WIDGET(m_child_window), m_intersect_rect.width, m_intersect_rect.height);
 
-    // We need to set the requested minimum size in order to get in-process GTK
-    // widgets to re-size automatically. Unfortunately, that is the only widget
-    // category that this works for... others need to do it themselves.
-    gtk_widget_set_size_request(GTK_WIDGET(m_child_window), m_intersect_rect.width, m_intersect_rect.height);
+    if (m_socket == NULL)
+        return;
+
+    // All positioning is done on the socket's GdkWindow directly, since it
+    // has been reparented into the stack window (not the anchor container).
+    gtk_widget_set_size_request(GTK_WIDGET(m_socket), -1, -1);
+    t_socket_window = gtk_widget_get_window(GTK_WIDGET(m_socket));
+    if (t_socket_window != NULL)
+        gdk_window_move_resize(t_socket_window,
+                               m_intersect_rect.x, m_intersect_rect.y,
+                               m_intersect_rect.width, m_intersect_rect.height);
+    gtk_widget_set_size_request(GTK_WIDGET(m_socket), m_intersect_rect.width, m_intersect_rect.height);
 }
 
 void MCNativeLayerX11::doSetViewportGeometry(const MCRectangle &p_rect)
@@ -194,26 +232,15 @@ void MCNativeLayerX11::doSetGeometry(const MCRectangle& p_rect)
 {
 	m_rect = p_rect;
 	updateContainerGeometry();
-	
+
+	if (m_socket == NULL)
+		return;
+
 	MCRectangle t_rect;
 	t_rect = m_rect;
 	t_rect.x -= m_intersect_rect.x;
 	t_rect.y -= m_intersect_rect.y;
-	
-    // Move the overlay window first, to ensure events don't get stolen
 
-    // Clear any minimum size parameters for the GTK widgets
-    gtk_widget_set_size_request(GTK_WIDGET(m_socket), -1, -1);
-    
-    // Resize the socket
-    gdk_window_move_resize(gtk_widget_get_window(GTK_WIDGET(m_socket)), t_rect.x, t_rect.y, t_rect.width, t_rect.height);
-    
-    // We need to set the requested minimum size in order to get in-process GTK
-    // widgets to re-size automatically. Unfortunately, that is the only widget
-    // category that this works for... others need to do it themselves.
-    gtk_widget_set_size_request(GTK_WIDGET(m_socket), t_rect.width, t_rect.height);
-    
-    // Update the contained window too
     GdkWindow* t_remote;
     t_remote = (GdkWindow*)gtk_socket_get_plug_window(m_socket);
     if (t_remote != NULL)
@@ -222,15 +249,28 @@ void MCNativeLayerX11::doSetGeometry(const MCRectangle& p_rect)
 
 void MCNativeLayerX11::doSetVisible(bool p_visible)
 {
-    if (p_visible)
-        gtk_widget_show(GTK_WIDGET(m_child_window));
-    else
-        gtk_widget_hide(GTK_WIDGET(m_child_window));
+    GdkWindow *t_socket_window;
+    t_socket_window = m_socket != NULL ? gtk_widget_get_window(GTK_WIDGET(m_socket)) : NULL;
 
-	if (p_visible)
-		doSetGeometry(m_object->getrect());
-		
-	updateInputShape();
+    if (p_visible)
+    {
+        if (m_child_window != NULL)
+            gtk_widget_show(GTK_WIDGET(m_child_window));
+        if (m_socket != NULL)
+            gtk_widget_show(GTK_WIDGET(m_socket));
+        if (t_socket_window != NULL)
+            gdk_window_show(t_socket_window);
+        doSetGeometry(m_object->getrect());
+    }
+    else
+    {
+        if (t_socket_window != NULL)
+            gdk_window_hide(t_socket_window);
+        if (m_socket != NULL)
+            gtk_widget_hide(GTK_WIDGET(m_socket));
+    }
+
+    updateInputShape();
 }
 
 void MCNativeLayerX11::doRelayer()
@@ -251,14 +291,22 @@ void MCNativeLayerX11::doRelayer()
         if (t_before != NULL)
         {
             t_before_layer = reinterpret_cast<MCNativeLayerX11*>(t_before->getNativeLayer());
-            t_before_window = gtk_widget_get_window(GTK_WIDGET(t_before_layer->m_child_window));
+            // Use the socket's GdkWindow for stacking (it is the window that
+            // lives in the stack's GdkWindow child tree after reparenting).
+            t_before_window = t_before_layer->m_socket != NULL
+                ? gtk_widget_get_window(GTK_WIDGET(t_before_layer->m_socket))
+                : NULL;
         }
         else
         {
             t_before_layer = NULL;
             t_before_window = NULL;
         }
-        gdk_window_restack(gtk_widget_get_window(GTK_WIDGET(m_child_window)), t_before_window, FALSE);
+
+        GdkWindow *t_socket_window;
+        t_socket_window = m_socket != NULL ? gtk_widget_get_window(GTK_WIDGET(m_socket)) : NULL;
+        if (t_socket_window != NULL)
+            gdk_window_restack(t_socket_window, t_before_window, FALSE);
     }
 }
 
