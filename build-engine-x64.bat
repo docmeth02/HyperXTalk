@@ -135,10 +135,14 @@ echo.
 :: ----------------------------------------------------------
 echo Building libffi ...
 echo Building libffi ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBFFI% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "LIBFFI_LOG=%~dp0build-libffi.log"
+"%MSBUILD%" %VCXPROJ_LIBFFI% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%LIBFFI_LOG%" 2>&1
+set LIBFFI_ERR=%ERRORLEVEL%
+type "%LIBFFI_LOG%"
+type "%LIBFFI_LOG%" >> "%LOGFILE%"
+if %LIBFFI_ERR% NEQ 0 (
     echo.
-    echo LIBFFI BUILD FAILED. See %LOGFILE% for details.
+    echo LIBFFI BUILD FAILED. See %LIBFFI_LOG% for details.
     exit /b 1
 )
 echo libffi OK.
@@ -150,10 +154,14 @@ echo.
 :: Rebuild guarantees they are compiled with include_win64 → FFI_DEFAULT_ABI=1.
 echo Building libFoundation (FFI closure fix: x64 now uses include_win64 headers) ...
 echo Building libFoundation ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBFOUNDATION% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "FOUND_LOG=%~dp0build-libfoundation.log"
+"%MSBUILD%" %VCXPROJ_LIBFOUNDATION% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%FOUND_LOG%" 2>&1
+set FOUND_ERR=%ERRORLEVEL%
+type "%FOUND_LOG%"
+type "%FOUND_LOG%" >> "%LOGFILE%"
+if %FOUND_ERR% NEQ 0 (
     echo.
-    echo LIBFOUNDATION BUILD FAILED. See %LOGFILE% for details.
+    echo LIBFOUNDATION BUILD FAILED. See %FOUND_LOG% for details.
     exit /b 1
 )
 echo libFoundation OK.
@@ -161,10 +169,14 @@ echo libFoundation OK.
 echo.
 echo Building libScript ...
 echo Building libScript ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBSCRIPT% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "SCRIPT_LOG=%~dp0build-libscript.log"
+"%MSBUILD%" %VCXPROJ_LIBSCRIPT% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%SCRIPT_LOG%" 2>&1
+set SCRIPT_ERR=%ERRORLEVEL%
+type "%SCRIPT_LOG%"
+type "%SCRIPT_LOG%" >> "%LOGFILE%"
+if %SCRIPT_ERR% NEQ 0 (
     echo.
-    echo LIBSCRIPT BUILD FAILED. See %LOGFILE% for details.
+    echo LIBSCRIPT BUILD FAILED. See %SCRIPT_LOG% for details.
     exit /b 1
 )
 echo libScript OK.
