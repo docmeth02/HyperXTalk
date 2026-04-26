@@ -1,0 +1,292 @@
+name: Build HyperXTalk
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build configuration'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Release
+          - Debug
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # macOS ARM64
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-macos:
+    name: macOS ARM64
+    runs-on: macos-15        # macOS 15 Sequoia — Apple Silicon (ARM64)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Accept Xcode licence
+        run: sudo xcodebuild -license accept
+
+      - name: Install Homebrew dependencies
+        run: |
+          brew install openssl@3 libpq mysql-client pixman meson ninja pkg-config
+
+      - name: Set up Java (Temurin — required by libfoundation JNI bindings)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build prebuilt third-party libraries
+        run: make prebuilt-mac
+        env:
+          BUILDTYPE: ${{ github.event.inputs.build_type }}
+
+      - name: Configure (GYP → Xcode projects)
+        run: make config-mac
+
+      - name: Compile
+        run: make compile-mac CODESIGN_IDENTITY="-"
+        env:
+          BUILDTYPE: ${{ github.event.inputs.build_type }}
+
+      - name: Package (mac-bin)
+        run: make package-mac-bin CODESIGN_IDENTITY="-"
+        env:
+          BUILDTYPE: ${{ github.event.inputs.build_type }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HyperXTalk-macOS-ARM64-${{ github.event.inputs.build_type }}
+          # Upload the whole mac-bin folder — contains HyperXTalk.app plus
+          # all externals, support files, and standalone engine.
+          path: mac-bin/
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Linux x86_64
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-linux:
+    name: Linux x86_64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential python3 python3-pip pkg-config \
+            libssl-dev libcurl4-openssl-dev \
+            libgtk2.0-dev libglib2.0-dev \
+            libpng-dev libjpeg-dev libfreetype6-dev libfontconfig1-dev \
+            libx11-dev libxext-dev libxrender-dev \
+            libxinerama-dev libxrandr-dev libxcb1-dev \
+            libgif-dev libpcre3-dev zlib1g-dev \
+            default-jdk
+
+      - name: Configure (GYP → Makefiles)
+        run: ./config.sh --platform linux-x86_64
+
+      - name: Compile
+        run: make compile-linux-x86_64
+        env:
+          BUILDTYPE: ${{ github.event.inputs.build_type }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HyperXTalk-Linux-x86_64-${{ github.event.inputs.build_type }}
+          path: linux-x86_64-bin/
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Windows x86_64
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-windows:
+    name: Windows x86_64
+    runs-on: windows-latest   # Windows Server 2022 + Visual Studio 2022
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Scoop
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+          # Make scoop shims available to all subsequent steps
+          echo "$env:USERPROFILE\scoop\shims" >> $env:GITHUB_PATH
+
+      - name: Install MySQL and PostgreSQL via Scoop
+        shell: pwsh
+        run: |
+          scoop install mysql postgresql
+
+      - name: Restore NuGet packages (WebView2)
+        shell: pwsh
+        run: |
+          $target = "packages\Microsoft.Web.WebView2.1.0.3912.50"
+          $webview2h = "$target\build\native\include\WebView2.h"
+          if (-not (Test-Path $webview2h)) {
+            # Download .nupkg directly from nuget.org and extract it.
+            # The nuget CLI "Package already installed" behaviour does not reliably
+            # place files in the local output directory, so we bypass it entirely.
+            $nupkg = "$env:TEMP\webview2.nupkg"
+            Invoke-WebRequest "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.3912.50" -OutFile $nupkg
+            Expand-Archive $nupkg -DestinationPath $target -Force
+          }
+          if (-not (Test-Path $webview2h)) {
+            Write-Error "WebView2.h still not found at: $webview2h"
+            exit 1
+          }
+          Write-Host "WebView2.h found at: $webview2h"
+
+      - name: Prepare libcairo config.h for Windows
+        shell: cmd
+        run: copy thirdparty\libcairo\src\config.h.win32 thirdparty\libcairo\src\config.h
+
+      - name: Prepare cairo-features.h for Windows
+        shell: pwsh
+        run: |
+          # The committed cairo-features.h was generated for macOS (Quartz backend).
+          # Overwrite it with the Windows/Win32 backend feature set.
+          Set-Content -Path "thirdparty\libcairo\src\cairo-features.h" -Value @"
+          /* Hand-crafted for Windows / MSVC x64 — replaces the macOS meson output. */
+          #pragma once
+          #define CAIRO_FEATURES_H
+          #define CAIRO_HAS_IMAGE_SURFACE 1
+          #define CAIRO_HAS_MIME_SURFACE 1
+          #define CAIRO_HAS_OBSERVER_SURFACE 1
+          #define CAIRO_HAS_PDF_SURFACE 1
+          #define CAIRO_HAS_PNG_FUNCTIONS 1
+          #define CAIRO_HAS_PS_SURFACE 1
+          #define CAIRO_HAS_RECORDING_SURFACE 1
+          #define CAIRO_HAS_SCRIPT_SURFACE 1
+          #define CAIRO_HAS_SVG_SURFACE 1
+          #define CAIRO_HAS_USER_FONT 1
+          #define CAIRO_HAS_WIN32_SURFACE 1
+          #define CAIRO_HAS_WIN32_FONT 1
+          "@
+
+      - name: Prepare pixman-version.h for Windows
+        shell: cmd
+        run: copy thirdparty\libcairo\subprojects\pixman-0.43.4\pixman\pixman-version.h.win32 thirdparty\libcairo\subprojects\pixman-0.43.4\pixman\pixman-version.h
+
+      - name: Add MSBuild to PATH
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
+          $msbuildDir = Split-Path $msbuild -Parent
+          echo $msbuildDir >> $env:GITHUB_PATH
+
+<<<<<<< HEAD
+      - name: Install ATL for v142 toolset (needed by kernel for w32-ds-player.cpp)
+        shell: pwsh
+        run: |
+          # kernel.vcxproj uses PlatformToolset=v142.  MSBuild v142 resolves ATL
+          # headers from its own toolset directory (MSVC 14.29.x), NOT from the
+          # v143 directory (14.44.x).  We must therefore check specifically for the
+          # v142 ATL headers and install them if absent; setting INCLUDE to the v143
+          # path is not sufficient.
+          $msvcRoot = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC"
+          $v142Atl = Get-ChildItem -Path $msvcRoot -Filter "atlbase.h" -Recurse `
+                     -ErrorAction SilentlyContinue |
+                     Where-Object { $_.FullName -match "14\.29\." } |
+                     Select-Object -First 1
+          if ($v142Atl) {
+            Write-Host "v142 ATL already present: $($v142Atl.FullName)"
+          } else {
+            Write-Host "v142 ATL not found — installing Microsoft.VisualStudio.Component.VC.v142.ATL ..."
+            $vswhere   = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+            $vsPath    = & $vswhere -latest -products * -property installationPath
+            $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+            $proc = Start-Process -FilePath $installer `
+                      -ArgumentList "modify","--installPath",$vsPath, `
+                        "--add","Microsoft.VisualStudio.Component.VC.v142.ATL", `
+                        "--quiet","--norestart","--noUpdateInstaller" `
+                      -Wait -PassThru
+            if ($proc.ExitCode -ne 0) {
+              Write-Error "VS installer exited with code $($proc.ExitCode)"
+              exit 1
+            }
+            $v142Atl = Get-ChildItem -Path $msvcRoot -Filter "atlbase.h" -Recurse `
+                       -ErrorAction SilentlyContinue |
+                       Where-Object { $_.FullName -match "14\.29\." } |
+                       Select-Object -First 1
+            if (-not $v142Atl) {
+              Write-Error "v142 atlbase.h still not found after install"
+              exit 1
+            }
+            Write-Host "v142 ATL installed: $($v142Atl.FullName)"
+=======
+      - name: Locate or install ATL headers (needed by kernel for w32-ds-player.cpp)
+        shell: pwsh
+        run: |
+          # kernel.vcxproj (v142 toolset) compiles w32-ds-player.cpp which includes
+          # atlbase.h.  ATL for the v142 toolset may not be present on the runner by
+          # default, so we search first and install if necessary.
+          $atl = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" `
+                 -Filter "atlbase.h" -Recurse -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+          if ($atl) {
+            Write-Host "ATL found at: $($atl.FullName)"
+            $atlDir = $atl.DirectoryName
+            echo "INCLUDE=$env:INCLUDE;$atlDir" >> $env:GITHUB_ENV
+          } else {
+            Write-Host "atlbase.h not found — installing Microsoft.VisualStudio.Component.VC.v142.ATL ..."
+            $vswhere  = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+            $vsPath   = & $vswhere -latest -products * -property installationPath
+            $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+            & $installer modify --installPath $vsPath `
+                --add Microsoft.VisualStudio.Component.VC.v142.ATL `
+                --quiet --norestart --noUpdateInstaller
+            $atl = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" `
+                   -Filter "atlbase.h" -Recurse -ErrorAction SilentlyContinue |
+                   Select-Object -First 1
+            if (-not $atl) {
+              Write-Error "atlbase.h still not found after install attempt"
+              exit 1
+            }
+            $atlDir = $atl.DirectoryName
+            Write-Host "ATL installed at: $($atl.FullName)"
+            echo "INCLUDE=$env:INCLUDE;$atlDir" >> $env:GITHUB_ENV
+>>>>>>> refs/remotes/origin/main
+          }
+
+      - name: Build thirdparty libraries
+        shell: cmd
+        run: build-thirdparty-x64.bat
+        # The bat builds all thirdparty libs (which we need), then attempts to
+        # build development.vcxproj directly — that fails on a clean checkout
+        # because startupstack.cpp hasn't been generated yet.  The engine is
+        # built correctly by the next step (build-engine-x64.bat), so we
+        # allow this step to fail without aborting the job.
+        continue-on-error: true
+
+      - name: Build engine (Debug — required by Release bootstrap)
+        shell: cmd
+        run: build-engine-x64.bat
+
+      - name: Build Release
+        shell: cmd
+        run: build-release-x64.bat
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HyperXTalk-Windows-x86_64-${{ github.event.inputs.build_type }}
+          # Release output: HyperXTalk.exe, standalone-community.exe, externals, DB drivers
+          path: build-win-x86_64\livecode\Release\
+          retention-days: 30

@@ -1605,6 +1605,15 @@ struct MCWindowsDesktop: public MCSystemInterface, public MCWindowsSystemService
 		return starttime;
     }
     
+	virtual real64_t GetCurrentMicroseconds()
+	{
+		LARGE_INTEGER CurrentTime, Frequency;
+
+		QueryPerformanceFrequency(&Frequency); 
+		QueryPerformanceCounter(&CurrentTime);
+		return (real64_t)CurrentTime.QuadPart * 1000000.0 / (real64_t)Frequency.QuadPart;
+	}
+    
     virtual void ResetTime(void)
     {
         if (!MClowrestimers)
@@ -3877,12 +3886,8 @@ uint2 MCS_charsettolangid(uint1 charset)
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
+// Windows stub: browser enumeration is not implemented on this platform.
 bool MCS_get_browsers(MCStringRef &r_browsers)
 {
-    r_browsers = nullptr;
-    return true;
+	return false;
 }
-
-////////////////////////////////////////////////////////////////////////////////

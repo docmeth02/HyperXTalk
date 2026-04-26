@@ -987,7 +987,9 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
     if (window == 0 && r.x == -32768)
     {
         // Switch to a box drawing cursor and take control of the pointer
-        GdkCursor *t_cursor = gdk_cursor_new(GDK_PLUS);
+		// MDW bugfix_17257
+        // GdkCursor *t_cursor = gdk_cursor_new(GDK_PLUS);
+        GdkCursor *t_cursor = gdk_cursor_new_from_name(dpy, "crosshair");
         if (gdk_pointer_grab(t_root, False,
                              GdkEventMask(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK|GDK_BUTTON_RELEASE_MASK),
                              NULL, t_cursor, GDK_CURRENT_TIME) != GDK_GRAB_SUCCESS)
@@ -1098,7 +1100,7 @@ MCImageBitmap *MCScreenDC::snapshot(MCRectangle &r, uint4 window, MCStringRef di
                     break;
 
 				default:
-					/* Ignore this event */
+					// ignore all other events
 					break;
             }
             

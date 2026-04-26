@@ -59,8 +59,9 @@
 
 /* Begin PBXBuildFile section */
 		4E718BF0345D6181A93E8290 /* libcustomssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EC41BE319B6EE5C76A31E50C /* libcustomssl.a */; };
-		69D7D940A1AA5663FA890636 /* revsecurity_compat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34E5F401EF9E7E1A2337B0F8 /* revsecurity_compat.cpp */; };
+		7BB9D493E56BD1B76EC96584 /* revsecurity_compat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34E5F401EF9E7E1A2337B0F8 /* revsecurity_compat.cpp */; };
 		806D2C7F4176FEED98DDEB68 /* ssl.mac.stubs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 556F3F3BAEA55CFFA5E08CAC /* ssl.mac.stubs.cpp */; };
+		A9703F55271797C14084CA06 /* ssl_legacy_aliases.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAAD5CB7D4FE8D950D69A4AD /* ssl_legacy_aliases.cpp */; };
 		AFBC4292E3613B3483A989B2 /* dummy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E6A743D720E9F49790C29E7E /* dummy.cpp */; };
 		B5B671D17D212B7C8664D5A4 /* libcustomcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6350B659646A07A5285D9DA3 /* libcustomcrypto.a */; };
 /* End PBXBuildFile section */
@@ -184,6 +185,7 @@
 		DFAA9D78B62EA33ECB172F86 /* target_os.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = target_os.gypi; path = ../../config/target_os.gypi; sourceTree = "<group>"; };
 		E2E1858653DDE7785DDC6C6F /* sslstubs.mac.symlist */ = {isa = PBXFileReference; lastKnownFileType = text; path = sslstubs.mac.symlist; sourceTree = "<group>"; };
 		E6A743D720E9F49790C29E7E /* dummy.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dummy.cpp; sourceTree = "<group>"; };
+		EAAD5CB7D4FE8D950D69A4AD /* ssl_legacy_aliases.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ssl_legacy_aliases.cpp; sourceTree = "<group>"; };
 		EC41BE319B6EE5C76A31E50C /* libcustomssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcustomssl.a; path = ../../prebuilt/lib/mac/libcustomssl.a; sourceTree = "<group>"; };
 		F8F0713DA82F62451A873674 /* emscripten-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "emscripten-settings.gypi"; path = "../../config/emscripten-settings.gypi"; sourceTree = "<group>"; };
 		FA5B881FBB286A87AB07A994 /* android-settings.gypi */ = {isa = PBXFileReference; explicitFileType = sourcecode; name = "android-settings.gypi"; path = "../../config/android-settings.gypi"; sourceTree = "<group>"; };
@@ -241,18 +243,10 @@
 			isa = PBXGroup;
 			children = (
 				3F7646ECCAC1422C6BB74DA8 /* ../.. */,
-				50360D6402342D9C6964D2DC /* src */,
+				AA5C079F0ED0350F687404BC /* src */,
 				36CEB386F4000B644FD3D5A3 /* ssl.stubs */,
 			);
 			name = Source;
-			sourceTree = "<group>";
-		};
-		50360D6402342D9C6964D2DC /* src */ = {
-			isa = PBXGroup;
-			children = (
-				34E5F401EF9E7E1A2337B0F8 /* revsecurity_compat.cpp */,
-			);
-			path = src;
 			sourceTree = "<group>";
 		};
 		563F1C5E4DBA0AC21031E040 = {
@@ -334,6 +328,15 @@
 				E6A743D720E9F49790C29E7E /* dummy.cpp */,
 			);
 			path = engine/src;
+			sourceTree = "<group>";
+		};
+		AA5C079F0ED0350F687404BC /* src */ = {
+			isa = PBXGroup;
+			children = (
+				34E5F401EF9E7E1A2337B0F8 /* revsecurity_compat.cpp */,
+				EAAD5CB7D4FE8D950D69A4AD /* ssl_legacy_aliases.cpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		B30009F40AE41F31DC3F09F8 /* Projects */ = {
@@ -483,6 +486,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				806D2C7F4176FEED98DDEB68 /* ssl.mac.stubs.cpp in Sources */,
+				A9703F55271797C14084CA06 /* ssl_legacy_aliases.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,7 +495,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AFBC4292E3613B3483A989B2 /* dummy.cpp in Sources */,
-				69D7D940A1AA5663FA890636 /* revsecurity_compat.cpp in Sources */,
+				7BB9D493E56BD1B76EC96584 /* revsecurity_compat.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

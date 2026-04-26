@@ -63,6 +63,8 @@ typedef void (*gtk_widget_style_getPTR)(GtkWidget*, const gchar*, ...);
 extern gtk_widget_style_getPTR gtk_widget_style_get_ptr;
 #define gtk_widget_style_get gtk_widget_style_get_ptr
 
+gint moz_gtk_init();
+
 static GtkWidget *gProtoWindow = NULL;
 static GtkWidget *gProtoContainer = NULL;
 static GtkWidget *gButtonWidget = NULL;
@@ -76,6 +78,7 @@ static GtkWidget *gProgressWidget = NULL;
 static GtkWidget *gTabWidget = NULL;
 static GtkWidget *gTooltipWidget = NULL;
 static GtkWidget *gMenuitemWidget = NULL;
+static GtkWidget *gProtoMenu = NULL;
 static GtkWidget *gSpinbuttonWidget = NULL;
 static GtkWidget *gHScaleWidget = NULL;
 static GtkWidget *gVScaleWidget = NULL;
@@ -87,9 +90,16 @@ static GtkStyleContext* GetWidgetStyleContext(GtkWidget *widget)
     return gtk_widget_get_style_context(widget);
 }
 
+static void ensure_proto_container()
+{
+    if (!gProtoWindow)
+        moz_gtk_init();
+}
+
 static void ensure_button_widget()
 {
     if (!gButtonWidget) {
+        ensure_proto_container();
         gButtonWidget = gtk_button_new_with_label("M");
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gButtonWidget);
         gtk_widget_realize(gButtonWidget);
@@ -99,6 +109,7 @@ static void ensure_button_widget()
 static void ensure_checkbox_widget()
 {
     if (!gCheckboxWidget) {
+        ensure_proto_container();
         gCheckboxWidget = gtk_check_button_new_with_label("M");
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gCheckboxWidget);
         gtk_widget_realize(gCheckboxWidget);
@@ -108,6 +119,7 @@ static void ensure_checkbox_widget()
 static void ensure_radiobutton_widget()
 {
     if (!gRadiobuttonWidget) {
+        ensure_proto_container();
         gRadiobuttonWidget = gtk_radio_button_new_with_label(NULL, "M");
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gRadiobuttonWidget);
         gtk_widget_realize(gRadiobuttonWidget);
@@ -117,6 +129,7 @@ static void ensure_radiobutton_widget()
 static void ensure_scrollbar_widget()
 {
     if (!gHorizScrollbarWidget) {
+        ensure_proto_container();
         gHorizScrollbarWidget = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, NULL);
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gHorizScrollbarWidget);
         gtk_widget_realize(gHorizScrollbarWidget);
@@ -131,6 +144,7 @@ static void ensure_scrollbar_widget()
 static void ensure_entry_widget()
 {
     if (!gEntryWidget) {
+        ensure_proto_container();
         gEntryWidget = gtk_entry_new();
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gEntryWidget);
         gtk_widget_realize(gEntryWidget);
@@ -140,6 +154,7 @@ static void ensure_entry_widget()
 static void ensure_scale_widget()
 {
     if (!gHScaleWidget) {
+        ensure_proto_container();
         gHScaleWidget = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, NULL);
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gHScaleWidget);
         gtk_widget_realize(gHScaleWidget);
@@ -154,6 +169,7 @@ static void ensure_scale_widget()
 static void ensure_frame_widget()
 {
     if (!gFrameWidget) {
+        ensure_proto_container();
         gFrameWidget = gtk_frame_new(NULL);
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gFrameWidget);
         gtk_widget_realize(gFrameWidget);
@@ -163,6 +179,7 @@ static void ensure_frame_widget()
 static void ensure_progress_widget()
 {
     if (!gProgressWidget) {
+        ensure_proto_container();
         gProgressWidget = gtk_progress_bar_new();
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gProgressWidget);
         gtk_widget_realize(gProgressWidget);
@@ -172,6 +189,7 @@ static void ensure_progress_widget()
 static void ensure_tab_widget()
 {
     if (!gTabWidget) {
+        ensure_proto_container();
         gTabWidget = gtk_notebook_new();
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gTabWidget);
         gtk_widget_realize(gTabWidget);
@@ -181,6 +199,7 @@ static void ensure_tab_widget()
 static void ensure_combo_widget()
 {
     if (!gComboBoxWidget) {
+        ensure_proto_container();
         gComboBoxWidget = gtk_combo_box_text_new();
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gComboBoxWidget);
         gtk_widget_realize(gComboBoxWidget);
@@ -199,14 +218,17 @@ static void ensure_tooltip_widget()
 static void ensure_menu_item_widget()
 {
     if (!gMenuitemWidget) {
+        if (!gProtoMenu)
+            gProtoMenu = gtk_menu_new();
         gMenuitemWidget = gtk_menu_item_new();
-        gtk_widget_realize(gMenuitemWidget);
+        gtk_menu_shell_append(GTK_MENU_SHELL(gProtoMenu), gMenuitemWidget);
     }
 }
 
 static void ensure_spin_widget()
 {
     if (!gSpinbuttonWidget) {
+        ensure_proto_container();
         gSpinbuttonWidget = gtk_spin_button_new(NULL, 1, 0);
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gSpinbuttonWidget);
         gtk_widget_realize(gSpinbuttonWidget);
@@ -216,6 +238,7 @@ static void ensure_spin_widget()
 static void ensure_listbox_widget()
 {
     if (!gListboxWidget) {
+        ensure_proto_container();
         gListboxWidget = gtk_tree_view_new();
         gtk_container_add(GTK_CONTAINER(gProtoContainer), gListboxWidget);
         gtk_widget_realize(gListboxWidget);
@@ -472,6 +495,7 @@ gint moz_gtk_shutdown()
     gTabWidget = NULL;
     gTooltipWidget = NULL;
     gMenuitemWidget = NULL;
+    gProtoMenu = NULL;
     gSpinbuttonWidget = NULL;
     gHScaleWidget = NULL;
     gVScaleWidget = NULL;
@@ -635,28 +659,30 @@ gint moz_gtk_get_widget_border(GtkThemeWidgetType widget, gint *xthickness, gint
 gint moz_gtk_checkbox_get_metrics(gint *indicator_size, gint *indicator_spacing)
 {
     ensure_checkbox_widget();
+    gint size = 0, spacing = 0;
     gtk_widget_style_get(gCheckboxWidget,
-                         "indicator-size", indicator_size,
-                         "indicator-spacing", indicator_spacing,
+                         "indicator-size", &size,
+                         "indicator-spacing", &spacing,
                          NULL);
-    if (*indicator_size == 0)
-        *indicator_size = 13;
-    if (*indicator_spacing == 0)
-        *indicator_spacing = 2;
+    if (size == 0) size = 13;
+    if (spacing == 0) spacing = 2;
+    if (indicator_size) *indicator_size = size;
+    if (indicator_spacing) *indicator_spacing = spacing;
     return MOZ_GTK_SUCCESS;
 }
 
 gint moz_gtk_radiobutton_get_metrics(gint *indicator_size, gint *indicator_spacing)
 {
     ensure_radiobutton_widget();
+    gint size = 0, spacing = 0;
     gtk_widget_style_get(gRadiobuttonWidget,
-                         "indicator-size", indicator_size,
-                         "indicator-spacing", indicator_spacing,
+                         "indicator-size", &size,
+                         "indicator-spacing", &spacing,
                          NULL);
-    if (*indicator_size == 0)
-        *indicator_size = 13;
-    if (*indicator_spacing == 0)
-        *indicator_spacing = 2;
+    if (size == 0) size = 13;
+    if (spacing == 0) spacing = 2;
+    if (indicator_size) *indicator_size = size;
+    if (indicator_spacing) *indicator_spacing = spacing;
     return MOZ_GTK_SUCCESS;
 }
 
@@ -725,6 +751,7 @@ void spinbutton_get_rects(GtkArrowType type, GdkRectangle *rect,
 void moz_gtk_get_widget_color(GtkStateType widgettype,
                                uint2 &red, uint2 &blue, uint2 &green)
 {
+    ensure_proto_container();
     if (!gProtoWindow)
         return;
     GtkStyleContext *style = GetWidgetStyleContext(gProtoWindow);

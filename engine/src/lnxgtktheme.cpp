@@ -291,7 +291,7 @@ Boolean MCNativeTheme::load()
 	if (!initialised)
 	{
 		gtk_init();
-		
+
 		initialised = True;
 		GtkSettings *settings = gtk_settings_get_default();
 		if (settings)

@@ -21,26 +21,45 @@ mkdir -p "${PREBUILT_LIB}"
 
 LIBS="libskia libsqlite libxml libzip libcairo libxslt libiodbc"
 
+FAILED_LIBS=""
 for LIB in ${LIBS}; do
     echo "=== Building ${LIB} ==="
-    xcodebuild \
+    if xcodebuild \
         -project "${REPO_ROOT}/build-mac/livecode/thirdparty/${LIB}/${LIB}.xcodeproj" \
         -configuration Debug \
         -arch arm64 \
         SOLUTION_DIR="${REPO_ROOT}" \
-        2>&1 | grep -E "BUILD (SUCCEEDED|FAILED)|error:" || true
+        2>&1 | grep -E "BUILD (SUCCEEDED|FAILED)|error:"; then
+        :
+    else
+        echo "ERROR: ${LIB} build failed — re-running with full output:"
+        xcodebuild \
+            -project "${REPO_ROOT}/build-mac/livecode/thirdparty/${LIB}/${LIB}.xcodeproj" \
+            -configuration Debug \
+            -arch arm64 \
+            SOLUTION_DIR="${REPO_ROOT}" \
+            2>&1 | tail -40
+        FAILED_LIBS="${FAILED_LIBS} ${LIB}"
+    fi
 done
+
+if [ -n "${FAILED_LIBS}" ]; then
+    echo ""
+    echo "ERROR: The following libraries failed to build:${FAILED_LIBS}"
+    exit 1
+fi
 
 echo ""
 echo "=== Copying outputs into prebuilt/lib/mac ==="
-cp "${BUILD_OUT}/libcairo.a"  "${PREBUILT_LIB}/libcairo.a"
-cp "${BUILD_OUT}/libxslt.a"   "${PREBUILT_LIB}/libxslt.a"
-cp "${BUILD_OUT}/libiodbc.a"  "${PREBUILT_LIB}/libiodbc.a"
-cp "${BUILD_OUT}/libxml.a"    "${PREBUILT_LIB}/libxml.a"
-cp "${BUILD_OUT}/libzip.a"    "${PREBUILT_LIB}/libzip.a"
-cp "${BUILD_OUT}/libsqlite.a" "${PREBUILT_LIB}/libsqlite.a"
+for OUT in libcairo.a libxslt.a libiodbc.a libxml.a libzip.a libsqlite.a; do
+    if [ -f "${BUILD_OUT}/${OUT}" ]; then
+        cp "${BUILD_OUT}/${OUT}" "${PREBUILT_LIB}/${OUT}"
+    else
+        echo "WARNING: ${OUT} not found in ${BUILD_OUT} — skipping"
+    fi
+done
 for F in "${BUILD_OUT}"/libskia*.a; do
-    cp "$F" "${PREBUILT_LIB}/$(basename "$F")"
+    [ -f "$F" ] && cp "$F" "${PREBUILT_LIB}/$(basename "$F")"
 done
 
 # Rebuild libskia_opt_arm.a with real NEON + CRC32 objects.
