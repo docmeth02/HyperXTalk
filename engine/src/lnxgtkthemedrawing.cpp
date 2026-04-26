@@ -493,9 +493,15 @@ gint moz_gtk_shutdown()
     gFrameWidget = NULL;
     gProgressWidget = NULL;
     gTabWidget = NULL;
-    gTooltipWidget = NULL;
+    if (gTooltipWidget) {
+        gtk_widget_destroy(gTooltipWidget);
+        gTooltipWidget = NULL;
+    }
     gMenuitemWidget = NULL;
-    gProtoMenu = NULL;
+    if (gProtoMenu) {
+        gtk_widget_destroy(gProtoMenu);
+        gProtoMenu = NULL;
+    }
     gSpinbuttonWidget = NULL;
     gHScaleWidget = NULL;
     gVScaleWidget = NULL;
@@ -755,14 +761,14 @@ void moz_gtk_get_widget_color(GtkStateType widgettype,
     if (!gProtoWindow)
         return;
     GtkStyleContext *style = GetWidgetStyleContext(gProtoWindow);
-    GdkRGBA color;
-    gtk_style_context_get_background_color(style, GTK_STATE_FLAG_NORMAL, &color);
+    GdkRGBA color = {0};
 
     switch (widgettype) {
         case GTK_STATE_SELECTED:
-            gtk_style_context_get_background_color(style, GTK_STATE_FLAG_SELECTED, &color);
+            gtk_style_context_lookup_color(style, "theme_selected_bg_color", &color);
             break;
         default:
+            gtk_style_context_lookup_color(style, "theme_bg_color", &color);
             break;
     }
     red = (uint2)(color.red * 65535);

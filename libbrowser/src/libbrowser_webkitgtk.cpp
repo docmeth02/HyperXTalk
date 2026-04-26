@@ -322,9 +322,7 @@ static void eval_js_finished(GObject *source_object, GAsyncResult *res, gpointer
 	{
 		ctx->success = false;
 		ctx->result = nil;
-		// g_error_free not in stubs, use g_free instead
-		g_free(error->message);
-		g_free(error);
+		g_error_free(error);
 	}
 	else if (value != nil)
 	{

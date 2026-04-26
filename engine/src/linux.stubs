@@ -472,7 +472,7 @@ gtk libgtk-3.so.0
 	gtk_style_context_set_state: (pointer, integer) -> ()
 	gtk_style_context_get_state: (pointer) -> (integer)
 	gtk_style_context_get_border: (pointer, integer, pointer) -> ()
-	gtk_style_context_get_background_color: (pointer, integer, pointer) -> ()
+	gtk_style_context_lookup_color: (pointer, pointer, pointer) -> (integer)
 	gtk_render_background: (pointer, pointer, double, double, double, double) -> ()
 	gtk_render_frame: (pointer, pointer, double, double, double, double) -> ()
 	gtk_render_check: (pointer, pointer, double, double, double, double) -> ()
@@ -602,6 +602,7 @@ glib libglib-2.0.so.0
 	g_main_context_dispatch: (pointer) -> ()
 	g_main_context_find_source_by_id: (pointer, integer) -> (pointer)
 	g_source_destroy: (pointer) -> ()
+	g_error_free: (pointer) -> ()
 
 esd libesd.so.0
 	esd_close: (integer) -> (integer)
