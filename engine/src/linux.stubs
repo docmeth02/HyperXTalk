@@ -336,7 +336,7 @@ gtk libgtk-3.so.0
 	gtk_misc_get_type: () -> (integer)
 	gtk_dialog_get_type: () -> (integer)
 	gtk_handle_box_get_type: () -> (integer)
-	#gtk_menu_shell_get_type: () -> (integer)
+	gtk_menu_shell_get_type: () -> (integer)
 	gtk_menu_item_get_type: () -> (integer)
 	#gtk_check_menu_item_get_type: () -> (integer)
 
@@ -369,7 +369,7 @@ gtk libgtk-3.so.0
 	gtk_statusbar_new: () -> (pointer)
 	
 
-	#gtk_menu_shell_append: (pointer, pointer) -> ()
+	gtk_menu_shell_append: (pointer, pointer) -> ()
 	#gtk_check_menu_item_set_active: (pointer, integer) -> ()
 	#gtk_menu_item_set_submenu: (pointer, pointer) -> ()
 
