@@ -44,6 +44,8 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 
+extern "C" void MCLinuxSetGtkDialogModalState(bool p_active);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 struct MCLinuxPageSetup
@@ -322,7 +324,10 @@ void run_dialog(GtkWidget *dialog, MCStringRef &r_value)
 	// TODO : This needs to be changed to a proper callback function : gdk_event_handler_set()
 	g_timeout_add(100, gtk_idle_callback, NULL);
 
-	if (gtk_dialog_run(GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
+	MCLinuxSetGtkDialogModalState(true);
+	gint t_response = gtk_dialog_run(GTK_DIALOG (dialog));
+	MCLinuxSetGtkDialogModalState(false);
+	if (t_response == GTK_RESPONSE_ACCEPT)
     {
         MCAutoStringRef t_filename;
 		if ( gtk_file_chooser_get_select_multiple ( GTK_FILE_CHOOSER ( dialog ) ) )
@@ -359,14 +364,14 @@ void run_dialog(GtkWidget *dialog, MCStringRef &r_value)
 
 
 
-void close_dialog ( GtkWidget *dialog ) 
+void close_dialog ( GtkWidget *dialog )
 {
-	
+	MCLinuxSetGtkDialogModalState(true);
 	gtk_widget_destroy(dialog);
 
 	while (gtk_events_pending())
 		gtk_main_iteration();
-	
+	MCLinuxSetGtkDialogModalState(false);
 }
 
 
@@ -411,7 +416,7 @@ void add_dialog_filters(GtkWidget *dialog, MCStringRef *p_types, uint4 p_type_co
 					gtk_file_filter_add_pattern(filter, filter_mask);
 
 					MCCStringFree(filter_mask);
-					delete t_filter_mask;
+					free(t_filter_mask);
 				}
 			}
 			else

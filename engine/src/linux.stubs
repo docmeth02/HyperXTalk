@@ -430,6 +430,7 @@ gtk libgtk-3.so.0
 	gtk_socket_add_id: (pointer, integer) -> ()
 	gtk_widget_hide: (pointer) -> ()
 	gtk_widget_show: (pointer) -> ()
+	gtk_widget_show_all: (pointer) -> ()
 	gtk_fixed_move: (pointer, pointer, integer, integer) -> ()
 	gtk_fixed_get_type: () -> (integer)
 	gtk_bin_get_child: (pointer) -> (pointer)

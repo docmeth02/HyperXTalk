@@ -151,13 +151,20 @@ extern "C"
 void gtk_main_do_event(GdkEvent*);
 }
 
+static bool s_gtk_dialog_modal_state = false;
+
+extern "C" void MCLinuxSetGtkDialogModalState(bool p_active)
+{
+    s_gtk_dialog_modal_state = p_active;
+}
+
 void gdk_event_fn(GdkEvent *p_event, gpointer dc)
 {
-    // Let GTK know about the event (needed so it can drive its Save As
-    // dialogues and the like)
     gtk_main_do_event(p_event);
-    
-    //fprintf(stderr, "gdk_event_fn\n");
+
+    if (s_gtk_dialog_modal_state)
+        return;
+
     ((MCScreenDC*)dc)->EnqueueEvent(gdk_event_copy(p_event));
 }
 
