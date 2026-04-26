@@ -23,6 +23,8 @@ set VCXPROJ_SECURITY_COMMUNITY=build-win-x86_64\livecode\engine\security-communi
 set VCXPROJ_LIBXML=build-win-x86_64\livecode\thirdparty\libxml\libxml.vcxproj
 set VCXPROJ_LIBXSLT=build-win-x86_64\livecode\thirdparty\libxslt\libxslt.vcxproj
 set VCXPROJ_REVXML=build-win-x86_64\livecode\revxml\external-revxml.vcxproj
+set VCXPROJ_REVXML_SERVER=build-win-x86_64\livecode\revxml\external-revxml-server.vcxproj
+set VCXPROJ_REVZIP_SERVER=build-win-x86_64\livecode\revzip\external-revzip-server.vcxproj
 set VCXPROJ_REVBROWSER=build-win-x86_64\livecode\revbrowser\external-revbrowser.vcxproj
 set VCXPROJ_REVDB=build-win-x86_64\livecode\revdb\external-revdb.vcxproj
 set VCXPROJ_REVSECURITY=build-win-x86_64\livecode\thirdparty\libopenssl\revsecurity.vcxproj
@@ -460,15 +462,9 @@ if not exist "%OUTDIR%\server-community.exe" (
     exit /b 1
 )
 echo server-community.exe bootstrap OK.
-:: extension-utils.livecodescript calls __EnsureExternal "revzip" and "revxml",
-:: which resolve to server-revzip.dll / server-revxml.dll in specialFolderPath("engine")
-:: (i.e. the directory containing server-community.exe = Release\).
-:: Bootstrap them from Debug alongside server-community.exe.
-copy /Y "%DBG_DIR%\server-revzip.dll" "%OUTDIR%\server-revzip.dll" > nul 2>nul
-copy /Y "%DBG_DIR%\server-revxml.dll" "%OUTDIR%\server-revxml.dll" > nul 2>nul
-if not exist "%OUTDIR%\server-revzip.dll" echo WARNING: server-revzip.dll not found in Debug output. Extension packaging may fail.
-if not exist "%OUTDIR%\server-revxml.dll" echo WARNING: server-revxml.dll not found in Debug output. Extension packaging may fail.
-echo server-revzip.dll + server-revxml.dll bootstrap OK.
+:: server-revzip.dll and server-revxml.dll are built in Release later in this
+:: script (after Release libxml2/libxslt/libzip are ready) and land directly
+:: in %OUTDIR% -- no bootstrap copy needed here.
 
 :: ----------------------------------------------------------
 :: Bootstrap startupstack.cpp into the Release shared_intermediate.
@@ -567,6 +563,42 @@ echo Building libxslt (Release) ...
 "%MSBUILD%" %VCXPROJ_LIBXSLT% /t:Rebuild /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
 if %ERRORLEVEL% NEQ 0 ( echo libxslt build failed. See %LOGFILE% & exit /b 1 )
 echo libxslt OK.
+
+echo.
+:: ----------------------------------------------------------
+:: Build server-revxml.dll and server-revzip.dll (Release).
+:: These must be built AFTER Release libxml2/libxslt/libzip are ready
+:: and BEFORE the lcs-extensions step which loads them via server-community.exe.
+:: They land directly in Release\ (matching server-community.exe's location)
+:: so the bootstrap copy at the top of this script can be retired.
+:: Using Release configuration avoids CRT mismatch crashes when
+:: server-community.exe (Release) loads these DLLs via __EnsureExternal.
+:: ----------------------------------------------------------
+echo Building server-revxml.dll (Release -- required by lcs-extensions) ...
+echo Building server-revxml.dll ... >> "%LOGFILE%"
+set "SRVXML_LOG=%~dp0build-server-revxml.log"
+"%MSBUILD%" %VCXPROJ_REVXML_SERVER% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false "/p:SolutionDir=%~dp0build-win-x86_64\livecode\\" /v:minimal /nologo > "%SRVXML_LOG%" 2>&1
+set SRVXML_ERR=%ERRORLEVEL%
+type "%SRVXML_LOG%"
+type "%SRVXML_LOG%" >> "%LOGFILE%"
+if %SRVXML_ERR% NEQ 0 (
+    echo WARNING: server-revxml.dll Release build failed. Extension packaging may fail.
+) else (
+    echo server-revxml.dll OK.
+)
+
+echo Building server-revzip.dll (Release -- required by lcs-extensions) ...
+echo Building server-revzip.dll ... >> "%LOGFILE%"
+set "SRVZIP_LOG=%~dp0build-server-revzip.log"
+"%MSBUILD%" %VCXPROJ_REVZIP_SERVER% /p:Configuration=Release /p:Platform=x64 /p:BuildProjectReferences=false "/p:SolutionDir=%~dp0build-win-x86_64\livecode\\" /v:minimal /nologo > "%SRVZIP_LOG%" 2>&1
+set SRVZIP_ERR=%ERRORLEVEL%
+type "%SRVZIP_LOG%"
+type "%SRVZIP_LOG%" >> "%LOGFILE%"
+if %SRVZIP_ERR% NEQ 0 (
+    echo WARNING: server-revzip.dll Release build failed. Extension packaging may fail.
+) else (
+    echo server-revzip.dll OK.
+)
 
 echo.
 echo Building engine (Release) ...
