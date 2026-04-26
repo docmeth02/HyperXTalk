@@ -191,45 +191,38 @@ jobs:
           $msbuildDir = Split-Path $msbuild -Parent
           echo $msbuildDir >> $env:GITHUB_PATH
 
-      - name: Install ATL for v142 toolset (needed by kernel for w32-ds-player.cpp)
+      - name: Inject ATL include path via MSBuild props (needed by kernel for w32-ds-player.cpp)
         shell: pwsh
         run: |
-          # kernel.vcxproj uses PlatformToolset=v142.  MSBuild v142 resolves ATL
-          # headers from its own toolset directory (MSVC 14.29.x), NOT from the
-          # v143 directory (14.44.x).  We must therefore check specifically for the
-          # v142 ATL headers and install them if absent; setting INCLUDE to the v143
-          # path is not sufficient.
-          $msvcRoot = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC"
-          $v142Atl = Get-ChildItem -Path $msvcRoot -Filter "atlbase.h" -Recurse `
-                     -ErrorAction SilentlyContinue |
-                     Where-Object { $_.FullName -match "14\.29\." } |
-                     Select-Object -First 1
-          if ($v142Atl) {
-            Write-Host "v142 ATL already present: $($v142Atl.FullName)"
-          } else {
-            Write-Host "v142 ATL not found — installing Microsoft.VisualStudio.Component.VC.v142.ATL ..."
-            $vswhere   = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-            $vsPath    = & $vswhere -latest -products * -property installationPath
-            $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-            $proc = Start-Process -FilePath $installer `
-                      -ArgumentList "modify","--installPath",$vsPath, `
-                        "--add","Microsoft.VisualStudio.Component.VC.v142.ATL", `
-                        "--quiet","--norestart","--noUpdateInstaller" `
-                      -Wait -PassThru
-            if ($proc.ExitCode -ne 0) {
-              Write-Error "VS installer exited with code $($proc.ExitCode)"
-              exit 1
-            }
-            $v142Atl = Get-ChildItem -Path $msvcRoot -Filter "atlbase.h" -Recurse `
-                       -ErrorAction SilentlyContinue |
-                       Where-Object { $_.FullName -match "14\.29\." } |
-                       Select-Object -First 1
-            if (-not $v142Atl) {
-              Write-Error "v142 atlbase.h still not found after install"
-              exit 1
-            }
-            Write-Host "v142 ATL installed: $($v142Atl.FullName)"
+          # kernel.vcxproj (v142 toolset) compiles w32-ds-player.cpp which needs
+          # atlbase.h.  The v142 ATL component is not present on this runner, but
+          # the v143 ATL headers (already installed) are compatible for compilation
+          # purposes.  Rather than fighting the VS installer, we create a small
+          # .props file that prepends the ATL include directory to
+          # AdditionalIncludeDirectories for every project, then point
+          # ForceImportBeforeCppTargets at it so MSBuild picks it up automatically.
+          $atl = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" `
+                 -Filter "atlbase.h" -Recurse -ErrorAction SilentlyContinue |
+                 Select-Object -First 1
+          if (-not $atl) {
+            Write-Error "atlbase.h not found anywhere under VS installation"
+            exit 1
           }
+          $atlDir = $atl.DirectoryName
+          Write-Host "ATL headers found at: $atlDir"
+          $propsPath = "${{ github.workspace }}\atl-include.props"
+          Set-Content -Path $propsPath -Value @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+            <ItemDefinitionGroup>
+              <ClCompile>
+                <AdditionalIncludeDirectories>$atlDir;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+              </ClCompile>
+            </ItemDefinitionGroup>
+          </Project>
+          "@
+          Write-Host "Props file written to: $propsPath"
+          echo "ForceImportBeforeCppTargets=$propsPath" >> $env:GITHUB_ENV
 
       - name: Build thirdparty libraries
         shell: cmd
