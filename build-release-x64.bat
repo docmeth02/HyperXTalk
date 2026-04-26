@@ -874,6 +874,14 @@ set "LCS_LOG=%~dp0build-lcs-extensions-release.log"
 set LCS_ERR=%ERRORLEVEL%
 type "%LCS_LOG%"
 type "%LCS_LOG%" >> "%LOGFILE%"
+:: Always show per-extension server-community.exe output (captured to sce-*.log
+:: by the CommandLineTemplate; MSBuild /v:minimal suppresses task stdout so we
+:: must type them explicitly from the bat script).
+for %%F in ("%OUTDIR%\sce-*.log") do (
+    echo --- %%~nxF ---
+    type "%%F"
+    type "%%F" >> "%LOGFILE%"
+)
 if %LCS_ERR% NEQ 0 ( echo LCS-EXTENSIONS BUILD FAILED. See %LCS_LOG% & exit /b 1 )
 echo lcs-extensions OK.
 
