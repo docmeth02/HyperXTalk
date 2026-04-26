@@ -20,6 +20,7 @@ set VCXPROJ_LIBXSLT=build-win-x86_64\livecode\thirdparty\libxslt\libxslt.vcxproj
 set VCXPROJ_REVXML=build-win-x86_64\livecode\revxml\external-revxml.vcxproj
 set VCXPROJ_REVXML_SERVER=build-win-x86_64\livecode\revxml\external-revxml-server.vcxproj
 set VCXPROJ_REVZIP_SERVER=build-win-x86_64\livecode\revzip\external-revzip-server.vcxproj
+set VCXPROJ_LIBZIP=build-win-x86_64\livecode\thirdparty\libzip\libzip.vcxproj
 set VCXPROJ_REVBROWSER=build-win-x86_64\livecode\revbrowser\external-revbrowser.vcxproj
 
 :: ----------------------------------------------------------
@@ -552,14 +553,38 @@ echo revxml OK.
 echo.
 echo Building server-revxml.dll (needed by lcs-extensions packaging) ...
 echo Building server-revxml.dll ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_REVXML_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if %ERRORLEVEL% NEQ 0 ( echo WARNING: server-revxml build failed. ) else ( echo server-revxml OK. )
+set "SRVXML_LOG=%~dp0build-server-revxml.log"
+"%MSBUILD%" %VCXPROJ_REVXML_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%SRVXML_LOG%" 2>&1
+set SRVXML_ERR=%ERRORLEVEL%
+type "%SRVXML_LOG%"
+type "%SRVXML_LOG%" >> "%LOGFILE%"
+if %SRVXML_ERR% NEQ 0 ( echo WARNING: server-revxml build failed. ) else ( echo server-revxml OK. )
+
+echo.
+:: libzip.lib is needed by server-revzip.dll at link time.
+:: It is not in the prebuilt thirdparty dir, so build it here.
+echo Building libzip (needed by server-revzip.dll) ...
+echo Building libzip ... >> "%LOGFILE%"
+set "LIBZIP_LOG=%~dp0build-libzip.log"
+"%MSBUILD%" %VCXPROJ_LIBZIP% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%LIBZIP_LOG%" 2>&1
+set LIBZIP_ERR=%ERRORLEVEL%
+type "%LIBZIP_LOG%"
+type "%LIBZIP_LOG%" >> "%LOGFILE%"
+if %LIBZIP_ERR% NEQ 0 (
+    echo ERROR: libzip build failed. See %LIBZIP_LOG%
+    exit /b 1
+)
+echo libzip OK.
 
 echo.
 echo Building server-revzip.dll (needed by lcs-extensions packaging) ...
 echo Building server-revzip.dll ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_REVZIP_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if %ERRORLEVEL% NEQ 0 ( echo WARNING: server-revzip build failed. ) else ( echo server-revzip OK. )
+set "SRVZIP_LOG=%~dp0build-server-revzip.log"
+"%MSBUILD%" %VCXPROJ_REVZIP_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%SRVZIP_LOG%" 2>&1
+set SRVZIP_ERR=%ERRORLEVEL%
+type "%SRVZIP_LOG%"
+type "%SRVZIP_LOG%" >> "%LOGFILE%"
+if %SRVZIP_ERR% NEQ 0 ( echo WARNING: server-revzip build failed. ) else ( echo server-revzip OK. )
 
 echo.
 echo Building revbrowser (Debug — used as fallback by build-release-x64.bat) ...
