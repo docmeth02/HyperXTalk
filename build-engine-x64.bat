@@ -83,6 +83,25 @@ echo Build started: %DATE% %TIME%
 echo Build started: %DATE% %TIME% > "%LOGFILE%"
 echo. >> "%LOGFILE%"
 
+:: ----------------------------------------------------------
+:: Build libExternal.lib — required by dbmysql and other DB drivers.
+:: On the developer's machine this is a leftover from a previous build;
+:: on a clean CI checkout it must be compiled first.
+:: ----------------------------------------------------------
+echo Building libExternal ...
+echo Building libExternal ... >> "%LOGFILE%"
+set "VCXPROJ_LIBEXTERNAL=build-win-x86_64\livecode\libexternal\libExternal.vcxproj"
+"%MSBUILD%" %VCXPROJ_LIBEXTERNAL% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if errorlevel 1 (
+    echo.
+    echo LIBEXTERNAL BUILD FAILED. Errors:
+    findstr /i " error " "%LOGFILE%"
+    echo Full log: %LOGFILE%
+    exit /b 1
+)
+echo libExternal OK.
+
+echo.
 echo Building libbrowser (WebView2 fix) ...
 echo Building libbrowser (WebView2 fix) ... >> "%LOGFILE%"
 "%MSBUILD%" %VCXPROJ_BROWSER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
@@ -116,10 +135,14 @@ echo.
 :: ----------------------------------------------------------
 echo Building libffi ...
 echo Building libffi ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBFFI% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "LIBFFI_LOG=%~dp0build-libffi.log"
+"%MSBUILD%" %VCXPROJ_LIBFFI% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%LIBFFI_LOG%" 2>&1
+set LIBFFI_ERR=%ERRORLEVEL%
+type "%LIBFFI_LOG%"
+type "%LIBFFI_LOG%" >> "%LOGFILE%"
+if %LIBFFI_ERR% NEQ 0 (
     echo.
-    echo LIBFFI BUILD FAILED. See %LOGFILE% for details.
+    echo LIBFFI BUILD FAILED. See %LIBFFI_LOG% for details.
     exit /b 1
 )
 echo libffi OK.
@@ -129,12 +152,69 @@ echo.
 :: in incremental builds, so foundation-handler.obj and foundation-typeinfo.obj
 :: would keep the stale FFI_DEFAULT_ABI=5 value (from include_win32) baked in.
 :: Rebuild guarantees they are compiled with include_win64 → FFI_DEFAULT_ABI=1.
+:: ----------------------------------------------------------
+:: Generate icudata-minimal.cpp (shared_intermediate/src/icudata-minimal.cpp).
+::
+:: dependency chain:
+::   minimal_icu_data.vcxproj
+::     → runs icupkg (from prebuilt ICU) on icudt58l.dat to produce
+::       shared_intermediate/data/icudata-minimal.dat
+::   encode_minimal_icu_data.vcxproj
+::     → runs util/encode_data.py on the .dat file to produce
+::       shared_intermediate/src/icudata-minimal.cpp
+::
+:: libFoundation.vcxproj compiles icudata-minimal.cpp, so this must run
+:: before the libFoundation build.
+:: ----------------------------------------------------------
+:: Step 1: minimal_icu_data — runs icupkg on the bundled ICU dat file to
+:: produce icudata-minimal.dat.  Built with BuildProjectReferences=false to
+:: avoid chaining into fetch.vcxproj → fetch-win.vcxproj, which would abort
+:: because prebuilt/lib/win32/icudt.lib is not in the repo.  The ICU
+:: binaries (icupkg.exe) are already present in prebuilt/unpacked/icu/.
+echo Generating icudata-minimal.dat (minimal_icu_data) ...
+echo Generating icudata-minimal.dat ... >> "%LOGFILE%"
+set "VCXPROJ_MINICU=build-win-x86_64\livecode\prebuilt\minimal_icu_data.vcxproj"
+set "MINICU_LOG=%~dp0build-minimal-icu.log"
+"%MSBUILD%" %VCXPROJ_MINICU% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%MINICU_LOG%" 2>&1
+set MINICU_ERR=%ERRORLEVEL%
+type "%MINICU_LOG%"
+type "%MINICU_LOG%" >> "%LOGFILE%"
+if %MINICU_ERR% NEQ 0 (
+    echo.
+    echo MINIMAL_ICU_DATA FAILED. See %MINICU_LOG% for details.
+    exit /b 1
+)
+echo minimal_icu_data OK.
+
+echo.
+:: Step 2: encode_minimal_icu_data — runs util/encode_data.py on the .dat
+:: file to produce icudata-minimal.cpp.
+echo Generating icudata-minimal.cpp (encode_minimal_icu_data) ...
+echo Generating icudata-minimal.cpp ... >> "%LOGFILE%"
+set "VCXPROJ_ICU=build-win-x86_64\livecode\prebuilt\encode_minimal_icu_data.vcxproj"
+set "ICU_LOG=%~dp0build-encode-icu.log"
+"%MSBUILD%" %VCXPROJ_ICU% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%ICU_LOG%" 2>&1
+set ICU_ERR=%ERRORLEVEL%
+type "%ICU_LOG%"
+type "%ICU_LOG%" >> "%LOGFILE%"
+if %ICU_ERR% NEQ 0 (
+    echo.
+    echo ENCODE_MINIMAL_ICU_DATA FAILED. See %ICU_LOG% for details.
+    exit /b 1
+)
+echo encode_minimal_icu_data OK.
+
+echo.
 echo Building libFoundation (FFI closure fix: x64 now uses include_win64 headers) ...
 echo Building libFoundation ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBFOUNDATION% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "FOUND_LOG=%~dp0build-libfoundation.log"
+"%MSBUILD%" %VCXPROJ_LIBFOUNDATION% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%FOUND_LOG%" 2>&1
+set FOUND_ERR=%ERRORLEVEL%
+type "%FOUND_LOG%"
+type "%FOUND_LOG%" >> "%LOGFILE%"
+if %FOUND_ERR% NEQ 0 (
     echo.
-    echo LIBFOUNDATION BUILD FAILED. See %LOGFILE% for details.
+    echo LIBFOUNDATION BUILD FAILED. See %FOUND_LOG% for details.
     exit /b 1
 )
 echo libFoundation OK.
@@ -142,10 +222,14 @@ echo libFoundation OK.
 echo.
 echo Building libScript ...
 echo Building libScript ... >> "%LOGFILE%"
-"%MSBUILD%" %VCXPROJ_LIBSCRIPT% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if errorlevel 1 (
+set "SCRIPT_LOG=%~dp0build-libscript.log"
+"%MSBUILD%" %VCXPROJ_LIBSCRIPT% /t:Rebuild /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%SCRIPT_LOG%" 2>&1
+set SCRIPT_ERR=%ERRORLEVEL%
+type "%SCRIPT_LOG%"
+type "%SCRIPT_LOG%" >> "%LOGFILE%"
+if %SCRIPT_ERR% NEQ 0 (
     echo.
-    echo LIBSCRIPT BUILD FAILED. See %LOGFILE% for details.
+    echo LIBSCRIPT BUILD FAILED. See %SCRIPT_LOG% for details.
     exit /b 1
 )
 echo libScript OK.
@@ -165,6 +249,63 @@ if errorlevel 1 (
     exit /b 1
 )
 echo LCB modules OK.
+
+echo.
+:: ----------------------------------------------------------
+:: Generate startupstack.cpp (shared_intermediate/src/startupstack.cpp).
+::
+:: dependency chain:
+::   descriptify_environment_stack.vcxproj
+::     → runs server-community.exe (committed bootstrap binary) to produce
+::       shared_intermediate/src/environment_descriptified.livecode
+::   encode_environment_stack.vcxproj
+::     → runs util/compress_data.py on the .livecode file to produce
+::       shared_intermediate/src/startupstack.cpp
+::
+:: development.vcxproj compiles startupstack.cpp, so this must run before
+:: the engine build.  On the developer's machine the file is a leftover from
+:: a previous build; on a clean CI checkout it does not exist.
+::
+:: We build encode_environment_stack with BuildProjectReferences=true so
+:: MSBuild automatically chains descriptify_environment_stack first.
+:: ----------------------------------------------------------
+:: Step 1: descriptify_environment_stack — runs the committed server-community.exe
+:: to produce environment_descriptified.livecode.
+:: Built with BuildProjectReferences=false to avoid chaining into host-server →
+:: server → libicu → fetch → fetch-win, which aborts because prebuilt/lib/win32/
+:: icudt.lib is not in the repo.  server-community.exe is already committed.
+echo Generating environment_descriptified.livecode (descriptify_environment_stack) ...
+echo Generating environment_descriptified.livecode ... >> "%LOGFILE%"
+set "VCXPROJ_DESCRIPTIFY=build-win-x86_64\livecode\engine\descriptify_environment_stack.vcxproj"
+set "DESCRIPTIFY_LOG=%~dp0build-descriptify-stack.log"
+"%MSBUILD%" %VCXPROJ_DESCRIPTIFY% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%DESCRIPTIFY_LOG%" 2>&1
+set DESCRIPTIFY_ERR=%ERRORLEVEL%
+type "%DESCRIPTIFY_LOG%"
+type "%DESCRIPTIFY_LOG%" >> "%LOGFILE%"
+if %DESCRIPTIFY_ERR% NEQ 0 (
+    echo.
+    echo DESCRIPTIFY_ENVIRONMENT_STACK FAILED. See %DESCRIPTIFY_LOG% for details.
+    exit /b 1
+)
+echo descriptify_environment_stack OK.
+
+echo.
+:: Step 2: encode_environment_stack — runs util/compress_data.py on the
+:: .livecode file to produce startupstack.cpp.
+echo Generating startupstack.cpp (encode_environment_stack) ...
+echo Generating startupstack.cpp ... >> "%LOGFILE%"
+set "VCXPROJ_ENCODE=build-win-x86_64\livecode\engine\encode_environment_stack.vcxproj"
+set "ENCODE_LOG=%~dp0build-encode-stack.log"
+"%MSBUILD%" %VCXPROJ_ENCODE% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%ENCODE_LOG%" 2>&1
+set ENCODE_ERR=%ERRORLEVEL%
+type "%ENCODE_LOG%"
+type "%ENCODE_LOG%" >> "%LOGFILE%"
+if %ENCODE_ERR% NEQ 0 (
+    echo.
+    echo ENCODE_ENVIRONMENT_STACK FAILED. See %ENCODE_LOG% for details.
+    exit /b 1
+)
+echo encode_environment_stack OK.
 
 echo.
 :: ----------------------------------------------------------

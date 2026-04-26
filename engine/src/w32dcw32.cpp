@@ -277,9 +277,85 @@ bool MCScreenDC::getkeysdown(MCListRef& r_list)
 }
 
 extern HANDLE g_notify_wakeup;
+
+// Forward declarations for the dark-mode polling helper.
+// MCplatformIsDarkMode is an extern "C" function defined in w32dcs.cpp.
+// MCPlatformHandleSystemAppearanceChanged is a C++ function in desktop.cpp.
+extern "C" bool MCplatformIsDarkMode(void);
+void MCPlatformHandleSystemAppearanceChanged(void);
+
+// ── Dark/light mode polling fallback ─────────────────────────────────────────
+// Windows broadcasts WM_SETTINGCHANGE "ImmersiveColorSet" when the user
+// toggles dark mode, but delivery can be missed on elevated processes or on
+// Windows builds where the broadcast is unreliable.  This function is called
+// at most every 500 ms from MCScreenDC::handle() to poll the registry directly
+// and trigger MCPlatformHandleSystemAppearanceChanged() when the mode changes.
+// It acts as a guaranteed fallback that works regardless of message delivery.
+static void MCWin32PollDarkMode(void)
+{
+    static bool s_init   = false;
+    static bool s_dark   = false;
+    static ULONGLONG s_last_tick = 0;
+
+    ULONGLONG t_now = GetTickCount64();
+    if (t_now - s_last_tick < 500)   // at most every 500 ms
+        return;
+    s_last_tick = t_now;
+
+    bool t_dark = MCplatformIsDarkMode();
+
+    if (!s_init)
+    {
+        // First call: record the current state without triggering a change.
+        s_dark = t_dark;
+        s_init = true;
+        return;
+    }
+
+    if (t_dark != s_dark)
+    {
+        s_dark = t_dark;
+        MCPlatformHandleSystemAppearanceChanged();
+
+        // Belt-and-suspenders: MCPlatformHandleSystemAppearanceChanged() already
+        // calls dirtyall() + MCRedrawDirtyScreen() which schedules a repaint via
+        // kMCActionsUpdateScreen.  But that path is silently skipped when
+        // MClockscreen > 0 or the action bit hasn't been consumed yet.
+        //
+        // Directly invalidate every visible stack window so Windows will
+        // synthesise WM_PAINT messages in the next PeekMessage pass inside
+        // MCScreenDC::handle().  UpdateWindow() is NOT called here to avoid
+        // re-entrant paint processing inside the polling helper; the WM_PAINT
+        // messages will be dispatched normally on the next message-loop iteration.
+        if (MCstacks != nullptr)
+        {
+            MCStacknode *t_node = MCstacks->topnode();
+            if (t_node != nullptr)
+            {
+                MCStacknode *t_first = t_node;
+                do
+                {
+                    MCStack *t_stack = t_node->getstack();
+                    if (t_stack != nullptr && t_stack->getwindow() != nullptr)
+                    {
+                        HWND t_hwnd = (HWND)t_stack->getwindow()->handle.window;
+                        if (t_hwnd != nullptr && IsWindow(t_hwnd))
+                            InvalidateRect(t_hwnd, nullptr, TRUE);
+                    }
+                    t_node = t_node->next();
+                }
+                while (t_node != t_first);
+            }
+        }
+    }
+}
+
 Boolean MCScreenDC::handle(real8 sleep, Boolean dispatch, Boolean anyevent,
                            Boolean &abort, Boolean &reset)
 {
+    // Poll for dark/light mode changes as a reliable fallback.
+    MCWin32PollDarkMode();
+
 	MSG msg, tmsg;
 	stateinfo oldinfo = *curinfo;
 	curinfo->abort = curinfo->reset = False;
@@ -657,23 +733,56 @@ LRESULT CALLBACK MCWindowProc(HWND hwnd, UINT msg, WPARAM wParam,
 	case WM_DISPLAYCHANGE:
 	case WM_SETTINGCHANGE:
 	{
-		if (hwnd != ((MCScreenDC *)MCscreen) -> getinvisiblewindow())
-			break;
-
 		// WM_SETTINGCHANGE with lParam = "ImmersiveColorSet" is the Windows
 		// 10/11 signal that the user has toggled light ↔ dark mode.
-		// Fire systemAppearanceChanged before the generic desktopChanged path.
 		//
-		// The invisible window is registered with RegisterClassA / CreateWindowA,
-		// so Windows delivers WM_SETTINGCHANGE with an ANSI lParam string — not
-		// UTF-16. Use lstrcmpA (not lstrcmpW) to match it correctly.
+		// Windows broadcasts this to ALL top-level windows (HWND_BROADCAST).
+		// The lParam encoding depends on how the message reaches the window
+		// procedure — see the ANSI vs Unicode note below.
+		//
+		// IMPORTANT: This check must come BEFORE the invisible-window guard below.
+		// The broadcast reaches whichever window processes its message queue first
+		// — often a visible stack window, not the invisible window — so gating on
+		// getinvisiblewindow() would silently swallow the notification.
+		//
+		// A static flag prevents double-processing when multiple windows each
+		// receive the same broadcast in the same event-loop turn.
+		//
+		// ANSI vs Unicode lParam note:
+		//   Stack windows (t_foreign_window = false) are dispatched by calling
+		//   MCWindowProc directly with the raw msg.lParam from PeekMessageW, which
+		//   is a Unicode LPCWSTR pointer — lstrcmpW is correct for that path.
+		//
+		//   The invisible window (t_foreign_window = true) goes through
+		//   DispatchMessageW.  Because the invisible window was registered with
+		//   RegisterClassA / created with CreateWindowA, Windows thunks
+		//   WM_SETTINGCHANGE (a known string-parameter message) to ANSI before
+		//   calling the window procedure — so lParam arrives as a plain LPCSTR.
+		//   lstrcmpA is correct for that path.
+		//
+		//   Trying both is safe: lstrcmpW on an ANSI string mismatches on the
+		//   first wchar_t (0x6D49 ≠ 0x0049) and returns quickly without crashing;
+		//   lstrcmpA on a Unicode string sees "I\0" (two bytes) and also mismatches.
 		if (msg == WM_SETTINGCHANGE && lParam != 0 &&
-		    lstrcmpA(reinterpret_cast<LPCSTR>(lParam), "ImmersiveColorSet") == 0)
+		    (lstrcmpW(reinterpret_cast<LPCWSTR>(lParam), L"ImmersiveColorSet") == 0 ||
+		     lstrcmpA(reinterpret_cast<LPCSTR>(lParam),   "ImmersiveColorSet") == 0))
 		{
-			// Forward declaration — defined in desktop.cpp.
-			void MCPlatformHandleSystemAppearanceChanged(void);
-			MCPlatformHandleSystemAppearanceChanged();
+			static bool s_appearance_change_pending = false;
+			if (!s_appearance_change_pending)
+			{
+				s_appearance_change_pending = true;
+				// Forward declaration — defined in desktop.cpp.
+				void MCPlatformHandleSystemAppearanceChanged(void);
+				MCPlatformHandleSystemAppearanceChanged();
+				s_appearance_change_pending = false;
+			}
 		}
+
+		// The rest of the WM_DISPLAYCHANGE / WM_SETTINGCHANGE handling (font
+		// cache invalidation, display-list refresh, etc.) is only relevant from
+		// the invisible window, which is guaranteed to receive every broadcast.
+		if (hwnd != ((MCScreenDC *)MCscreen) -> getinvisiblewindow())
+			break;
 
 		((MCScreenDC *)MCscreen) -> processdesktopchanged(true);
 	}
@@ -1538,15 +1647,41 @@ LRESULT CALLBACK MCWindowProc(HWND hwnd, UINT msg, WPARAM wParam,
 		return TRUE;
 	case WM_THEMECHANGED:
 	case WM_SYSCOLORCHANGE:
+	{
+		// WM_THEMECHANGED is broadcast to all top-level windows on every dark/light
+		// mode toggle (and on theme changes generally).  WM_SYSCOLORCHANGE arrives
+		// when system colours change.  Both arrive AFTER the registry has been
+		// updated, so MCplatformIsDarkMode() is guaranteed to return the new value.
+		//
+		// Handle from ANY window (not just the invisible one) because there is no
+		// guarantee which window's message is processed first.  A static flag
+		// prevents double-processing within the same event-loop turn.
+		//
+		// This is the most reliable trigger for dark/light mode on Windows 10/11
+		// and serves as a fallback when WM_SETTINGCHANGE "ImmersiveColorSet" is
+		// missed (e.g. due to ANSI/Unicode thunking in the invisible-window path).
+		// MCPlatformHandleSystemAppearanceChanged already calls updatesystemcolors()
+		// and MCRedrawDirtyScreen() internally, so this single call is sufficient.
+		// It is safe to call multiple times (once per window that receives the
+		// broadcast) since it is idempotent: colours are re-sampled, stacks are
+		// re-dirtied, and the delaymessage queue may accumulate a few copies of
+		// systemAppearanceChanged — but scripts setting the same colour twice is
+		// harmless.
+		void MCPlatformHandleSystemAppearanceChanged(void);
+		MCPlatformHandleSystemAppearanceChanged();
+
+		// The native-theme cycle (HTHEME handle refresh) and MCRedrawDirtyScreen
+		// are only needed once, from the invisible window, where the theme was
+		// initialised.  MCPlatformHandleSystemAppearanceChanged() above already
+		// calls MCRedrawDirtyScreen() unconditionally, so this block handles only
+		// the theme-handle cycling.
 		if (hwnd == pms->getinvisiblewindow() && MCcurtheme && MCcurtheme->getthemeid() == LF_NATIVEWIN)
 		{
 			MCcurtheme->unload();
 			MCcurtheme->load();
-
-			// MW-2011-08-17: [[ Redraw ]] The theme has changed so redraw everything.
-			MCRedrawDirtyScreen();
 		}
 		break;
+	}
 	case WM_ACTIVATEAPP:
 		if (wParam != isactive)
 		{

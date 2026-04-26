@@ -10,14 +10,21 @@ XCODEBUILD_FILTER ?=
 # Requires Homebrew prereqs: openssl@3, libpq, mysql-client.
 prebuilt-mac:
 	@echo "=== Verifying Homebrew prereqs ==="
-	@for formula in openssl@3 libpq mysql-client; do \
+	@for formula in openssl@3 libpq mysql-client pixman; do \
 	  if ! brew --prefix $$formula >/dev/null 2>&1; then \
 	    echo "ERROR: Homebrew formula '$$formula' not installed."; \
-	    echo "  Run: brew install openssl@3 libpq mysql-client"; \
+	    echo "  Run: brew install openssl@3 libpq mysql-client pixman"; \
+	    exit 1; \
+	  fi; \
+	done
+	@for tool in meson ninja; do \
+	  if ! command -v $$tool >/dev/null 2>&1; then \
+	    echo "ERROR: '$$tool' not found. Run: brew install meson ninja"; \
 	    exit 1; \
 	  fi; \
 	done
 	sh prebuilt/scripts/build-libffi-mac-arm64.sh
+	sh prebuilt/scripts/build-libcairo-mac-arm64.sh
 	sh prebuilt/scripts/build-thirdparty-mac-arm64.sh
 	sh prebuilt/scripts/build-libz-mac-arm64.sh
 	sh prebuilt/scripts/build-icu-mac-arm64.sh
@@ -601,6 +608,36 @@ package-mac-bin:
 	@[ -d "ide/Documentation" ] && \
 	    cp -R "ide/Documentation" "$(MACBIN_TOOLS)/Documentation" || true
 	@# ----------------------------------------------------------------
+	@# Quick Look extension: build and embed
+	@# ----------------------------------------------------------------
+	@echo "Building HyperXTalkQL Quick Look extension..."
+	@QLOUT="_build/mac/$(BUILDTYPE)/ql" && \
+	  QLAPPEX="$$QLOUT/HyperXTalkQL.appex" && \
+	  SDKPATH=$$(xcrun --sdk macosx --show-sdk-path 2>/dev/null) && \
+	  mkdir -p "$$QLOUT" && \
+	  swiftc \
+	    -target arm64-apple-macos11.0 \
+	    -sdk "$$SDKPATH" \
+	    -module-name HyperXTalkQL \
+	    -framework Quartz \
+	    -Xfrontend -application-extension \
+	    -Xlinker -e -Xlinker _NSExtensionMain \
+	    ide/HyperXTalkQL/HyperXTalkQL/PreviewViewController.swift \
+	    -o "$$QLOUT/HyperXTalkQL" && \
+	  mkdir -p "$$QLAPPEX/Contents/MacOS" && \
+	  cp "$$QLOUT/HyperXTalkQL" "$$QLAPPEX/Contents/MacOS/" && \
+	  cp ide/HyperXTalkQL/HyperXTalkQL/Info.plist "$$QLAPPEX/Contents/" && \
+	  echo "Built HyperXTalkQL.appex." || \
+	  echo "Warning: HyperXTalkQL build failed; Quick Look preview will not be available."
+	@mkdir -p "$(MACBIN_BUNDLE)/Contents/PlugIns"
+	@if [ -d "_build/mac/$(BUILDTYPE)/ql/HyperXTalkQL.appex" ]; then \
+	    cp -R "_build/mac/$(BUILDTYPE)/ql/HyperXTalkQL.appex" \
+	        "$(MACBIN_BUNDLE)/Contents/PlugIns/"; \
+	    echo "Embedded HyperXTalkQL.appex."; \
+	else \
+	    echo "Warning: HyperXTalkQL.appex not found; skipping Quick Look extension."; \
+	fi
+	@# ----------------------------------------------------------------
 	@# Strip extended attributes (resource forks, Finder info, etc.)
 	@# xattr -cr must run before codesign or signing will be rejected.
 	@# ----------------------------------------------------------------
@@ -621,6 +658,11 @@ package-mac-bin:
 	      --options runtime \
 	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
 	done
+	@find "$(MACBIN_BUNDLE)" -name "*.appex" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements ide/HyperXTalkQL/HyperXTalkQL.entitlements "$$F" 2>/dev/null || true; \
+	done
 	@# Sign executables inside bundles and in MacOS folder
 	@find "$(MACBIN_BUNDLE)" -type f -name "lc-compile" | while read F; do \
 	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
@@ -632,4 +674,11 @@ package-mac-bin:
 	    --entitlements HyperXTalk.entitlements \
 	    "$(MACBIN_BUNDLE)"
 	@echo "=== Package complete: $(MACBIN_BUNDLE) ==="
+	@# Re-register the app bundle so the Quick Look extension is picked up
+	@# immediately without needing to relaunch or manually run lsregister.
+	@/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
+	    -f "$(MACBIN_BUNDLE)" 2>/dev/null || true
+	@pluginkit -a "$(MACBIN_BUNDLE)/Contents/PlugIns/HyperXTalkQL.appex" 2>/dev/null || true
+	@qlmanage -r 2>/dev/null || true
+	@echo "Quick Look extension registered."
 

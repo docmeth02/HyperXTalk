@@ -74,26 +74,6 @@ bool MCPDFPrintingDevice::create_cairo_font_from_custom_printer_font(const MCCus
 	return t_success;
 }
 
-bool MCPDFPrintingDevice::set_cairo_pdf_datetime_to_now(cairo_pdf_datetime_t &r_datetime)
-{
-	time_t t_time;
-	tm * t_datetime;
-
-	time ( &t_time );
-
-	t_datetime = gmtime ( &t_time );
-	
-	r_datetime.year = t_datetime->tm_year + 1900;
-	r_datetime.month = t_datetime->tm_mon + 1;
-	r_datetime.day = t_datetime->tm_mday;
-	r_datetime.hour = t_datetime->tm_hour;
-	r_datetime.minute = t_datetime->tm_min;
-	r_datetime.second = t_datetime->tm_sec;
-
-	r_datetime.utc_minute_offset = 0;
-
-	return true;
-}
 
 // SN-2014-12-23: [[ Bug 14278 ]] Added system-specific to get the path.
 bool MCPDFPrintingDevice::get_filename(const char* p_utf8_path, char *& r_system_path)

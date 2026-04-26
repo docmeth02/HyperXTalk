@@ -36,23 +36,6 @@ bool MCPDFPrintingDevice::create_cairo_font_from_custom_printer_font(const MCCus
 	return t_success;
 }
 
-bool MCPDFPrintingDevice::set_cairo_pdf_datetime_to_now(cairo_pdf_datetime_t &r_datetime)
-{
-	SYSTEMTIME t_time;
-
-	GetSystemTime(&t_time);
-
-	r_datetime.year = t_time.wYear;
-	r_datetime.month = t_time.wMonth;
-	r_datetime.day = t_time.wDay;
-	r_datetime.hour = t_time.wHour;
-	r_datetime.minute = t_time.wMinute;
-	r_datetime.second = t_time.wSecond;
-
-	r_datetime.utc_minute_offset = 0;
-
-	return true;
-}
 
 // SN-2014-12-23: [[ Bug 14178 ]] Windows doesn't support UTF-8 filepaths
 bool MCPDFPrintingDevice::get_filename(const char* p_utf8_path, char *& r_system_path)
