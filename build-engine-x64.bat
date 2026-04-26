@@ -18,6 +18,8 @@ set VCXPROJ_SECURITY_COMMUNITY=build-win-x86_64\livecode\engine\security-communi
 set VCXPROJ_LIBXML=build-win-x86_64\livecode\thirdparty\libxml\libxml.vcxproj
 set VCXPROJ_LIBXSLT=build-win-x86_64\livecode\thirdparty\libxslt\libxslt.vcxproj
 set VCXPROJ_REVXML=build-win-x86_64\livecode\revxml\external-revxml.vcxproj
+set VCXPROJ_REVXML_SERVER=build-win-x86_64\livecode\revxml\external-revxml-server.vcxproj
+set VCXPROJ_REVZIP_SERVER=build-win-x86_64\livecode\revzip\external-revzip-server.vcxproj
 set VCXPROJ_REVBROWSER=build-win-x86_64\livecode\revbrowser\external-revbrowser.vcxproj
 
 :: ----------------------------------------------------------
@@ -546,6 +548,18 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 echo revxml OK.
+
+echo.
+echo Building server-revxml.dll (needed by lcs-extensions packaging) ...
+echo Building server-revxml.dll ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_REVXML_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if %ERRORLEVEL% NEQ 0 ( echo WARNING: server-revxml build failed. ) else ( echo server-revxml OK. )
+
+echo.
+echo Building server-revzip.dll (needed by lcs-extensions packaging) ...
+echo Building server-revzip.dll ... >> "%LOGFILE%"
+"%MSBUILD%" %VCXPROJ_REVZIP_SERVER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
+if %ERRORLEVEL% NEQ 0 ( echo WARNING: server-revzip build failed. ) else ( echo server-revzip OK. )
 
 echo.
 echo Building revbrowser (Debug — used as fallback by build-release-x64.bat) ...
