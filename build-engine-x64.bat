@@ -166,11 +166,34 @@ echo.
 :: libFoundation.vcxproj compiles icudata-minimal.cpp, so this must run
 :: before the libFoundation build.
 :: ----------------------------------------------------------
+:: Step 1: minimal_icu_data — runs icupkg on the bundled ICU dat file to
+:: produce icudata-minimal.dat.  Built with BuildProjectReferences=false to
+:: avoid chaining into fetch.vcxproj → fetch-win.vcxproj, which would abort
+:: because prebuilt/lib/win32/icudt.lib is not in the repo.  The ICU
+:: binaries (icupkg.exe) are already present in prebuilt/unpacked/icu/.
+echo Generating icudata-minimal.dat (minimal_icu_data) ...
+echo Generating icudata-minimal.dat ... >> "%LOGFILE%"
+set "VCXPROJ_MINICU=build-win-x86_64\livecode\prebuilt\minimal_icu_data.vcxproj"
+set "MINICU_LOG=%~dp0build-minimal-icu.log"
+"%MSBUILD%" %VCXPROJ_MINICU% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%MINICU_LOG%" 2>&1
+set MINICU_ERR=%ERRORLEVEL%
+type "%MINICU_LOG%"
+type "%MINICU_LOG%" >> "%LOGFILE%"
+if %MINICU_ERR% NEQ 0 (
+    echo.
+    echo MINIMAL_ICU_DATA FAILED. See %MINICU_LOG% for details.
+    exit /b 1
+)
+echo minimal_icu_data OK.
+
+echo.
+:: Step 2: encode_minimal_icu_data — runs util/encode_data.py on the .dat
+:: file to produce icudata-minimal.cpp.
 echo Generating icudata-minimal.cpp (encode_minimal_icu_data) ...
 echo Generating icudata-minimal.cpp ... >> "%LOGFILE%"
 set "VCXPROJ_ICU=build-win-x86_64\livecode\prebuilt\encode_minimal_icu_data.vcxproj"
 set "ICU_LOG=%~dp0build-encode-icu.log"
-"%MSBUILD%" %VCXPROJ_ICU% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=true /v:minimal /nologo > "%ICU_LOG%" 2>&1
+"%MSBUILD%" %VCXPROJ_ICU% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%ICU_LOG%" 2>&1
 set ICU_ERR=%ERRORLEVEL%
 type "%ICU_LOG%"
 type "%ICU_LOG%" >> "%LOGFILE%"
