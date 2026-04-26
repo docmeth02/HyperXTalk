@@ -157,8 +157,27 @@ jobs:
         run: copy thirdparty\libcairo\src\config.h.win32 thirdparty\libcairo\src\config.h
 
       - name: Prepare cairo-features.h for Windows
-        shell: cmd
-        run: copy thirdparty\libcairo\src\cairo-features.h.win32 thirdparty\libcairo\src\cairo-features.h
+        shell: pwsh
+        run: |
+          # The committed cairo-features.h was generated for macOS (Quartz backend).
+          # Overwrite it with the Windows/Win32 backend feature set.
+          Set-Content -Path "thirdparty\libcairo\src\cairo-features.h" -Value @"
+          /* Hand-crafted for Windows / MSVC x64 — replaces the macOS meson output. */
+          #pragma once
+          #define CAIRO_FEATURES_H
+          #define CAIRO_HAS_IMAGE_SURFACE 1
+          #define CAIRO_HAS_MIME_SURFACE 1
+          #define CAIRO_HAS_OBSERVER_SURFACE 1
+          #define CAIRO_HAS_PDF_SURFACE 1
+          #define CAIRO_HAS_PNG_FUNCTIONS 1
+          #define CAIRO_HAS_PS_SURFACE 1
+          #define CAIRO_HAS_RECORDING_SURFACE 1
+          #define CAIRO_HAS_SCRIPT_SURFACE 1
+          #define CAIRO_HAS_SVG_SURFACE 1
+          #define CAIRO_HAS_USER_FONT 1
+          #define CAIRO_HAS_WIN32_SURFACE 1
+          #define CAIRO_HAS_WIN32_FONT 1
+          "@
 
       - name: Prepare pixman-version.h for Windows
         shell: cmd
