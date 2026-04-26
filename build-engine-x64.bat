@@ -18,6 +18,7 @@ set VCXPROJ_SECURITY_COMMUNITY=build-win-x86_64\livecode\engine\security-communi
 set VCXPROJ_LIBXML=build-win-x86_64\livecode\thirdparty\libxml\libxml.vcxproj
 set VCXPROJ_LIBXSLT=build-win-x86_64\livecode\thirdparty\libxslt\libxslt.vcxproj
 set VCXPROJ_REVXML=build-win-x86_64\livecode\revxml\external-revxml.vcxproj
+set VCXPROJ_REVBROWSER=build-win-x86_64\livecode\revbrowser\external-revbrowser.vcxproj
 
 :: ----------------------------------------------------------
 :: MySQL 9.6.0 prerequisite check
@@ -545,6 +546,20 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 echo revxml OK.
+
+echo.
+echo Building revbrowser (Debug — used as fallback by build-release-x64.bat) ...
+echo Building revbrowser (Debug) ... >> "%LOGFILE%"
+set "REVBROWSER_LOG=%~dp0build-revbrowser.log"
+"%MSBUILD%" %VCXPROJ_REVBROWSER% /p:Configuration=Debug /p:Platform=x64 /p:BuildProjectReferences=false /v:minimal /nologo > "%REVBROWSER_LOG%" 2>&1
+set REVBROWSER_ERR=%ERRORLEVEL%
+type "%REVBROWSER_LOG%"
+type "%REVBROWSER_LOG%" >> "%LOGFILE%"
+if %REVBROWSER_ERR% NEQ 0 (
+    echo WARNING: revbrowser Debug build failed -- Release step will also fail.
+) else (
+    echo revbrowser Debug OK.
+)
 
 echo.
 :: ----------------------------------------------------------

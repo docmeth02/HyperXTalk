@@ -638,8 +638,12 @@ echo.
 :: Release difference is optimisation only — ABI is identical.
 :: ----------------------------------------------------------
 echo Building revbrowser (Release) ...
-"%MSBUILD%" %VCXPROJ_REVBROWSER% /p:Configuration=Release /p:Platform=x64 "/p:OutDir=%OUTDIR%\\" /p:BuildProjectReferences=false /v:minimal /nologo >> "%LOGFILE%" 2>&1
-if %ERRORLEVEL% NEQ 0 goto revbrowser_fallback
+set "REVBROWSER_REL_LOG=%~dp0build-revbrowser-release.log"
+"%MSBUILD%" %VCXPROJ_REVBROWSER% /p:Configuration=Release /p:Platform=x64 "/p:OutDir=%OUTDIR%\\" /p:BuildProjectReferences=false /v:minimal /nologo > "%REVBROWSER_REL_LOG%" 2>&1
+set REVBROWSER_REL_ERR=%ERRORLEVEL%
+type "%REVBROWSER_REL_LOG%"
+type "%REVBROWSER_REL_LOG%" >> "%LOGFILE%"
+if %REVBROWSER_REL_ERR% NEQ 0 goto revbrowser_fallback
 if not exist "%OUTDIR%\revbrowser.dll" goto revbrowser_fallback
 echo revbrowser Release OK.
 goto revbrowser_done
