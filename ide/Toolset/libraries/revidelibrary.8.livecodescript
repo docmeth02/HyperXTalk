@@ -1395,7 +1395,10 @@ on revIDEEnsureAPIDatabase
 
    -- Skip if destination already matches the shipped file.
    if there is a file tDest then
-      if the size of file tDest >= the size of file tSource then
+      local tDestSize, tSourceSize
+      put the size of file tDest into tDestSize
+      put the size of file tSource into tSourceSize
+      if tDestSize >= tSourceSize then
          exit revIDEEnsureAPIDatabase
       end if
    end if
