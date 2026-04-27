@@ -3285,6 +3285,7 @@ on systemAppearanceChanged pMode, pWindowColor, pTextColor
    --   set the foregroundColor of this stack to pTextColor
    local tDividerCounter
    put 1 into tDividerCounter
+   lock screen
    repeat for each item tItem in revMenubarItems()
       local tModeIsLight, tModeIsDark
       if (pMode is "light") then
@@ -3303,4 +3304,5 @@ on systemAppearanceChanged pMode, pWindowColor, pTextColor
          set the visible of button (tItem & "-DM") of group "Toolbar" of me to tModeIsDark
       end if
    end repeat
+   unlock screen
 end systemAppearanceChanged
