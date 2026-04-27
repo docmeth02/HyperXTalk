@@ -1865,6 +1865,7 @@ const LT factor_table[] =
         {"word", TT_CHUNK, CT_WORD},
         {"wordoffset", TT_FUNCTION, F_WORD_OFFSET},
         {"words", TT_CLASS, CT_WORD},
+        {"worker", TT_CHUNK, CT_WORKER},
 		{"working", TT_PROPERTY, P_WORKING},
 		{"wrap", TT_BINOP, O_WRAP},
         {"xextent", TT_PROPERTY, P_X_EXTENT},

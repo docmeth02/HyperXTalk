@@ -486,6 +486,9 @@ class MCCreate : public MCStatement
     bool alias: 1;
     // MW-2014-09-30: [[ ScriptOnlyStack ]] For 'create script only stack ...' form.
     bool script_only_stack : 1;
+    // Workers: 'create worker <name> [from <scriptfile>]'
+    MCExpression *worker_file;
+    bool worker : 1;
 public:
 	MCCreate()
 	{
@@ -499,6 +502,8 @@ public:
 		visible = True;
         // MW-2014-09-30: [[ ScriptOnlyStack ]] Initial value.
         script_only_stack = False;
+        worker_file = NULL;
+        worker = False;
 	}
 	virtual ~MCCreate();
 	virtual Parse_stat parse(MCScriptPoint &);
@@ -992,17 +997,21 @@ public:
 
 // MW-2008-11-05: [[ Dispatch Command ]] The statement class for the 'dispatch' command.
 //   'dispatch' [ command | function ] <message> [ 'to' <target> ] [ 'with' <arguments> ]
+//   Extended: 'dispatch' <message> 'to' 'worker' <name> [ 'with' <arguments> ]
 class MCDispatchCmd: public MCStatement
 {
 	MCExpression *message;
 	MCChunk *target;
 	MCParameter *params;
+    // Worker dispatch: 'dispatch <msg> to worker <name> [with <params>]'
+    MCExpression *worker_name;
     struct
     {
         /* The container count is the number of containers needed to execute
          * the command. It is calculated after parsing the node. */
         unsigned container_count : 16;
         bool is_function : 1;
+        bool to_worker : 1;
     };
 
 public:
@@ -1011,11 +1020,13 @@ public:
 		message = NULL;
 		target = NULL;
 		params = NULL;
+        worker_name = NULL;
 		is_function = false;
         container_count = 0;
+        to_worker = false;
 	}
 	~MCDispatchCmd(void);
-	
+
 	virtual Parse_stat parse(MCScriptPoint& sp);
     virtual void exec_ctxt(MCExecContext &ctxt);
 };
