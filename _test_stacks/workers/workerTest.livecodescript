@@ -24,11 +24,11 @@ on testWorkers
    --   -- to an error; we just ignore that here for simplicity.
    create worker "mathWorker" from sWorkerScriptPath
    
-   --   -- Test 1: compute squares of 1..8
-   --   dispatch "computeSquares" to worker "mathWorker" with 8
+   -- Test 1: compute squares of 1..8
+   dispatch "computeSquares" to worker "mathWorker" with 8
    
-   --   -- Test 2: reverse a sentence
-   --   dispatch "reverseWords" to worker "mathWorker" with "the quick brown fox"
+   -- Test 2: reverse a sentence
+   dispatch "reverseWords" to worker "mathWorker" with "the quick brown fox"
 end testWorkers
 
 -- -----------------------------------------------------------------------
@@ -46,5 +46,5 @@ end onReverseWordsResult
 -- Cleanup
 -- -----------------------------------------------------------------------
 on closeStack
-   --   destroy worker "mathWorker"
+   destroy worker "mathWorker"
 end closeStack

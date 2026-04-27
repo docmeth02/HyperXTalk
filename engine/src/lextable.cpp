@@ -704,6 +704,7 @@ const LT factor_table[] =
         {"cachedurl", TT_FUNCTION, F_CACHED_URLS},
         {"cachedurls", TT_FUNCTION, F_CACHED_URLS},
         {"callbacks", TT_PROPERTY, P_CALLBACKS},
+        {"caller", TT_CHUNK, CT_CALLER},
         {"cantabort", TT_PROPERTY, P_CANT_ABORT},
         {"cantdelete", TT_PROPERTY, P_CANT_DELETE},
         {"cantmodify", TT_PROPERTY, P_CANT_MODIFY},

@@ -431,12 +431,6 @@ enum Exec_errors
 	// {EE-0134} create: stack is locked (cantModify)
 	EE_CREATE_LOCKED,
 
-	// create worker: a worker with that name already exists
-	EE_CREATE_WORKEREXISTS,
-
-	// create worker: failed to create the worker's backing stack
-	EE_CREATE_WORKERFAILED,
-	
 	// {EE-0135} crop: error in image expression
 	EE_CROP_NOIMAGE,
 	
@@ -2063,9 +2057,6 @@ enum Exec_errors
 	// {EE-0676} dispatch: bad target
 	EE_DISPATCH_BADTARGET,
 
-	// dispatch to worker: named worker not found
-	EE_DISPATCH_WORKERNOTFOUND,
-	
 	// {EE-0677} queryRegistry: bad destination
 	EE_QUERYREGISTRY_BADDEST,
 	

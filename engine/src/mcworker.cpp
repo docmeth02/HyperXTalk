@@ -159,7 +159,7 @@ void MCWorkerExecCreate(MCExecContext &ctxt,
     // Reject duplicate names.
     if (MCWorkerFind(p_name) != nullptr)
     {
-        ctxt.LegacyThrow(EE_CREATE_WORKEREXISTS);
+        ctxt.UserThrow(MCSTR("create worker: a worker with that name already exists"));
         return;
     }
 
@@ -168,7 +168,7 @@ void MCWorkerExecCreate(MCExecContext &ctxt,
     MCStackSecurityCreateStack(t_stack);
     if (t_stack == nullptr)
     {
-        ctxt.LegacyThrow(EE_CREATE_WORKERFAILED);
+        ctxt.UserThrow(MCSTR("create worker: failed to create backing stack"));
         return;
     }
 
@@ -220,7 +220,7 @@ void MCWorkerExecDispatch(MCExecContext &ctxt,
     MCWorker *t_worker = MCWorkerFind(p_worker_name);
     if (t_worker == nullptr)
     {
-        ctxt.LegacyThrow(EE_DISPATCH_WORKERNOTFOUND);
+        ctxt.UserThrow(MCSTR("dispatch to worker: named worker not found"));
         return;
     }
 
@@ -250,7 +250,7 @@ void MCWorkerExecDispatchToCaller(MCExecContext &ctxt,
     // Must be called from within a worker handler.
     if (s_current_worker == nullptr || s_current_worker->GetCallerStack() == nullptr)
     {
-        ctxt.LegacyThrow(EE_DISPATCH_WORKERNOTFOUND);
+        ctxt.UserThrow(MCSTR("dispatch to caller: not currently executing inside a worker"));
         return;
     }
 
@@ -266,7 +266,7 @@ void MCWorkerExecDestroy(MCExecContext &ctxt,
     MCWorker *t_worker = MCWorkerFind(p_name);
     if (t_worker == nullptr)
     {
-        ctxt.LegacyThrow(EE_DISPATCH_WORKERNOTFOUND);
+        ctxt.UserThrow(MCSTR("destroy worker: named worker not found"));
         return;
     }
 

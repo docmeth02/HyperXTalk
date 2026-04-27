@@ -818,7 +818,7 @@ void MCDelete::exec_ctxt(MCExecContext& ctxt)
 	if (worker)
 	{
 		MCAutoStringRef t_name;
-		if (!ctxt.EvalExprAsStringRef(worker_name, EE_DISPATCH_WORKERNOTFOUND, &t_name))
+		if (!ctxt.EvalExprAsStringRef(worker_name, EE_DELETE_BADFILEEXP, &t_name))
 			return;
 		MCWorkerExecDestroy(ctxt, *t_name);
 		return;
