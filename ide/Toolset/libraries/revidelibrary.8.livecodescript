@@ -1380,7 +1380,7 @@ end revIDEInitialiseIDELibrary
 -- again.  This handler runs unconditionally early in IDE startup so the
 -- first open always finds the real 6 MB database, not an empty stub.
 on revIDEEnsureAPIDatabase
-   local tSource, tDest, tCacheDir
+   local tSource, tDest, tCacheDir, tStamp
    set the itemdelimiter to "/"
 
    -- Source: shipped database inside the app bundle (or source repo in dev).
@@ -1392,14 +1392,17 @@ on revIDEEnsureAPIDatabase
    put revEnvironmentUserDocsPath() & "/IDE" into tCacheDir
    revIDEEnsurePath tCacheDir
    put tCacheDir & "/api.sqlite" into tDest
+   put tCacheDir & "/api.sqlite.version" into tStamp
 
-   -- Skip if destination already matches the shipped file.
+   -- Skip if we already seeded this version's database.
+   -- The stamp file records the engine version string written after a
+   -- successful copy; a fresh install or version upgrade will have no
+   -- matching stamp so the copy always runs at least once per version.
    if there is a file tDest then
-      local tDestSize, tSourceSize
-      put the size of file tDest into tDestSize
-      put the size of file tSource into tSourceSize
-      if tDestSize >= tSourceSize then
-         exit revIDEEnsureAPIDatabase
+      if there is a file tStamp then
+         if url ("file:" & tStamp) is the version then
+            exit revIDEEnsureAPIDatabase
+         end if
       end if
    end if
 
@@ -1411,6 +1414,9 @@ on revIDEEnsureAPIDatabase
       -- Windows: write via the binfile URL mechanism.
       put url ("binfile:" & tSource) into url ("binfile:" & tDest)
    end if
+
+   -- Write the version stamp so subsequent launches skip the copy.
+   put the version into url ("file:" & tStamp)
 end revIDEEnsureAPIDatabase
 
 on ideExtensionsChanged
