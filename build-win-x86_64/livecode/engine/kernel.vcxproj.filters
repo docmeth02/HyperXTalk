@@ -8772,6 +8772,9 @@
     <ClInclude Include="..\..\..\engine\src\mcstring.h">
       <Filter>..\..\..\engine\src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\engine\src\mcworker.h">
+      <Filter>..\..\..\engine\src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\engine\src\mctristate.h">
       <Filter>..\..\..\engine\src</Filter>
     </ClInclude>
@@ -8857,6 +8860,9 @@
       <Filter>..\..\..\engine\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\engine\src\mcstring.cpp">
+      <Filter>..\..\..\engine\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\engine\src\mcworker.cpp">
       <Filter>..\..\..\engine\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\engine\src\mcutility.cpp">
