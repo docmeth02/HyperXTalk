@@ -1344,6 +1344,16 @@ on revIDEInitialiseIDELibrary
    ## Regenerate dictionary data
    revInternal__LoadLibrary "revDatabaseLibrary"
 
+   -- Seed api.sqlite into the user doc-cache before any code opens the
+   -- database.  ideDocsInitialize caches the SQLite connection the first
+   -- time it runs; if the DB is opened as an empty stub that cached
+   -- connection is used for the entire session and ideDocsEnsureDatabase
+   -- inside revidedocumentationlibrary never gets another chance to copy
+   -- the real file.  Do the copy here — unconditionally before anything
+   -- else touches the database — so the connection is always seeded from
+   -- the 6 MB shipped database.
+   revIDEEnsureAPIDatabase
+
    -- home.livecodescript only calls revIDEGenerateDistributedDocs when
    -- NOT installed (dev builds).  On installed builds we must trigger it
    -- here so that api.sqlite is written to the user doc-cache before
@@ -1362,6 +1372,43 @@ on revIDEInitialiseIDELibrary
    ideSubscribe "ideExtensionsChanged"
    ideSubscribe "ideDesktopChanged"
 end revIDEInitialiseIDELibrary
+
+-- Copy the shipped api.sqlite from the app bundle into the user doc-cache
+-- before anything opens the SQLite connection.  Once revDocsOpenAPIDatabase
+-- is called the first time, the connection is cached for the entire session
+-- and ideDocsEnsureDatabase inside revidedocumentationlibrary never runs
+-- again.  This handler runs unconditionally early in IDE startup so the
+-- first open always finds the real 6 MB database, not an empty stub.
+on revIDEEnsureAPIDatabase
+   local tSource, tDest, tCacheDir
+   set the itemdelimiter to "/"
+
+   -- Source: shipped database inside the app bundle (or source repo in dev).
+   put item 1 to -3 of the filename of stack "home" & \
+         "/Documentation/html_viewer/resources/data/api/api.sqlite" into tSource
+   if there is not a file tSource then exit revIDEEnsureAPIDatabase
+
+   -- Destination: user-writable doc-cache.
+   put revEnvironmentUserDocsPath() & "/IDE" into tCacheDir
+   revIDEEnsurePath tCacheDir
+   put tCacheDir & "/api.sqlite" into tDest
+
+   -- Skip if destination already matches the shipped file.
+   if there is a file tDest then
+      if the size of file tDest >= the size of file tSource then
+         exit revIDEEnsureAPIDatabase
+      end if
+   end if
+
+   -- Use the OS copy command — more reliable than binfile: URL for large
+   -- binary files and avoids any in-memory string truncation issues.
+   if the platform is "macosx" or the platform is "linux" then
+      get shell("cp -f " & quote & tSource & quote & " " & quote & tDest & quote)
+   else
+      -- Windows: write via the binfile URL mechanism.
+      put url ("binfile:" & tSource) into url ("binfile:" & tDest)
+   end if
+end revIDEEnsureAPIDatabase
 
 on ideExtensionsChanged
    revIDERegenerateBuiltDictionaryData
