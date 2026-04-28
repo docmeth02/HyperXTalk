@@ -433,6 +433,7 @@
     <ClInclude Include="..\..\..\engine\src\mcsemaphore.h"/>
     <ClInclude Include="..\..\..\engine\src\mcssl.h"/>
     <ClInclude Include="..\..\..\engine\src\mcstring.h"/>
+    <ClInclude Include="..\..\..\engine\src\mcworker.h"/>
     <ClInclude Include="..\..\..\engine\src\mctristate.h"/>
     <ClInclude Include="..\..\..\engine\src\mcutility.h"/>
     <ClInclude Include="..\..\..\engine\src\md5.h"/>
@@ -630,6 +631,7 @@
     <ClCompile Include="..\..\..\engine\src\mcio.cpp"/>
     <ClCompile Include="..\..\..\engine\src\mcssl.cpp"/>
     <ClCompile Include="..\..\..\engine\src\mcstring.cpp"/>
+    <ClCompile Include="..\..\..\engine\src\mcworker.cpp"/>
     <ClCompile Include="..\..\..\engine\src\mcutility.cpp"/>
     <ClCompile Include="..\..\..\engine\src\md5.cpp"/>
     <ClCompile Include="..\..\..\engine\src\notify.cpp"/>

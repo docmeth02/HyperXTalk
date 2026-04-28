@@ -18,6 +18,8 @@ set VCXPROJ_SECURITY_COMMUNITY=build-win-x86_64\livecode\engine\security-communi
 set VCXPROJ_LIBXML=build-win-x86_64\livecode\thirdparty\libxml\libxml.vcxproj
 set VCXPROJ_LIBXSLT=build-win-x86_64\livecode\thirdparty\libxslt\libxslt.vcxproj
 set VCXPROJ_REVXML=build-win-x86_64\livecode\revxml\external-revxml.vcxproj
+set VCXPROJ_REVXML_SERVER=build-win-x86_64\livecode\revxml\external-revxml-server.vcxproj
+set VCXPROJ_REVZIP_SERVER=build-win-x86_64\livecode\revzip\external-revzip-server.vcxproj
 set VCXPROJ_REVBROWSER=build-win-x86_64\livecode\revbrowser\external-revbrowser.vcxproj
 
 :: ----------------------------------------------------------
@@ -546,6 +548,11 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 echo revxml OK.
+
+echo.
+:: server-revxml.dll and server-revzip.dll are built in Release by
+:: build-release-x64.bat (after Release libxml2/libxslt/libzip are ready)
+:: so they use the Release CRT matching server-community.exe.
 
 echo.
 echo Building revbrowser (Debug — used as fallback by build-release-x64.bat) ...
