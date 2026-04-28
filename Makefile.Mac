@@ -639,39 +639,9 @@ package-mac-bin:
 	    echo "Warning: HyperXTalkQL.appex not found; skipping Quick Look extension."; \
 	fi
 	@# ----------------------------------------------------------------
-	@# Strip extended attributes (resource forks, Finder info, etc.)
-	@# xattr -cr must run before codesign or signing will be rejected.
-	@# ----------------------------------------------------------------
-	@echo "Stripping extended attributes..."
-	@xattr -cr "$(MACBIN_BUNDLE)"
-	@# ----------------------------------------------------------------
-	@# Re-sign the bundle now that new files have been added
-	@# ----------------------------------------------------------------
-	@echo "Re-signing bundle contents with hardened runtime..."
-	@find "$(MACBIN_BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
-	    sort -r | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	done
-	@find "$(MACBIN_BUNDLE)" -name "*.bundle" | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	done
-	@find "$(MACBIN_BUNDLE)" -name "*.appex" | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements ide/HyperXTalkQL/HyperXTalkQL.entitlements "$$F" 2>/dev/null || true; \
-	done
-	@# Sign executables inside bundles and in MacOS folder
-	@find "$(MACBIN_BUNDLE)" -type f -name "lc-compile" | while read F; do \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	done
-	@# ----------------------------------------------------------------
-	@# VLC: bundle libvlc + libvlccore + plugins from VLC.app
+	@# VLC: bundle libvlc + libvlccore + plugins from VLC.app.
+	@# Must happen before xattr -cr and the re-sign pass so that
+	@# the copied dylibs are included in the final codesign sweep.
 	@# ----------------------------------------------------------------
 	@VLC_APP="/Applications/VLC.app/Contents/MacOS"; \
 	VLC_FW="$(MACBIN_BUNDLE)/Contents/Frameworks"; \
@@ -707,6 +677,38 @@ package-mac-bin:
 	  echo "WARNING: VLC.app not found at $$VLC_APP — skipping VLC bundling."; \
 	  echo "         Install VLC ARM64 from https://www.videolan.org/ to enable media playback."; \
 	fi
+	@# ----------------------------------------------------------------
+	@# Strip extended attributes (resource forks, Finder info, etc.)
+	@# xattr -cr must run before codesign or signing will be rejected.
+	@# ----------------------------------------------------------------
+	@echo "Stripping extended attributes..."
+	@xattr -cr "$(MACBIN_BUNDLE)"
+	@# ----------------------------------------------------------------
+	@# Re-sign the bundle now that new files have been added
+	@# ----------------------------------------------------------------
+	@echo "Re-signing bundle contents with hardened runtime..."
+	@find "$(MACBIN_BUNDLE)" \( -name "*.framework" -o -name "*.dylib" \) | \
+	    sort -r | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	done
+	@find "$(MACBIN_BUNDLE)" -name "*.bundle" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	done
+	@find "$(MACBIN_BUNDLE)" -name "*.appex" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements ide/HyperXTalkQL/HyperXTalkQL.entitlements "$$F" 2>/dev/null || true; \
+	done
+	@# Sign executables inside bundles and in MacOS folder
+	@find "$(MACBIN_BUNDLE)" -type f -name "lc-compile" | while read F; do \
+	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	      --options runtime \
+	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	done
 	@codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
 	    --entitlements HyperXTalk.entitlements \
