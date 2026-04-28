@@ -84,7 +84,7 @@ bool MCVLCPlayer::EnsureVLCInstance()
         {
             *t_macos = '\0'; // now points at .../Contents
             snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                     "--plugin-path=%s/Frameworks/vlc-plugins", t_buf);
+                     "--plugin-path=%s/Resources/vlc-plugins", t_buf);
         }
         else
         {

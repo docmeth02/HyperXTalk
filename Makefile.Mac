@@ -645,13 +645,14 @@ package-mac-bin:
 	@# ----------------------------------------------------------------
 	@VLC_APP="/Applications/VLC.app/Contents/MacOS"; \
 	VLC_FW="$(MACBIN_BUNDLE)/Contents/Frameworks"; \
+	VLC_RS="$(MACBIN_BUNDLE)/Contents/Resources"; \
 	if [ -f "$$VLC_APP/lib/libvlc.dylib" ]; then \
 	  echo "Bundling VLC libraries..."; \
-	  mkdir -p "$$VLC_FW"; \
+	  mkdir -p "$$VLC_FW" "$$VLC_RS"; \
 	  cp "$$VLC_APP/lib/libvlc.dylib"     "$$VLC_FW/libvlc.dylib"; \
 	  cp "$$VLC_APP/lib/libvlccore.dylib" "$$VLC_FW/libvlccore.dylib"; \
-	  cp -R "$$VLC_APP/plugins"           "$$VLC_FW/vlc-plugins"; \
-	  find "$$VLC_FW/vlc-plugins" -name "plugins.dat" -delete; \
+	  cp -R "$$VLC_APP/plugins"           "$$VLC_RS/vlc-plugins"; \
+	  find "$$VLC_RS/vlc-plugins" -name "plugins.dat" -delete; \
 	  echo "Fixing VLC dylib install names..."; \
 	  install_name_tool -id "@executable_path/../Frameworks/libvlc.dylib" \
 	      "$$VLC_FW/libvlc.dylib"; \
