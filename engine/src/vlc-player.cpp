@@ -39,11 +39,11 @@ Software Foundation.  */
 // ---------------------------------------------------------------------------
 
 #if defined(TARGET_PLATFORM_MACOS_X)
-// Implemented in vlc-player-mac.mm
-extern void *MCVLCCreateNSView(void);
-extern void  MCVLCDestroyNSView(void *p_view);
-extern void  MCVLCSyncNSView(void *p_view,
-                              MCRectangle p_rect, bool p_visible);
+// Implemented in vlc-player-mac.mm (compiled as Objective-C++, hence extern "C")
+extern "C" void *MCVLCCreateNSView(void);
+extern "C" void  MCVLCDestroyNSView(void *p_view);
+extern "C" void  MCVLCSyncNSView(void *p_view,
+                                  MCRectangle p_rect, bool p_visible);
 #endif
 
 // ---------------------------------------------------------------------------
