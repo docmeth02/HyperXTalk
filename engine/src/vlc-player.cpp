@@ -33,6 +33,10 @@ Software Foundation.  */
 #include <vlc/libvlc_media_player.h>
 #include <vlc/libvlc_events.h>
 
+#if defined(TARGET_PLATFORM_MACOS_X)
+#include <dlfcn.h>    // dladdr / Dl_info — used in EnsureVLCInstance to locate the bundle
+#endif
+
 // ---------------------------------------------------------------------------
 // Platform-specific helpers declared here, defined in vlc-player-mac.mm (Mac)
 // or inline below (Win/Linux).
@@ -61,13 +65,54 @@ bool MCVLCPlayer::EnsureVLCInstance()
         return true;
     }
 
+    // On macOS, the VLC plugins are bundled alongside the app in
+    // Contents/Frameworks/vlc-plugins/.  Derive the path from the location
+    // of this dylib so it works regardless of where the .app lives.
+    // On other platforms the system-installed VLC finds its own plugins.
+#if defined(TARGET_PLATFORM_MACOS_X)
+    static char s_plugin_path_arg[PATH_MAX + 16];
+    Dl_info t_info;
+    if (dladdr((void *)EnsureVLCInstance, &t_info) && t_info.dli_fname)
+    {
+        // dli_fname = .../HyperXTalk.app/Contents/MacOS/HyperXTalk (or similar)
+        // Walk up to Contents/ and append Frameworks/vlc-plugins
+        char t_buf[PATH_MAX];
+        strlcpy(t_buf, t_info.dli_fname, sizeof(t_buf));
+        // Strip to Contents/
+        char *t_macos = strstr(t_buf, "/MacOS/");
+        if (t_macos)
+        {
+            *t_macos = '\0'; // now points at .../Contents
+            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
+                     "--plugin-path=%s/Frameworks/vlc-plugins", t_buf);
+        }
+        else
+        {
+            s_plugin_path_arg[0] = '\0';
+        }
+    }
+    else
+    {
+        s_plugin_path_arg[0] = '\0';
+    }
+
+    const char *t_args_mac[] = {
+        "--quiet",
+        "--no-osd",
+        "--no-stats",
+        s_plugin_path_arg[0] ? s_plugin_path_arg : "--no-plugins-scan",
+    };
+    s_vlc_instance = libvlc_new(4, t_args_mac);
+#else
     const char *t_args[] = {
-        "--no-xlib",          // avoid X threading issues
+        "--no-xlib",          // avoid X threading issues on Linux
         "--quiet",
         "--no-osd",
         "--no-stats",
     };
     s_vlc_instance = libvlc_new(4, t_args);
+#endif
+
     if (s_vlc_instance == nullptr)
         return false;
 

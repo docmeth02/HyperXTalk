@@ -670,6 +670,43 @@ package-mac-bin:
 	      --options runtime \
 	      --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
 	done
+	@# ----------------------------------------------------------------
+	@# VLC: bundle libvlc + libvlccore + plugins from VLC.app
+	@# ----------------------------------------------------------------
+	@VLC_APP="/Applications/VLC.app/Contents/MacOS"; \
+	VLC_FW="$(MACBIN_BUNDLE)/Contents/Frameworks"; \
+	if [ -f "$$VLC_APP/lib/libvlc.dylib" ]; then \
+	  echo "Bundling VLC libraries..."; \
+	  mkdir -p "$$VLC_FW"; \
+	  cp "$$VLC_APP/lib/libvlc.dylib"     "$$VLC_FW/libvlc.dylib"; \
+	  cp "$$VLC_APP/lib/libvlccore.dylib" "$$VLC_FW/libvlccore.dylib"; \
+	  cp -R "$$VLC_APP/plugins"           "$$VLC_FW/vlc-plugins"; \
+	  echo "Fixing VLC dylib install names..."; \
+	  install_name_tool -id "@executable_path/../Frameworks/libvlc.dylib" \
+	      "$$VLC_FW/libvlc.dylib"; \
+	  install_name_tool -id "@executable_path/../Frameworks/libvlccore.dylib" \
+	      "$$VLC_FW/libvlccore.dylib"; \
+	  OLD_CORE=$$(otool -L "$$VLC_FW/libvlc.dylib" | awk '/libvlccore/{print $$1}'); \
+	  [ -n "$$OLD_CORE" ] && install_name_tool \
+	      -change "$$OLD_CORE" \
+	      "@executable_path/../Frameworks/libvlccore.dylib" \
+	      "$$VLC_FW/libvlc.dylib" || true; \
+	  HYPERXTALK_BIN="$(MACBIN_BUNDLE)/Contents/MacOS/HyperXTalk"; \
+	  OLD_VLC=$$(otool -L "$$HYPERXTALK_BIN" 2>/dev/null | awk '/libvlc\.dylib/{print $$1}'); \
+	  [ -n "$$OLD_VLC" ] && install_name_tool \
+	      -change "$$OLD_VLC" \
+	      "@executable_path/../Frameworks/libvlc.dylib" \
+	      "$$HYPERXTALK_BIN" || true; \
+	  OLD_VLCC=$$(otool -L "$$HYPERXTALK_BIN" 2>/dev/null | awk '/libvlccore\.dylib/{print $$1}'); \
+	  [ -n "$$OLD_VLCC" ] && install_name_tool \
+	      -change "$$OLD_VLCC" \
+	      "@executable_path/../Frameworks/libvlccore.dylib" \
+	      "$$HYPERXTALK_BIN" || true; \
+	  echo "VLC bundled successfully."; \
+	else \
+	  echo "WARNING: VLC.app not found at $$VLC_APP — skipping VLC bundling."; \
+	  echo "         Install VLC ARM64 from https://www.videolan.org/ to enable media playback."; \
+	fi
 	@codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	    --options runtime \
 	    --entitlements HyperXTalk.entitlements \
