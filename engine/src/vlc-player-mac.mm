@@ -78,6 +78,22 @@ void MCVLCDestroyNSView(void *p_view)
     [t_view release];
 }
 
+void MCVLCReparentNSView(void *p_view, void *p_parent_view)
+{
+    if (p_view == nullptr)
+        return;
+
+    MCVLCPlayerView *t_view   = (MCVLCPlayerView *)p_view;
+    NSView          *t_parent = (NSView *)p_parent_view;
+
+    // Remove from any existing superview first.
+    if ([t_view superview] != nil && [t_view superview] != t_parent)
+        [t_view removeFromSuperview];
+
+    if (t_parent != nil && [t_view superview] == nil)
+        [t_parent addSubview: t_view];
+}
+
 void MCVLCSyncNSView(void *p_view, MCRectangle p_rect, bool p_visible)
 {
     if (p_view == nullptr)

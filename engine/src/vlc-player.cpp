@@ -46,6 +46,7 @@ Software Foundation.  */
 // Implemented in vlc-player-mac.mm (compiled as Objective-C++, hence extern "C")
 extern "C" void *MCVLCCreateNSView(void);
 extern "C" void  MCVLCDestroyNSView(void *p_view);
+extern "C" void  MCVLCReparentNSView(void *p_view, void *p_parent_view);
 extern "C" void  MCVLCSyncNSView(void *p_view,
                                   MCRectangle p_rect, bool p_visible);
 #endif
@@ -363,9 +364,10 @@ bool MCVLCPlayer::SetNativeParentView(void *p_parent_view)
 
     if (m_visible)
         gdk_window_show_unraised(t_win);
-#else
-    // macOS: the NSView is created at construction time; nothing to do here.
-    (void)p_parent_view;
+#elif defined(TARGET_PLATFORM_MACOS_X)
+    // Add the player view as a subview of the stack window's content view.
+    MCVLCReparentNSView(m_view, p_parent_view);
+    Synchronize();
 #endif
 
     return true;
