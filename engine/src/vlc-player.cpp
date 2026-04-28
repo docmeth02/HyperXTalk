@@ -430,6 +430,16 @@ void MCVLCPlayer::Load(MCStringRef p_filename, bool p_is_url)
 
     libvlc_media_player_set_media(m_player, m_media);
 
+    // Parse the media synchronously so track metadata (dimensions, duration)
+    // is immediately available when the engine queries MovieRect / Duration
+    // right after setting the filename.  libvlc_media_parse is deprecated in
+    // favour of the async libvlc_media_parse_with_options, but for local files
+    // the blocking version is acceptable and keeps the call-site simple.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    libvlc_media_parse(m_media);
+#pragma clang diagnostic pop
+
     // Reset selection / state.
     m_selection_start  = 0;
     m_selection_finish = 0;
@@ -723,18 +733,52 @@ void MCVLCPlayer::GetProperty(MCPlatformPlayerProperty p_property,
         case kMCPlatformPlayerPropertyMovieRect:
         {
             unsigned t_w = 0, t_h = 0;
+            // libvlc_video_get_size only works during active playback.
+            // For the pre-play query from prepare(), read track metadata
+            // (populated by libvlc_media_parse called in Load()).
             if (m_player != nullptr)
                 libvlc_video_get_size(m_player, 0, &t_w, &t_h);
-            *(MCRectangle *)r_value = MCRectangleMake(0, 0, t_w, t_h);
+            if (t_w == 0 && t_h == 0 && m_media != nullptr)
+            {
+                libvlc_media_track_t **t_tracks = nullptr;
+                unsigned t_count = libvlc_media_tracks_get(m_media, &t_tracks);
+                for (unsigned i = 0; i < t_count; i++)
+                {
+                    if (t_tracks[i]->i_type == libvlc_track_video &&
+                        t_tracks[i]->video != nullptr)
+                    {
+                        t_w = t_tracks[i]->video->i_width;
+                        t_h = t_tracks[i]->video->i_height;
+                        break;
+                    }
+                }
+                if (t_tracks != nullptr)
+                    libvlc_media_tracks_release(t_tracks, t_count);
+            }
+            *(MCRectangle *)r_value = MCRectangleMake(0, 0,
+                                                      (int16_t)t_w,
+                                                      (int16_t)t_h);
             break;
         }
 
         case kMCPlatformPlayerPropertyDuration:
-            *(MCPlatformPlayerDuration *)r_value =
-                (m_player != nullptr)
-                    ? (MCPlatformPlayerDuration)libvlc_media_player_get_length(m_player)
-                    : 0;
+        {
+            // libvlc_media_player_get_length returns 0 until playback starts.
+            // libvlc_media_get_duration reads the parsed container header and
+            // is available immediately after libvlc_media_parse.
+            MCPlatformPlayerDuration t_dur = 0;
+            if (m_media != nullptr)
+            {
+                libvlc_time_t t_vlc = libvlc_media_get_duration(m_media);
+                if (t_vlc > 0)
+                    t_dur = (MCPlatformPlayerDuration)t_vlc;
+            }
+            if (t_dur == 0 && m_player != nullptr)
+                t_dur = (MCPlatformPlayerDuration)
+                            libvlc_media_player_get_length(m_player);
+            *(MCPlatformPlayerDuration *)r_value = t_dur;
             break;
+        }
 
         case kMCPlatformPlayerPropertyTimescale:
             // VLC uses milliseconds internally → timescale is 1000.
