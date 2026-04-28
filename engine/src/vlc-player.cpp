@@ -23,6 +23,8 @@ Software Foundation.  */
 #include "platform.h"
 #include "platform-internal.h"
 
+#include "graphics_util.h"
+
 #include "vlc-player.h"
 
 // Pull in the VLC headers as plain C.
@@ -843,7 +845,7 @@ void MCVLCPlayer::GetTrackProperty(uindex_t                     p_index,
             }
             /* UNCHECKED */
             MCStringCreateWithCString(t_type_name,
-                                      (MCStringRef *)r_value);
+                                      *(MCStringRef *)r_value);
             break;
         }
 
