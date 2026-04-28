@@ -30,9 +30,15 @@ Software Foundation.  */
     return YES;
 }
 
-- (BOOL)wantsLayer
+// Do NOT override wantsLayer — VLC 3's macosx vout module uses OpenGL and
+// requires a plain (non-layer-backed) NSView as its rendering target.
+// A layer-backed view conflicts with VLC's GL context setup and produces
+// a blank output.  Use drawRect: for the black fill instead.
+
+- (void)drawRect:(NSRect)dirtyRect
 {
-    return YES;
+    [[NSColor blackColor] set];
+    NSRectFill(dirtyRect);
 }
 
 - (void)dealloc
@@ -55,11 +61,6 @@ void *MCVLCCreateNSView(void)
         [[MCVLCPlayerView alloc] initWithFrame: NSZeroRect];
     if (t_view == nil)
         return nullptr;
-
-    // Give it a black background so the area is clearly defined.
-    [t_view setWantsLayer: YES];
-    t_view.layer.backgroundColor =
-        [[NSColor blackColor] CGColor];
 
     return (void *)t_view;
 }
