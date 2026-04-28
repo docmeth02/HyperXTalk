@@ -653,6 +653,10 @@
 			'src/platform-recorder.cpp',
 			'src/platform-surface.cpp',
 			'src/platform-window.cpp',
+
+			# Group "VLC Player"
+			'src/vlc-player.h',
+			'src/vlc-player.cpp',
 			
 			# Group "Native Layer"
 			'src/native-layer.cpp',
@@ -710,6 +714,7 @@
 			'src/coretextlayout.mm',
 			'src/mac-abort.mm',
 			'src/mac-av-player.mm',
+			'src/vlc-player-mac.mm',
 			'src/mac-color.mm',
 			'src/mac-core.mm',
 			'src/mac-cursor.mm',
