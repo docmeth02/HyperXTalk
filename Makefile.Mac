@@ -651,7 +651,11 @@ package-mac-bin:
 	  mkdir -p "$$VLC_FW" "$$VLC_RS"; \
 	  cp "$$VLC_APP/lib/libvlc.dylib"     "$$VLC_FW/libvlc.dylib"; \
 	  cp "$$VLC_APP/lib/libvlccore.dylib" "$$VLC_FW/libvlccore.dylib"; \
-	  cp -R "$$VLC_APP/plugins"           "$$VLC_RS/vlc-plugins"; \
+	  if [ -d "$$VLC_APP/plugins/plugins" ]; then \
+	    cp -R "$$VLC_APP/plugins/plugins" "$$VLC_RS/vlc-plugins"; \
+	  else \
+	    cp -R "$$VLC_APP/plugins"         "$$VLC_RS/vlc-plugins"; \
+	  fi; \
 	  find "$$VLC_RS/vlc-plugins" -name "plugins.dat" -delete; \
 	  echo "Fixing VLC dylib install names..."; \
 	  install_name_tool -id "@executable_path/../Frameworks/libvlc.dylib" \

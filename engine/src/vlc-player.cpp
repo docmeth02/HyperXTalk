@@ -35,6 +35,7 @@ Software Foundation.  */
 
 #if defined(TARGET_PLATFORM_MACOS_X)
 #include <dlfcn.h>    // dladdr / Dl_info — used in EnsureVLCInstance to locate the bundle
+#include <unistd.h>   // access() — used to probe candidate plugin directories
 #endif
 
 // ---------------------------------------------------------------------------
@@ -66,35 +67,63 @@ bool MCVLCPlayer::EnsureVLCInstance()
         return true;
     }
 
-    // On macOS, the VLC plugins are bundled alongside the app in
-    // Contents/Frameworks/vlc-plugins/.  Derive the path from the location
-    // of this dylib so it works regardless of where the .app lives.
-    // On other platforms the system-installed VLC finds its own plugins.
+    // On macOS: locate VLC plugins.  Priority:
+    //   1. Bundled nested:  Contents/Resources/vlc-plugins/plugins
+    //      (VLC.app copies a plugins/plugins/ subdirectory structure)
+    //   2. Bundled flat:    Contents/Resources/vlc-plugins
+    //   3. VLC.app nested:  /Applications/VLC.app/.../plugins/plugins
+    //   4. VLC.app flat:    /Applications/VLC.app/.../plugins
+    //      (fallback for development builds without bundled plugins)
+    //   5. --no-plugins-scan  (last resort — audio/video will not work)
 #if defined(TARGET_PLATFORM_MACOS_X)
-    static char s_plugin_path_arg[PATH_MAX + 16];
+    static char s_plugin_path_arg[PATH_MAX + 32];
+    s_plugin_path_arg[0] = '\0';
+
+    // --- derive bundle Contents/ path from this binary's location ---
     Dl_info t_info;
     if (dladdr((void *)EnsureVLCInstance, &t_info) && t_info.dli_fname)
     {
-        // dli_fname = .../HyperXTalk.app/Contents/MacOS/HyperXTalk (or similar)
-        // Walk up to Contents/ and append Frameworks/vlc-plugins
-        char t_buf[PATH_MAX];
-        strlcpy(t_buf, t_info.dli_fname, sizeof(t_buf));
-        // Strip to Contents/
-        char *t_macos = strstr(t_buf, "/MacOS/");
+        char t_contents[PATH_MAX];
+        strlcpy(t_contents, t_info.dli_fname, sizeof(t_contents));
+        char *t_macos = strstr(t_contents, "/MacOS/");
         if (t_macos)
         {
-            *t_macos = '\0'; // now points at .../Contents
-            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                     "--plugin-path=%s/Resources/vlc-plugins", t_buf);
-        }
-        else
-        {
-            s_plugin_path_arg[0] = '\0';
+            *t_macos = '\0'; // t_contents now ends at ".../Contents"
+
+            // Probe nested layout first (VLC.app ships plugins/plugins/).
+            char t_probe[PATH_MAX];
+            snprintf(t_probe, sizeof(t_probe),
+                     "%s/Resources/vlc-plugins/plugins", t_contents);
+            if (access(t_probe, F_OK) == 0)
+            {
+                snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
+                         "--plugin-path=%s", t_probe);
+            }
+            else
+            {
+                snprintf(t_probe, sizeof(t_probe),
+                         "%s/Resources/vlc-plugins", t_contents);
+                if (access(t_probe, F_OK) == 0)
+                    snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
+                             "--plugin-path=%s", t_probe);
+            }
         }
     }
-    else
+
+    // --- fall back to VLC.app for development / non-packaged builds ---
+    if (s_plugin_path_arg[0] == '\0')
     {
-        s_plugin_path_arg[0] = '\0';
+        const char *t_vlc_nested =
+            "/Applications/VLC.app/Contents/MacOS/plugins/plugins";
+        const char *t_vlc_flat =
+            "/Applications/VLC.app/Contents/MacOS/plugins";
+
+        if (access(t_vlc_nested, F_OK) == 0)
+            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
+                     "--plugin-path=%s", t_vlc_nested);
+        else if (access(t_vlc_flat, F_OK) == 0)
+            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
+                     "--plugin-path=%s", t_vlc_flat);
     }
 
     const char *t_args_mac[] = {
