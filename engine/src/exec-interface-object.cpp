@@ -741,6 +741,24 @@ static const PropList audioclipprops[] =
         {"playLoudness", P_PLAY_LOUDNESS},
     };
 
+static const PropList toolbarprops[] =
+    {
+        {"displayMode",      P_TOOLBAR_DISPLAY_MODE},
+        {"id",               P_ID},
+        {"itemEnabled",      P_TOOLBAR_ITEM_ENABLED},
+        {"itemIcon",         P_TOOLBAR_ITEM_ICON},
+        {"itemLabel",        P_TOOLBAR_ITEM_LABEL},
+        {"itemNames",        P_TOOLBAR_ITEM_NAMES},
+        {"itemStyle",        P_TOOLBAR_ITEM_STYLE},
+        {"itemTooltip",      P_TOOLBAR_ITEM_TOOLTIP},
+        {"layer",            P_LAYER},
+        {"lockLoc",          P_LOCK_LOCATION},
+        {"name",             P_SHORT_NAME},
+        {"rect",             P_RECTANGLE},
+        {"toolbarVisible",   P_TOOLBAR_VISIBLE},
+        {"visible",          P_VISIBLE}
+    };
+
 static const PropList videoclipprops[] =
     {
         {"altID", P_ALT_ID},
@@ -3360,6 +3378,10 @@ void MCObject::DoGetProperties(MCExecContext& ctxt, uint32_t part, bool p_effect
 		table = videoclipprops;
 		tablesize = ELEMENTS(videoclipprops);
 		break;
+    case CT_TOOLBAR:
+        table = toolbarprops;
+        tablesize = ELEMENTS(toolbarprops);
+        break;
     case CT_WIDGET:
 		table = NULL;
 		tablesize = 0;
