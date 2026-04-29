@@ -1782,6 +1782,9 @@ bool MCVLCPlayer::SetNativeParentView(void *p_parent_view)
         return false;
     }
 
+    // Prevent GDK from painting a background over VLC's X11 rendering.
+    gdk_window_set_back_pixmap(t_win, NULL, FALSE);
+
     if (m_view != nullptr)
         gdk_window_destroy((GdkWindow *)m_view);
 
@@ -2174,6 +2177,14 @@ void MCVLCPlayer::Start(double rate)
     }
 #endif
 
+#if defined(TARGET_PLATFORM_LINUX)
+    if (m_view != nullptr)
+    {
+        uint32_t t_xid = x11::gdk_x11_drawable_get_xid((GdkDrawable *)m_view);
+        libvlc_media_player_set_xwindow(m_player, t_xid);
+        vlc_log("[VLC] Start: re-set xwindow=%u\n", t_xid);
+    }
+#endif
     libvlc_media_player_play(m_player);
     libvlc_media_player_set_rate(m_player, (float)rate);
     m_playing = true;
@@ -2491,11 +2502,13 @@ void MCVLCPlayer::GetProperty(MCPlatformPlayerProperty p_property,
             break;
 
         case kMCPlatformPlayerPropertyCurrentTime:
+        {
+            libvlc_time_t t_time = (m_player != nullptr)
+                ? libvlc_media_player_get_time(m_player) : 0;
             *(MCPlatformPlayerDuration *)r_value =
-                (m_player != nullptr)
-                    ? (MCPlatformPlayerDuration)libvlc_media_player_get_time(m_player)
-                    : 0;
+                (t_time >= 0) ? (MCPlatformPlayerDuration)t_time : 0;
             break;
+        }
 
         case kMCPlatformPlayerPropertyStartTime:
             *(MCPlatformPlayerDuration *)r_value = m_selection_start;

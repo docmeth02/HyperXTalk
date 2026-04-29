@@ -889,6 +889,7 @@ MCRectangle MCPlayer::getactiverect(void)
 void MCPlayer::open()
 {
     MCControl::open();
+    fprintf(stderr, "[VLC] MCPlayer::open() opened=%d\n", opened);
     prepare(kMCEmptyString);
 	attachplayer();
 }
@@ -902,6 +903,7 @@ void MCPlayer::close()
 
 	if (opened == 0)
 	{
+		fprintf(stderr, "[VLC] MCPlayer::close() releasing platform player (opened=0)\n");
 		state |= CS_CLOSING;
 		playstop();
 		state &= ~CS_CLOSING;
@@ -913,6 +915,10 @@ void MCPlayer::close()
 			MCPlatformPlayerRelease(m_platform_player);
 			m_platform_player = nullptr;
 		}
+	}
+	else
+	{
+		fprintf(stderr, "[VLC] MCPlayer::close() opened=%d, keeping player\n", opened);
 	}
 }
 
@@ -1593,13 +1599,20 @@ void MCPlayer::attachplayer()
 {
     if (m_platform_player == nil)
         return;
-	
+
 	if (getflag(F_ALWAYS_BUFFER))
 		return;
-	
+
+#if defined(TARGET_PLATFORM_LINUX)
+	// On Linux, SetNativeParentView() in prepare() already created a GDK
+	// child window and passed its XID to libvlc_media_player_set_xwindow().
+	// The Mac-style native layer attach path is not used.
+	return;
+#endif
+
 	if (getNativeLayer() != nil)
 		return;
-	
+
 	SetNativeView(MCPlatformPlayerGetNativeView(m_platform_player));
 }
 
