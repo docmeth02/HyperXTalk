@@ -80,6 +80,14 @@ private:
     // -- VLC event callbacks (called on VLC internal thread) -----------------
     static void OnVLCEvent(const struct libvlc_event_t *p_event, void *p_opaque);
 
+#if defined(TARGET_PLATFORM_WINDOWS)
+    // WndProc for the VLC render-surface HWND.  Handles WM_SIZE so that
+    // VLC's D3D vout is reattached when MCNativeLayerWin32 resizes the
+    // window after initial creation.
+    static LRESULT CALLBACK s_vlc_wnd_proc(HWND hwnd, UINT msg,
+                                            WPARAM wp, LPARAM lp);
+#endif
+
     // -- Main-thread notification dispatchers --------------------------------
     static void DoTimeChanged(void *p_opaque);
     static void DoFinished(void *p_opaque);
@@ -125,6 +133,30 @@ private:
     bool m_playing;
     bool m_finished;
     bool m_has_invalid_filename;
+#if defined(TARGET_PLATFORM_WINDOWS)
+    // Set by Start() when the HWND is not yet sized; cleared when play
+    // actually begins (from WM_SIZE or the fallback timer).
+    bool m_play_pending;
+
+    // Set in WM_DESTROY when the destruction was NOT initiated by us
+    // (i.e. cascade-destroyed by MCNativeLayerWin32 tearing down its
+    // viewport container).  GetNativeView() / Start() check this and
+    // call RecreateNativeView() before returning / playing.
+    bool  m_view_dead;
+
+    // Set to true just before we call DestroyWindow ourselves so the
+    // WM_DESTROY handler can distinguish our intentional teardown from
+    // an external cascade destruction.
+    bool  m_destroying;
+
+    // The parent HWND passed to the most recent SetNativeParentView()
+    // call.  Used by RecreateNativeView() to re-parent the new child.
+    void *m_parent_view;
+
+    // Creates a new render-surface HWND (same class / style as the
+    // original) when the old one was cascade-destroyed externally.
+    void RecreateNativeView();
+#endif
 
     MCPlatformPlayerDuration m_buffered_time;
 
