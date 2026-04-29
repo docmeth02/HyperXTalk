@@ -1213,12 +1213,11 @@ bool MCVLCPlayer::EnsureVLCInstance()
     }
 
     const char *t_args[] = {
-        "--no-xlib",
         "--quiet",
         "--no-osd",
         "--no-stats",
     };
-    s_vlc_instance = libvlc_new(4, t_args);
+    s_vlc_instance = libvlc_new(3, t_args);
 #endif
 
     if (s_vlc_instance == nullptr)
@@ -1381,6 +1380,14 @@ MCVLCPlayer::~MCVLCPlayer()
         }
         m_view = nullptr;
     }
+#elif defined(TARGET_PLATFORM_LINUX)
+    if (m_view != nullptr)
+    {
+        x11::Display *t_dpy = x11::gdk_x11_display_get_xdisplay(
+            gdk_display_get_default());
+        x11::XDestroyWindow(t_dpy, (x11::Window)(uintptr_t)m_view);
+        m_view = nullptr;
+    }
 #endif
 
     MCMemoryDeleteArray(m_markers);
@@ -1438,15 +1445,18 @@ void MCVLCPlayer::Synchronize()
 #elif defined(TARGET_PLATFORM_LINUX)
     if (m_view != nullptr)
     {
-        GdkWindow *t_win = (GdkWindow *)m_view;
+        x11::Display *t_dpy = x11::gdk_x11_display_get_xdisplay(
+            gdk_display_get_default());
+        x11::Window t_win = (x11::Window)(uintptr_t)m_view;
         int t_w = m_rect.width  > 0 ? m_rect.width  : 1;
         int t_h = m_rect.height > 0 ? m_rect.height : 1;
-        gdk_window_move_resize(t_win,
+        x11::XMoveResizeWindow(t_dpy, t_win,
                                m_rect.x, m_rect.y, t_w, t_h);
         if (m_visible)
-            gdk_window_show_unraised(t_win);
+            x11::XMapWindow(t_dpy, t_win);
         else
-            gdk_window_hide(t_win);
+            x11::XUnmapWindow(t_dpy, t_win);
+        x11::XFlush(t_dpy);
     }
 #endif
 }
@@ -1464,10 +1474,8 @@ void MCVLCPlayer::AttachNativeView()
         libvlc_media_player_set_hwnd(m_player, m_view);
 #elif defined(TARGET_PLATFORM_LINUX)
     if (m_view != nullptr)
-    {
-        uint32_t t_xid = x11::gdk_x11_drawable_get_xid((GdkDrawable *)m_view);
-        libvlc_media_player_set_xwindow(m_player, t_xid);
-    }
+        libvlc_media_player_set_xwindow(m_player,
+                                        (uint32_t)(uintptr_t)m_view);
 #endif
 }
 
@@ -1760,41 +1768,35 @@ bool MCVLCPlayer::SetNativeParentView(void *p_parent_view)
         return false;
     }
 
-    GdkWindow *t_parent = (GdkWindow *)p_parent_view;
-    GdkWindowAttr t_wa;
-    t_wa.colormap    = gdk_drawable_get_colormap((GdkDrawable *)t_parent);
-    t_wa.x           = m_rect.x;
-    t_wa.y           = m_rect.y;
-    t_wa.width       = m_rect.width  > 0 ? m_rect.width  : 1;
-    t_wa.height      = m_rect.height > 0 ? m_rect.height : 1;
-    t_wa.event_mask  = 0;
-    t_wa.wclass      = GDK_INPUT_OUTPUT;
-    t_wa.window_type = GDK_WINDOW_CHILD;
+    // Use raw X11 child window instead of GDK — VLC's xcb video output
+    // does not render into GDK-managed windows.
+    GdkWindow *t_gdk_parent = (GdkWindow *)p_parent_view;
+    x11::Window t_parent_xid = x11::gdk_x11_drawable_get_xid(
+        (GdkDrawable *)t_gdk_parent);
+    x11::Display *t_dpy = x11::gdk_x11_display_get_xdisplay(
+        gdk_display_get_default());
 
-    GdkWindowAttributesType t_mask = (GdkWindowAttributesType)(GDK_WA_X | GDK_WA_Y);
-    if (t_wa.colormap != nullptr)
-        t_mask = (GdkWindowAttributesType)(t_mask | GDK_WA_COLORMAP);
-
-    GdkWindow *t_win = gdk_window_new(t_parent, &t_wa, t_mask);
-    if (t_win == nullptr)
-    {
-        vlc_log("[VLC] SetNativeParentView: gdk_window_new FAILED\n");
-        return false;
-    }
-
-    // Prevent GDK from painting a background over VLC's X11 rendering.
-    gdk_window_set_back_pixmap(t_win, NULL, FALSE);
+    int t_x = m_rect.x;
+    int t_y = m_rect.y;
+    int t_w = m_rect.width  > 0 ? m_rect.width  : 1;
+    int t_h = m_rect.height > 0 ? m_rect.height : 1;
 
     if (m_view != nullptr)
-        gdk_window_destroy((GdkWindow *)m_view);
+    {
+        x11::XDestroyWindow(t_dpy, (x11::Window)(uintptr_t)m_view);
+        m_view = nullptr;
+    }
 
-    m_view = t_win;
-    uint32_t t_xid = x11::gdk_x11_drawable_get_xid((GdkDrawable *)t_win);
-    vlc_log("[VLC] SetNativeParentView: xid=%u view=%p\n", t_xid, t_win);
-    libvlc_media_player_set_xwindow(m_player, t_xid);
+    x11::Window t_win = x11::XCreateSimpleWindow(
+        t_dpy, t_parent_xid, t_x, t_y, t_w, t_h, 0, 0, 0);
+    x11::XMapWindow(t_dpy, t_win);
+    x11::XFlush(t_dpy);
 
-    if (m_visible)
-        gdk_window_show_unraised(t_win);
+    m_view = (void *)(uintptr_t)t_win;
+
+    vlc_log("[VLC] SetNativeParentView: xid=%lu view=%p\n",
+            (unsigned long)t_win, m_view);
+    libvlc_media_player_set_xwindow(m_player, (uint32_t)t_win);
 #elif defined(TARGET_PLATFORM_MACOS_X)
     // Add the player view as a subview of the stack window's content view.
     MCVLCReparentNSView(m_view, p_parent_view);
@@ -2180,7 +2182,7 @@ void MCVLCPlayer::Start(double rate)
 #if defined(TARGET_PLATFORM_LINUX)
     if (m_view != nullptr)
     {
-        uint32_t t_xid = x11::gdk_x11_drawable_get_xid((GdkDrawable *)m_view);
+        uint32_t t_xid = (uint32_t)(uintptr_t)m_view;
         libvlc_media_player_set_xwindow(m_player, t_xid);
         vlc_log("[VLC] Start: re-set xwindow=%u\n", t_xid);
     }
