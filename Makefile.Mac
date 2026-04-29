@@ -651,11 +651,7 @@ package-mac-bin:
 	  mkdir -p "$$VLC_FW" "$$VLC_RS"; \
 	  cp "$$VLC_APP/lib/libvlc.dylib"     "$$VLC_FW/libvlc.dylib"; \
 	  cp "$$VLC_APP/lib/libvlccore.dylib" "$$VLC_FW/libvlccore.dylib"; \
-	  if [ -d "$$VLC_APP/plugins/plugins" ]; then \
-	    cp -R "$$VLC_APP/plugins/plugins" "$$VLC_RS/vlc-plugins"; \
-	  else \
-	    cp -R "$$VLC_APP/plugins"         "$$VLC_RS/vlc-plugins"; \
-	  fi; \
+	  cp -R "$$VLC_APP/plugins" "$$VLC_RS/vlc-plugins"; \
 	  find "$$VLC_RS/vlc-plugins" -name "plugins.dat" -delete; \
 	  echo "Fixing VLC dylib install names..."; \
 	  install_name_tool -id "@executable_path/../Frameworks/libvlc.dylib" \
@@ -678,6 +674,9 @@ package-mac-bin:
 	      -change "$$OLD_VLCC" \
 	      "@executable_path/../Frameworks/libvlccore.dylib" \
 	      "$$HYPERXTALK_BIN" || true; \
+	  echo "Adding Frameworks rpath so VLC plugins can resolve @rpath/libvlccore.dylib..."; \
+	  install_name_tool -add_rpath "@executable_path/../Frameworks" \
+	      "$$HYPERXTALK_BIN" 2>/dev/null || true; \
 	  echo "VLC bundled successfully."; \
 	else \
 	  echo "WARNING: VLC.app not found at $$VLC_APP — skipping VLC bundling."; \

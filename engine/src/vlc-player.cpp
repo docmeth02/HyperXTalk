@@ -36,6 +36,7 @@ Software Foundation.  */
 #if defined(TARGET_PLATFORM_MACOS_X)
 #include <dlfcn.h>    // dladdr / Dl_info — used in EnsureVLCInstance to locate the bundle
 #include <unistd.h>   // access() — used to probe candidate plugin directories
+#include <stdlib.h>   // setenv() — used to set VLC_PLUGIN_PATH before libvlc_new
 #endif
 
 // ---------------------------------------------------------------------------
@@ -312,18 +313,25 @@ bool MCVLCPlayer::EnsureVLCInstance()
         return true;
     }
 
-    // On macOS: locate VLC plugins.  Priority:
-    //   1. Bundled nested:  Contents/Resources/vlc-plugins/plugins
-    //      (VLC.app copies a plugins/plugins/ subdirectory structure)
-    //   2. Bundled flat:    Contents/Resources/vlc-plugins
-    //   3. VLC.app nested:  /Applications/VLC.app/.../plugins/plugins
-    //   4. VLC.app flat:    /Applications/VLC.app/.../plugins
-    //      (fallback for development builds without bundled plugins)
-    //   5. --no-plugins-scan  (last resort — audio/video will not work)
+    // On macOS: locate VLC plugins.
+    //
+    // --plugin-path was removed in libVLC 4.  The correct mechanism is to set
+    // the VLC_PLUGIN_PATH environment variable before calling libvlc_new.
+    //
+    // VLC.app structure:
+    //   plugins/plugins/*.dylib  — the actual codec plugin dylibs (nested dir)
+    //   plugins/*.jar etc        — support/data files at the top level
+    //
+    // The Makefile copies the entire VLC.app/plugins/ tree as vlc-plugins/, so
+    // after bundling the dylibs land in vlc-plugins/plugins/.
+    //
+    // Priority:
+    //   1. Bundled nested:  Contents/Resources/vlc-plugins/plugins  (dylibs here)
+    //   2. Bundled flat:    Contents/Resources/vlc-plugins           (fallback)
+    //   3. VLC.app nested:  /Applications/VLC.app/.../plugins/plugins (dylibs here)
+    //   4. VLC.app flat:    /Applications/VLC.app/.../plugins         (fallback)
+    //   5. Leave VLC_PLUGIN_PATH unset — libVLC will try its built-in defaults
 #if defined(TARGET_PLATFORM_MACOS_X)
-    static char s_plugin_path_arg[PATH_MAX + 32];
-    s_plugin_path_arg[0] = '\0';
-
     // --- derive bundle Contents/ path from this binary's location ---
     Dl_info t_info;
     if (dladdr((void *)EnsureVLCInstance, &t_info) && t_info.dli_fname)
@@ -335,49 +343,46 @@ bool MCVLCPlayer::EnsureVLCInstance()
         {
             *t_macos = '\0'; // t_contents now ends at ".../Contents"
 
-            // Probe nested layout first (VLC.app ships plugins/plugins/).
             char t_probe[PATH_MAX];
+            // The dylibs land in vlc-plugins/plugins/ after Makefile bundling.
             snprintf(t_probe, sizeof(t_probe),
                      "%s/Resources/vlc-plugins/plugins", t_contents);
             if (access(t_probe, F_OK) == 0)
             {
-                snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                         "--plugin-path=%s", t_probe);
+                setenv("VLC_PLUGIN_PATH", t_probe, 1);
             }
             else
             {
+                // Flat layout fallback.
                 snprintf(t_probe, sizeof(t_probe),
                          "%s/Resources/vlc-plugins", t_contents);
                 if (access(t_probe, F_OK) == 0)
-                    snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                             "--plugin-path=%s", t_probe);
+                    setenv("VLC_PLUGIN_PATH", t_probe, 1);
             }
         }
     }
 
     // --- fall back to VLC.app for development / non-packaged builds ---
-    if (s_plugin_path_arg[0] == '\0')
+    if (getenv("VLC_PLUGIN_PATH") == nullptr)
     {
+        // VLC.app puts the actual dylibs in plugins/plugins/ (nested).
         const char *t_vlc_nested =
             "/Applications/VLC.app/Contents/MacOS/plugins/plugins";
         const char *t_vlc_flat =
             "/Applications/VLC.app/Contents/MacOS/plugins";
 
         if (access(t_vlc_nested, F_OK) == 0)
-            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                     "--plugin-path=%s", t_vlc_nested);
+            setenv("VLC_PLUGIN_PATH", t_vlc_nested, 1);
         else if (access(t_vlc_flat, F_OK) == 0)
-            snprintf(s_plugin_path_arg, sizeof(s_plugin_path_arg),
-                     "--plugin-path=%s", t_vlc_flat);
+            setenv("VLC_PLUGIN_PATH", t_vlc_flat, 1);
     }
 
     const char *t_args_mac[] = {
         "--quiet",
         "--no-osd",
         "--no-stats",
-        s_plugin_path_arg[0] ? s_plugin_path_arg : "--no-plugins-scan",
     };
-    s_vlc_instance = libvlc_new(4, t_args_mac);
+    s_vlc_instance = libvlc_new(3, t_args_mac);
 #elif defined(TARGET_PLATFORM_WINDOWS)
     static char s_plugin_path_arg[MAX_PATH + 32];
     s_plugin_path_arg[0] = '\0';
@@ -1924,6 +1929,7 @@ void MCVLCPlayer::Load(MCStringRef p_filename, bool p_is_url)
     libvlc_media_parse(m_media);
 #pragma clang diagnostic pop
 #endif
+
 
     // Reset selection / state.
     m_selection_start  = 0;
