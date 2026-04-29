@@ -35,6 +35,63 @@ struct LnxToolbarItemData
     GtkToolItem    *widget;   // nil for separator/space items
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// GTK image loader: decode PNG bytes via GdkPixbufLoader
+
+static GdkPixbuf *_pixbufFromPNGData(const void *p_bytes, uindex_t p_length)
+{
+    if (!p_bytes || p_length == 0)
+        return NULL;
+
+    GdkPixbufLoader *t_loader = gdk_pixbuf_loader_new_with_type("png", NULL);
+    if (!t_loader)
+        return NULL;
+
+    GError *t_err = NULL;
+    if (!gdk_pixbuf_loader_write(t_loader,
+                                 (const guchar *)p_bytes,
+                                 (gsize)p_length,
+                                 &t_err))
+    {
+        if (t_err) g_error_free(t_err);
+        gdk_pixbuf_loader_close(t_loader, NULL);
+        g_object_unref(t_loader);
+        return NULL;
+    }
+    gdk_pixbuf_loader_close(t_loader, NULL);
+
+    GdkPixbuf *t_pixbuf = gdk_pixbuf_loader_get_pixbuf(t_loader);
+    if (t_pixbuf)
+        g_object_ref(t_pixbuf); // caller owns this ref
+    g_object_unref(t_loader);
+    return t_pixbuf;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// UTF-8 RAII helper: wraps MCStringConvertToUTF8String / MCMemoryDelete.
+// GTK uses UTF-8 exclusively; this ensures correct output regardless of the
+// system locale setting.
+
+struct MCAutoUTF8String
+{
+    char *m_str;
+    MCAutoUTF8String() : m_str(nil) {}
+    ~MCAutoUTF8String() { MCMemoryDelete(m_str); }
+
+    bool Lock(MCStringRef p_src)
+    {
+        MCMemoryDelete(m_str);
+        m_str = nil;
+        if (!p_src || MCStringIsEmpty(p_src))
+            return false;
+        return MCStringConvertToUTF8String(p_src, m_str);
+    }
+
+    const char *operator*() const { return m_str ? m_str : ""; }
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 class MCToolbarLinuxBackend : public MCToolbarBackend
 {
 public:
@@ -126,28 +183,44 @@ public:
         }
         else
         {
-            GtkToolButton *t_button = NULL;
-
             // Label
+            MCAutoUTF8String t_label_utf8;
             const char *t_label_cstr = "";
-            MCAutoStringRefAsCString t_label_c;
             if (p_item->GetLabel() && !MCStringIsEmpty(p_item->GetLabel()))
-                if (t_label_c.Lock(p_item->GetLabel()))
-                    t_label_cstr = *t_label_c;
+                if (t_label_utf8.Lock(p_item->GetLabel()))
+                    t_label_cstr = *t_label_utf8;
 
-            t_button = GTK_TOOL_BUTTON(
+            GtkToolButton *t_button = GTK_TOOL_BUTTON(
                 gtk_tool_button_new(NULL, t_label_cstr));
 
-            // Icon — try as a theme icon name
-            if (p_item->GetIcon() && !MCStringIsEmpty(p_item->GetIcon()))
+            // Icon: prefer cached PNG data from the stack image
+            MCDataRef t_img_data = p_item->GetImageData();
+            if (t_img_data != nil && !MCDataIsEmpty(t_img_data))
             {
-                MCAutoStringRefAsCString t_icon_c;
-                if (t_icon_c.Lock(p_item->GetIcon()))
+                GdkPixbuf *t_pixbuf = _pixbufFromPNGData(
+                    MCDataGetBytePtr(t_img_data),
+                    (uindex_t)MCDataGetLength(t_img_data));
+                if (t_pixbuf)
+                {
+                    GtkWidget *t_icon = gtk_image_new_from_pixbuf(t_pixbuf);
+                    g_object_unref(t_pixbuf);
+                    gtk_tool_button_set_icon_widget(t_button, t_icon);
+                    gtk_widget_show(t_icon);
+                }
+            }
+            else if (p_item->GetIcon() && !MCStringIsEmpty(p_item->GetIcon()))
+            {
+                // Fallback: XDG theme icon name
+                MCAutoUTF8String t_icon_utf8;
+                if (t_icon_utf8.Lock(p_item->GetIcon()))
                 {
                     GtkWidget *t_icon = gtk_image_new_from_icon_name(
-                        *t_icon_c, GTK_ICON_SIZE_LARGE_TOOLBAR);
+                        *t_icon_utf8, GTK_ICON_SIZE_LARGE_TOOLBAR);
                     if (t_icon)
+                    {
                         gtk_tool_button_set_icon_widget(t_button, t_icon);
+                        gtk_widget_show(t_icon);
+                    }
                 }
             }
 
@@ -159,18 +232,20 @@ public:
             // Tooltip
             if (p_item->GetTooltip() && !MCStringIsEmpty(p_item->GetTooltip()))
             {
-                MCAutoStringRefAsCString t_tip_c;
-                if (t_tip_c.Lock(p_item->GetTooltip()))
-                    gtk_tool_item_set_tooltip_text(t_item, *t_tip_c);
+                MCAutoUTF8String t_tip_utf8;
+                if (t_tip_utf8.Lock(p_item->GetTooltip()))
+                    gtk_tool_item_set_tooltip_text(t_item, *t_tip_utf8);
             }
 
-            // Click signal — pass index as user data
+            // Store the item name with the button widget so the click callback
+            // can look it up by name rather than by array index.  The index-
+            // based approach breaks after RemoveItem shifts the array.
+            g_object_set_data_full(G_OBJECT(t_button), "item-name",
+                                   (gpointer)MCValueRetain(p_item->GetName()),
+                                   (GDestroyNotify)MCValueRelease);
+            g_object_set_data(G_OBJECT(t_button), "backend", (gpointer)this);
             g_signal_connect(t_button, "clicked",
-                             G_CALLBACK(_onItemClicked),
-                             GINT_TO_POINTER(t_idx));
-            // Store backend pointer in item data
-            g_object_set_data(G_OBJECT(t_button), "backend",
-                              (gpointer)this);
+                             G_CALLBACK(_onItemClicked), NULL);
         }
 
         m_items[t_idx].widget = t_item;
@@ -200,6 +275,12 @@ public:
 
                 for (int j = i; j < m_item_count - 1; j++)
                     m_items[j] = m_items[j + 1];
+
+                // Reset the now-orphaned tail slot to release the extra retain
+                // left behind by the copy assignment in the shift above.
+                m_items[m_item_count - 1].~LnxToolbarItemData();
+                new (&m_items[m_item_count - 1]) LnxToolbarItemData();
+
                 m_item_count--;
                 return;
             }
@@ -226,17 +307,59 @@ public:
                 {
                     GtkToolButton *t_btn = GTK_TOOL_BUTTON(t_widget);
 
+                    // Label
                     if (p_item->GetLabel())
                     {
-                        MCAutoStringRefAsCString t_lbl;
+                        MCAutoUTF8String t_lbl;
                         if (t_lbl.Lock(p_item->GetLabel()))
                             gtk_tool_button_set_label(t_btn, *t_lbl);
                     }
+
+                    // Tooltip
                     if (p_item->GetTooltip())
                     {
-                        MCAutoStringRefAsCString t_tip;
+                        MCAutoUTF8String t_tip;
                         if (t_tip.Lock(p_item->GetTooltip()))
                             gtk_tool_item_set_tooltip_text(t_widget, *t_tip);
+                        else
+                            gtk_tool_item_set_tooltip_text(t_widget, "");
+                    }
+
+                    // Icon: reload from cached PNG data
+                    MCDataRef t_img_data = p_item->GetImageData();
+                    if (t_img_data != nil && !MCDataIsEmpty(t_img_data))
+                    {
+                        GdkPixbuf *t_pixbuf = _pixbufFromPNGData(
+                            MCDataGetBytePtr(t_img_data),
+                            (uindex_t)MCDataGetLength(t_img_data));
+                        if (t_pixbuf)
+                        {
+                            GtkWidget *t_icon =
+                                gtk_image_new_from_pixbuf(t_pixbuf);
+                            g_object_unref(t_pixbuf);
+                            gtk_tool_button_set_icon_widget(t_btn, t_icon);
+                            gtk_widget_show(t_icon);
+                        }
+                    }
+                    else if (p_item->GetIcon() && !MCStringIsEmpty(p_item->GetIcon()))
+                    {
+                        // Fallback: XDG theme icon name
+                        MCAutoUTF8String t_icon_utf8;
+                        if (t_icon_utf8.Lock(p_item->GetIcon()))
+                        {
+                            GtkWidget *t_icon = gtk_image_new_from_icon_name(
+                                *t_icon_utf8, GTK_ICON_SIZE_LARGE_TOOLBAR);
+                            if (t_icon)
+                            {
+                                gtk_tool_button_set_icon_widget(t_btn, t_icon);
+                                gtk_widget_show(t_icon);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Icon was cleared
+                        gtk_tool_button_set_icon_widget(t_btn, NULL);
                     }
                 }
                 return;
@@ -325,16 +448,18 @@ private:
 #endif
     }
 
-    static void _onItemClicked(GtkToolButton *button, gpointer user_data)
+    // Click callback: reads the item name stored on the button widget so the
+    // lookup is immune to array index shifts caused by RemoveItem.
+    static void _onItemClicked(GtkToolButton *button, gpointer /*user_data*/)
     {
-        int t_idx = GPOINTER_TO_INT(user_data);
         MCToolbarLinuxBackend *t_self =
             (MCToolbarLinuxBackend *)g_object_get_data(
                 G_OBJECT(button), "backend");
-        if (!t_self || t_idx < 0 || t_idx >= t_self->m_item_count)
-            return;
-        if (t_self->m_owner && *t_self->m_items[t_idx].name)
-            t_self->m_owner->itemClicked(*t_self->m_items[t_idx].name);
+        MCNameRef t_name =
+            (MCNameRef)g_object_get_data(G_OBJECT(button), "item-name");
+
+        if (t_self && t_name && t_self->m_owner)
+            t_self->m_owner->itemClicked(t_name);
     }
 };
 
