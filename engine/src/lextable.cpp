@@ -1064,6 +1064,7 @@ const LT factor_table[] =
         {"hiliteicon", TT_PROPERTY, P_HILITED_ICON},
         {"hilitepattern", TT_PROPERTY, P_HILITE_PATTERN},
         {"hilitepixel", TT_PROPERTY, P_HILITE_PIXEL},
+        {"hinttext", TT_PROPERTY, P_HINT_TEXT},
 		// MW-2011-11-24: [[ Nice Folders ]] The adjective for 'the home folder'.
 		{"home", TT_PROPERTY, P_HOME_FOLDER},
         {"hostaddress", TT_FUNCTION, F_HA},
@@ -1122,7 +1123,6 @@ const LT factor_table[] =
         {"keys", TT_FUNCTION, F_KEYS},
         {"keysdown", TT_FUNCTION, F_KEYS_DOWN},
         {"kind", TT_PROPERTY, P_KIND},
-        {"hinttext", TT_PROPERTY, P_HINT_TEXT},
         {"label", TT_PROPERTY, P_LABEL},
         {"labelwidth", TT_PROPERTY, P_LABEL_WIDTH},
         {"last", TT_CHUNK, CT_LAST},
