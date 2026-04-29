@@ -1502,6 +1502,13 @@ Boolean MCPlayer::prepare(MCStringRef options)
 #if defined(TARGET_PLATFORM_WINDOWS)
 	if (!MCPlatformPlayerSetNativeParentView(m_platform_player, getstack()->getrealwindow()))
 		return False;
+#elif defined(TARGET_PLATFORM_LINUX)
+	if (!MCPlatformPlayerSetNativeParentView(m_platform_player, getstack()->getwindow()))
+		return False;
+	{
+		MCRectangle t_rect = getrect();
+		MCPlatformSetPlayerProperty(m_platform_player, kMCPlatformPlayerPropertyRect, kMCPlatformPropertyTypeRectangle, &t_rect);
+	}
 #endif
 	
     // PM-2015-01-26: [[ Bug 14435 ]] Avoid prepending the defaultFolder or the stack folder
