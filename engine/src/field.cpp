@@ -2580,8 +2580,7 @@ void MCField::draw(MCDC *dc, const MCRectangle& p_dirty, bool p_isolated, bool p
 #define FIELD_EXTRA_KEYBOARDTYPE    (1 << 2)
 #define FIELD_EXTRA_RETURNKEYTYPE   (1 << 3)
 #define FIELD_EXTRA_PASSWORDFIELD   (1 << 4)
-#define FIELD_EXTRA_RETURNKEYTYPE    (1 << 3)
-#define FIELD_EXTRA_HINTTEXT        (1 << 4)
+#define FIELD_EXTRA_HINTTEXT        (1 << 5)
 
 IO_stat MCField::extendedsave(MCObjectOutputStream& p_stream, uint4 p_part, uint32_t p_version)
 {
@@ -2621,6 +2620,8 @@ IO_stat MCField::extendedsave(MCObjectOutputStream& p_stream, uint4 p_part, uint
     {
         t_flags |= FIELD_EXTRA_PASSWORDFIELD;
         t_size += sizeof(uint8_t);
+    }
+
     if (!MCStringIsEmpty(m_hint_text))
     {
         t_flags |= FIELD_EXTRA_HINTTEXT;
@@ -2654,6 +2655,8 @@ IO_stat MCField::extendedsave(MCObjectOutputStream& p_stream, uint4 p_part, uint
     if (t_stat == IO_NORMAL && (t_flags & FIELD_EXTRA_PASSWORDFIELD))
     {
         t_stat = p_stream . WriteU8(m_password_field ? 1 : 0);
+    }
+
     if (t_stat == IO_NORMAL && (t_flags & FIELD_EXTRA_HINTTEXT))
     {
         t_stat = p_stream . WriteStringRefNew(m_hint_text, p_version >= kMCStackFileFormatVersion_7_0);
@@ -2744,6 +2747,8 @@ IO_stat MCField::extendedload(MCObjectInputStream& p_stream, uint32_t p_version,
             t_stat = checkloadstat(p_stream . ReadU8(t_value));
             if (t_stat == IO_NORMAL)
                 m_password_field = (t_value != 0);
+        }
+
         if (t_stat == IO_NORMAL && (t_flags & FIELD_EXTRA_HINTTEXT) != 0)
         {
             MCStringRef t_hint_text;
@@ -2784,7 +2789,7 @@ IO_stat MCField::save(IO_handle stream, uint4 p_part, bool p_force_ext, uint32_t
                       nalignments != 0 ||
                       keyboard_type != kMCInterfaceKeyboardTypeNone ||
                       return_key_type != kMCInterfaceReturnKeyTypeNone ||
-                      m_password_field;
+                      m_password_field ||
                       !MCStringIsEmpty(m_hint_text);
     
     if ((stat = MCObject::save(stream, p_part, t_has_extension || p_force_ext, p_version)) != IO_NORMAL)

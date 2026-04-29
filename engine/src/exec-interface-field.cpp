@@ -963,6 +963,9 @@ void MCField::GetPasswordField(MCExecContext& ctxt, bool& r_setting)
 void MCField::SetPasswordField(MCExecContext& ctxt, bool p_setting)
 {
 	m_password_field = p_setting;
+	Redraw();
+}
+
 void MCField::GetHintText(MCExecContext& ctxt, MCStringRef& r_string)
 {
 	r_string = MCValueRetain(m_hint_text);
