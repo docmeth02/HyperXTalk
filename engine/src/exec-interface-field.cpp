@@ -955,6 +955,17 @@ void MCField::SetLabel(MCExecContext& ctxt, MCStringRef p_string)
 	MCValueAssign(label, p_string);
 }
 
+void MCField::GetPasswordField(MCExecContext& ctxt, bool& r_setting)
+{
+	r_setting = m_password_field;
+}
+
+void MCField::SetPasswordField(MCExecContext& ctxt, bool p_setting)
+{
+	m_password_field = p_setting;
+	Redraw();
+}
+
 void MCField::GetToggleHilite(MCExecContext& ctxt, bool& r_setting)
 {
 	r_setting = getflag(F_TOGGLE_HILITE);

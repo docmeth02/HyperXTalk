@@ -1356,6 +1356,7 @@ const LT factor_table[] =
         {"parts", TT_CLASS, CT_LAYER},
         {"passkey", TT_PROPERTY, P_KEY},
         {"password", TT_PROPERTY, P_PASSWORD},
+        {"passwordfield", TT_PROPERTY, P_PASSWORD_FIELD},
         {"pattern", TT_PROPERTY, P_BRUSH_PATTERN},
         {"patterns", TT_PROPERTY, P_PATTERNS},
         {"paused", TT_PROPERTY, P_PAUSED},
