@@ -25,6 +25,10 @@ along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 #endif
 #include <windows.h>
 #include <commctrl.h>
+// GDI+ requires OLE/COM types (MIDL_INTERFACE, PROPID, IUnknown, etc.) that
+// WIN32_LEAN_AND_MEAN strips from <windows.h>.  Pull them in explicitly before
+// including <gdiplus.h>, otherwise the SDK headers fail to parse.
+#include <objbase.h>
 #include <gdiplus.h>
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "gdiplus.lib")
@@ -56,6 +60,25 @@ struct W32ToolbarItemData
     int               icon_img_idx; // index in m_image_list, or -1 if none
 
     W32ToolbarItemData() : enabled(true), icon_img_idx(-1) {}
+
+    // MCAutoValueRefBase members delete the implicit copy-assignment operator.
+    // Provide an explicit one so the shift-down loop in RemoveItem() can use =.
+    // Use Reset() rather than operator=(T) because Reset() handles non-nil
+    // destination values correctly (release old, retain new), whereas
+    // operator=(T) asserts m_value==nil and is only valid for initial assignment.
+    W32ToolbarItemData& operator=(const W32ToolbarItemData& rhs)
+    {
+        if (this != &rhs)
+        {
+            name   .Reset(*rhs.name);
+            label  .Reset(*rhs.label);
+            tooltip.Reset(*rhs.tooltip);
+            icon   .Reset(*rhs.icon);
+            enabled      = rhs.enabled;
+            icon_img_idx = rhs.icon_img_idx;
+        }
+        return *this;
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +112,7 @@ static HBITMAP _bitmapFromPNGData(const void *p_bytes, uindex_t p_length,
         return NULL;
     }
 
-    // Decode via GDI+ (engine must have called GdiplusStartup at startup)
+    // Decode via GDI+ (initialised in Create() via GdiplusStartup)
     Bitmap *t_src = Bitmap::FromStream(t_stream);
     t_stream->Release(); // also frees t_mem
 
@@ -126,9 +149,13 @@ class MCToolbarWin32Backend : public MCToolbarBackend
 public:
     MCToolbarWin32Backend(MCToolbar *p_owner)
         : m_owner(p_owner), m_hwnd_toolbar(NULL), m_hwnd_parent(NULL),
-          m_image_list(NULL), m_item_count(0), m_visible(true)
+          m_image_list(NULL), m_item_count(0), m_visible(true),
+          m_gdip_token(0)
     {
-        memset(m_buttons,   0, sizeof(m_buttons));
+        memset(m_buttons, 0, sizeof(m_buttons));
+        // Note: m_item_data elements are already default-constructed by C++
+        // (all MCAutoValueRef members = nil).  The memset is redundant but
+        // harmless — both paths leave every pointer at zero/null.
         memset(m_item_data, 0, sizeof(m_item_data));
     }
 
@@ -136,7 +163,12 @@ public:
 
     void Create(void *p_window_handle) override
     {
-        m_hwnd_parent = (HWND)p_window_handle;
+        // On Windows the engine passes a _Drawable * (not a raw HWND).
+        // Unpack the actual client HWND from the drawable struct.
+        if (!p_window_handle)
+            return;
+        _Drawable *t_drawable = reinterpret_cast<_Drawable *>(p_window_handle);
+        m_hwnd_parent = reinterpret_cast<HWND>(t_drawable->handle.window);
         if (!m_hwnd_parent)
             return;
 
@@ -145,6 +177,19 @@ public:
         icex.dwSize = sizeof(icex);
         icex.dwICC  = ICC_BAR_CLASSES;
         InitCommonControlsEx(&icex);
+
+        // Initialise GDI+ for PNG icon decoding.  GdiplusStartup must be
+        // called before any Bitmap/Graphics usage; pair with GdiplusShutdown
+        // in Destroy().
+        if (!m_gdip_token)
+        {
+            Gdiplus::GdiplusStartupInput t_input;
+            Gdiplus::GdiplusStartup(&m_gdip_token, &t_input, nullptr);
+        }
+
+        // Register this backend on the parent HWND so MCWindowProc can route
+        // WM_COMMAND button-click notifications back to HandleCommand().
+        SetPropA(m_hwnd_parent, "MCToolbar", (HANDLE)this);
 
         m_hwnd_toolbar = CreateWindowEx(
             0,
@@ -180,6 +225,11 @@ public:
 
     void Destroy() override
     {
+        // Unregister the parent HWND property before destroying the toolbar
+        // so MCWindowProc stops routing WM_COMMAND to a dead backend.
+        if (m_hwnd_parent)
+            RemovePropA(m_hwnd_parent, "MCToolbar");
+
         if (m_hwnd_toolbar)
         {
             DestroyWindow(m_hwnd_toolbar);
@@ -190,9 +240,21 @@ public:
             ImageList_Destroy(m_image_list);
             m_image_list = NULL;
         }
+        // Release value refs without calling the explicit destructor —
+        // m_item_data is a member array so C++ will call dtors automatically
+        // when the backend is destroyed.  Explicit dtor + auto dtor = double-free.
+        // Assignment to a default-constructed instance properly releases old
+        // values and leaves the object in a safe (all-nil) state for the later
+        // auto-destructor call.
         for (int i = 0; i < m_item_count; i++)
-            m_item_data[i].~W32ToolbarItemData();
+            m_item_data[i] = W32ToolbarItemData();
         m_item_count = 0;
+
+        if (m_gdip_token)
+        {
+            Gdiplus::GdiplusShutdown(m_gdip_token);
+            m_gdip_token = 0;
+        }
     }
 
     void AddItem(const MCToolbarItem *p_item) override
@@ -202,17 +264,17 @@ public:
 
         int t_idx = m_item_count;
 
-        // Construct and populate per-item data
-        new (&m_item_data[t_idx]) W32ToolbarItemData();
-        /* UNCHECKED */ MCNameAssign(*(MCNameRef*)&m_item_data[t_idx].name,
-                                     p_item->GetName());
-        if (p_item->GetLabel())
-            /* UNCHECKED */ MCValueAssign(*(MCStringRef*)&m_item_data[t_idx].label,
-                                          p_item->GetLabel());
-        if (p_item->GetTooltip())
-            /* UNCHECKED */ MCValueAssign(*(MCStringRef*)&m_item_data[t_idx].tooltip,
-                                          p_item->GetTooltip());
-        m_item_data[t_idx].enabled = p_item->GetEnabled();
+        // Populate per-item data using Reset() which properly handles
+        // nil→value transitions and (for safety) any non-nil existing values.
+        // Do NOT use placement-new here — the array elements are already
+        // default-constructed, and the ctor's op=(T) asserts m_value==nil
+        // which would fire if the slot was previously used.
+        m_item_data[t_idx].name   .Reset(p_item->GetName());
+        m_item_data[t_idx].label  .Reset(p_item->GetLabel());
+        m_item_data[t_idx].tooltip.Reset(p_item->GetTooltip());
+        m_item_data[t_idx].icon   .Reset(nil);   // icon set below via image data path
+        m_item_data[t_idx].enabled      = p_item->GetEnabled();
+        m_item_data[t_idx].icon_img_idx = -1;
 
         // Build TBBUTTON
         TBBUTTON &btn = m_buttons[t_idx];
@@ -251,22 +313,29 @@ public:
                 }
             }
 
-            // Label — store as a string in the toolbar's string table
-            if (p_item->GetLabel() && !MCStringIsEmpty(p_item->GetLabel()))
-            {
-                MCAutoStringRefAsWString t_wlabel;
-                if (t_wlabel.Lock(p_item->GetLabel()))
-                {
-                    int t_str_idx = (int)SendMessage(m_hwnd_toolbar,
-                                                     TB_ADDSTRING, 0,
-                                                     (LPARAM)*t_wlabel);
-                    btn.iString = t_str_idx;
-                }
-            }
         }
 
         SendMessage(m_hwnd_toolbar, TB_ADDBUTTONS, 1, (LPARAM)&btn);
         m_item_count++;
+
+        // Set the button label via TB_SETBUTTONINFOW — this takes a direct
+        // LPCWSTR and handles all Unicode code points correctly.  Using
+        // TB_ADDSTRING + iString (the string-pool approach) has encoding
+        // quirks that corrupt non-ASCII text loaded from a stack file.
+        if (t_style != kMCToolbarItemStyleSeparator &&
+            p_item->GetLabel() && !MCStringIsEmpty(p_item->GetLabel()))
+        {
+            MCAutoStringRefAsWString t_wlabel;
+            if (t_wlabel.Lock(p_item->GetLabel()))
+            {
+                TBBUTTONINFOW tbi = {};
+                tbi.cbSize  = sizeof(tbi);
+                tbi.dwMask  = TBIF_TEXT;
+                tbi.pszText = const_cast<LPWSTR>(*t_wlabel);
+                SendMessage(m_hwnd_toolbar, TB_SETBUTTONINFOW,
+                            (WPARAM)(t_idx + 1), (LPARAM)&tbi);
+            }
+        }
 
         SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
     }
@@ -282,7 +351,8 @@ public:
                                 kMCCompareCaseless))
             {
                 SendMessage(m_hwnd_toolbar, TB_DELETEBUTTON, i, 0);
-                m_item_data[i].~W32ToolbarItemData();
+                // No explicit destructor here — the copy assignment in the
+                // shift loop below will properly release slot i's old values.
 
                 // Shift remaining items down
                 for (int j = i; j < m_item_count - 1; j++)
@@ -293,11 +363,10 @@ public:
                     m_buttons[j].idCommand = j + 1;
                 }
 
-                // Reset the now-orphaned tail slot to avoid leaked references.
-                // The copy assignment above left a duplicate there; destructing
-                // it releases the extra retain.
-                m_item_data[m_item_count - 1].~W32ToolbarItemData();
-                new (&m_item_data[m_item_count - 1]) W32ToolbarItemData();
+                // The tail slot is now a duplicate of [m_item_count-2].
+                // Release its refs via assignment to a default instance so
+                // the auto-destructor later sees a clean nil-valued object.
+                m_item_data[m_item_count - 1] = W32ToolbarItemData();
 
                 m_item_count--;
                 SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
@@ -337,15 +406,13 @@ public:
                         SendMessage(m_hwnd_toolbar, TB_SETBUTTONINFOW,
                                     (WPARAM)t_cmd_id, (LPARAM)&tbi);
                     }
-                    /* UNCHECKED */ MCValueAssign(
-                        *(MCStringRef*)&m_item_data[i].label, p_item->GetLabel());
+                    m_item_data[i].label.Reset(p_item->GetLabel());
                 }
 
                 // Tooltip — stored for TTN_NEEDTEXT; display requires the
                 // parent window's WM_NOTIFY handler to forward the notification.
                 if (p_item->GetTooltip())
-                    /* UNCHECKED */ MCValueAssign(
-                        *(MCStringRef*)&m_item_data[i].tooltip, p_item->GetTooltip());
+                    m_item_data[i].tooltip.Reset(p_item->GetTooltip());
 
                 // Icon: reload from cached PNG data
                 MCDataRef t_img_data = p_item->GetImageData();
@@ -409,7 +476,9 @@ public:
         while (m_item_count > 0)
         {
             SendMessage(m_hwnd_toolbar, TB_DELETEBUTTON, 0, 0);
-            m_item_data[--m_item_count].~W32ToolbarItemData();
+            --m_item_count;
+            // Use assignment (not explicit dtor) to release value refs safely.
+            m_item_data[m_item_count] = W32ToolbarItemData();
         }
         // Flush the image list so indices reset for the next batch of items
         if (m_image_list)
@@ -471,6 +540,14 @@ public:
             m_owner->itemClicked(*m_item_data[t_id].name);
     }
 
+    // Called by MCWin32ToolbarHandleParentCommand — checks the sender HWND so
+    // the free function never needs to touch the private m_hwnd_toolbar member.
+    void HandleParentCommand(HWND p_sender, WPARAM p_wparam)
+    {
+        if (p_sender == m_hwnd_toolbar)
+            HandleCommand(p_wparam);
+    }
+
 private:
     MCToolbar              *m_owner;
     HWND                    m_hwnd_toolbar;
@@ -478,6 +555,7 @@ private:
     HIMAGELIST              m_image_list;
     int                     m_item_count;
     bool                    m_visible;
+    ULONG_PTR               m_gdip_token;  // GDI+ token from GdiplusStartup
     TBBUTTON                m_buttons[W32_TOOLBAR_MAX_ITEMS];
     W32ToolbarItemData      m_item_data[W32_TOOLBAR_MAX_ITEMS];
 };
@@ -488,6 +566,25 @@ private:
 MCToolbarBackend *MCToolbarCreatePlatformBackend(MCToolbar *p_owner)
 {
     return new MCToolbarWin32Backend(p_owner);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// WM_COMMAND routing — called from MCWindowProc in w32dcw32.cpp
+//
+// When the user clicks a toolbar button, comctl32's toolbar WndProc calls
+// SendMessage(parent, WM_COMMAND, MAKEWPARAM(idCommand,0), (LPARAM)toolbar_hwnd)
+// synchronously.  MCWindowProc has no WM_COMMAND case, so this free function
+// is forward-declared in w32dcw32.cpp and called from there.
+//
+// The backend pointer is stored on the parent HWND via SetPropA in Create().
+
+void MCWin32ToolbarHandleParentCommand(HWND p_parent, HWND p_sender,
+                                       WPARAM p_wparam)
+{
+    MCToolbarWin32Backend *t_self =
+        reinterpret_cast<MCToolbarWin32Backend *>(GetPropA(p_parent, "MCToolbar"));
+    if (t_self != nullptr)
+        t_self->HandleParentCommand(p_sender, p_wparam);
 }
 
 #endif // _WINDOWS
