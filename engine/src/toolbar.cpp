@@ -676,6 +676,33 @@ IO_stat MCToolbar::extendedload(MCObjectInputStream& p_stream,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Layout helpers
+
+int32_t MCToolbar::getToolbarTopY()
+{
+    MCStack *t_stack = getstack();
+    if (t_stack == nil || !t_stack->hasmenubar())
+        return 0;
+
+    MCCard *t_card = t_stack->getcurcard();
+    if (t_card == nil)
+        return 0;
+
+    // Find the menu bar group on the current card — same lookup used by
+    // getnextscroll() on macOS.
+    MCControl *t_mbptr = t_card->getchild(
+        CT_EXPRESSION,
+        MCNameGetString(t_stack->getmenubar()),
+        CT_GROUP, CT_UNDEFINED);
+
+    if (t_mbptr == nil || !t_mbptr->getopened() || !t_mbptr->isvisible())
+        return 0;
+
+    const MCRectangle &r = t_mbptr->getrect();
+    return (int32_t)(r.y + r.height);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Private helpers
 
 void MCToolbar::_destroyItems()

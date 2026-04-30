@@ -255,6 +255,11 @@ public:
 
     void itemClicked(MCNameRef p_item_name);
 
+    // Returns the y pixel offset (in client-area coordinates) at which the
+    // platform toolbar should appear.  If the stack has an in-window menu bar
+    // group this is the group's bottom edge; otherwise it is 0.
+    int32_t getToolbarTopY();
+
 private:
     void _destroyItems();
     void _syncBackendItems();

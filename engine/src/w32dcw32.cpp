@@ -1498,6 +1498,10 @@ LRESULT CALLBACK MCWindowProc(HWND hwnd, UINT msg, WPARAM wParam,
 						MCdispatcher->wreshape(dw);
 				curinfo->handled = True;
 			}
+			// Keep the toolbar full-width and correctly positioned below the
+			// menu bar after any window resize.
+			extern void MCWin32ToolbarHandleParentResize(HWND);
+			MCWin32ToolbarHandleParentResize(hwnd);
 		}
 		break;
 	case WM_MOVE:

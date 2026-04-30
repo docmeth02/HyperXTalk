@@ -196,7 +196,7 @@ public:
             TOOLBARCLASSNAME,
             NULL,
             WS_CHILD | WS_VISIBLE |
-            TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | CCS_TOP,
+            TBSTYLE_FLAT | TBSTYLE_TOOLTIPS | CCS_NODIVIDER | CCS_NOPARENTALIGN,
             0, 0, 0, 0,
             m_hwnd_parent,
             (HMENU)1,
@@ -216,8 +216,12 @@ public:
         SendMessage(m_hwnd_toolbar, TB_SETIMAGELIST, 0,
                     (LPARAM)m_image_list);
 
-        // Size the toolbar to fit within parent
+        // Initial sizing and positioning.  TB_AUTOSIZE computes the toolbar
+        // height; _reposition() then sets x, y and width explicitly so that
+        // the toolbar appears below any in-window menu bar rather than always
+        // landing at y=0.
         SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
+        _reposition();
 
         if (!m_visible)
             ShowWindow(m_hwnd_toolbar, SW_HIDE);
@@ -338,6 +342,7 @@ public:
         }
 
         SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
+        _reposition();
     }
 
     void RemoveItem(MCNameRef p_name) override
@@ -370,6 +375,7 @@ public:
 
                 m_item_count--;
                 SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
+                _reposition();
                 return;
             }
         }
@@ -485,6 +491,7 @@ public:
             ImageList_Remove(m_image_list, -1);
 
         SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
+        _reposition();
     }
 
     void SetDisplayMode(MCToolbarDisplayMode p_mode) override
@@ -516,6 +523,7 @@ public:
         }
         SetWindowLong(m_hwnd_toolbar, GWL_STYLE, t_style);
         SendMessage(m_hwnd_toolbar, TB_AUTOSIZE, 0, 0);
+        _reposition();
     }
 
     void SetVisible(bool p_visible) override
@@ -548,7 +556,41 @@ public:
             HandleCommand(p_wparam);
     }
 
+    // Called by MCWin32ToolbarHandleParentResize when the parent window is
+    // resized (WM_SIZE), so the toolbar tracks the parent's width.
+    void HandleParentResize()
+    {
+        _reposition();
+    }
+
 private:
+    // Position and size the toolbar so that it spans the full client width,
+    // placed immediately below any in-window menu bar.  Must be called after
+    // every TB_AUTOSIZE because CCS_NOPARENTALIGN disables comctl32's automatic
+    // layout.
+    void _reposition()
+    {
+        if (!m_hwnd_toolbar || !m_hwnd_parent)
+            return;
+
+        // Full client width of the parent.
+        RECT t_client = {};
+        GetClientRect(m_hwnd_parent, &t_client);
+        int t_width = t_client.right;
+
+        // Toolbar height as computed by the last TB_AUTOSIZE.
+        RECT t_tb = {};
+        GetWindowRect(m_hwnd_toolbar, &t_tb);
+        int t_height = t_tb.bottom - t_tb.top;
+
+        // y-offset: bottom edge of the in-window menu bar group (0 if none).
+        // This mirrors the getnextscroll() logic used on macOS.
+        int t_y = (m_owner != nil) ? (int)m_owner->getToolbarTopY() : 0;
+
+        SetWindowPos(m_hwnd_toolbar, NULL,
+                     0, t_y, t_width, t_height,
+                     SWP_NOZORDER | SWP_NOACTIVATE);
+    }
     MCToolbar              *m_owner;
     HWND                    m_hwnd_toolbar;
     HWND                    m_hwnd_parent;
@@ -585,6 +627,16 @@ void MCWin32ToolbarHandleParentCommand(HWND p_parent, HWND p_sender,
         reinterpret_cast<MCToolbarWin32Backend *>(GetPropA(p_parent, "MCToolbar"));
     if (t_self != nullptr)
         t_self->HandleParentCommand(p_sender, p_wparam);
+}
+
+// Called from the WM_SIZE handler in w32dcw32.cpp so the toolbar tracks the
+// parent window's width and stays at the correct y offset below the menu bar.
+void MCWin32ToolbarHandleParentResize(HWND p_parent)
+{
+    MCToolbarWin32Backend *t_self =
+        reinterpret_cast<MCToolbarWin32Backend *>(GetPropA(p_parent, "MCToolbar"));
+    if (t_self != nullptr)
+        t_self->HandleParentResize();
 }
 
 #endif // _WINDOWS
