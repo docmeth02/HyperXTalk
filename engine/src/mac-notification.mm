@@ -156,17 +156,33 @@ void MCPlatformCancelAllNotifications()
 
 void MCPlatformGetNotificationPermission(MCStringRef& r_permission)
 {
-    // getNotificationSettingsWithCompletionHandler is async; we block briefly
-    // on a semaphore so we can return a synchronous result.
+    // getNotificationSettingsWithCompletionHandler is async; we want to return
+    // a synchronous result.
+    //
+    // On recent macOS versions the completion block is delivered on the calling
+    // thread's run-loop / queue rather than an independent secondary thread.
+    // Calling this from the main thread and then waiting on a semaphore on that
+    // same thread would deadlock — the block could never fire because the queue
+    // is blocked.
+    //
+    // Fix: issue the query from a background queue.  That guarantees the
+    // completion block is delivered independently of the main thread, so the
+    // semaphore wait here (on the main thread) will always resolve.
     __block UNAuthorizationStatus t_status = UNAuthorizationStatusNotDetermined;
     dispatch_semaphore_t t_sem = dispatch_semaphore_create(0);
 
-    [_center() getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
-        t_status = settings.authorizationStatus;
-        dispatch_semaphore_signal(t_sem);
-    }];
+    // Capture the notification center reference on the main thread before
+    // dispatching, since _center() must only be called from the main thread.
+    UNUserNotificationCenter *t_center = _center();
 
-    // Wait at most 2 seconds; in practice this resolves immediately.
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        [t_center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
+            t_status = settings.authorizationStatus;
+            dispatch_semaphore_signal(t_sem);
+        }];
+    });
+
+    // Wait at most 2 seconds.  In practice this resolves in < 10 ms.
     dispatch_semaphore_wait(t_sem, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC));
 
     switch (t_status)
