@@ -1216,8 +1216,9 @@ bool MCVLCPlayer::EnsureVLCInstance()
         "--quiet",
         "--no-osd",
         "--no-stats",
+        "--vout=xcb_x11",
     };
-    s_vlc_instance = libvlc_new(3, t_args);
+    s_vlc_instance = libvlc_new(4, t_args);
 #endif
 
     if (s_vlc_instance == nullptr)
@@ -1255,6 +1256,9 @@ MCVLCPlayer::MCVLCPlayer()
     : m_player(nullptr),
       m_media(nullptr),
       m_view(nullptr),
+#if defined(TARGET_PLATFORM_LINUX)
+      m_colormap(0),
+#endif
       m_rect(MCRectangleMake(0, 0, 0, 0)),
       m_visible(true),
       m_offscreen(false),
@@ -1386,6 +1390,11 @@ MCVLCPlayer::~MCVLCPlayer()
         x11::Display *t_dpy = x11::gdk_x11_display_get_xdisplay(
             gdk_display_get_default());
         x11::XDestroyWindow(t_dpy, (x11::Window)(uintptr_t)m_view);
+        if (m_colormap != 0)
+        {
+            x11::XFreeColormap(t_dpy, m_colormap);
+            m_colormap = 0;
+        }
         m_view = nullptr;
     }
 #endif
@@ -1786,9 +1795,49 @@ bool MCVLCPlayer::SetNativeParentView(void *p_parent_view)
         x11::XDestroyWindow(t_dpy, (x11::Window)(uintptr_t)m_view);
         m_view = nullptr;
     }
+    if (m_colormap != 0)
+    {
+        x11::XFreeColormap(t_dpy, m_colormap);
+        m_colormap = 0;
+    }
 
-    x11::Window t_win = x11::XCreateSimpleWindow(
-        t_dpy, t_parent_xid, t_x, t_y, t_w, t_h, 0, 0, 0);
+    // Use a 24-bit (non-ARGB) visual to prevent transparency under
+    // compositing WMs.  GDK may use a 32-bit ARGB visual for its
+    // windows; child windows inherit that visual, and VLC's xcb output
+    // leaves the alpha byte at 0 — making every pixel transparent.
+    x11::Window t_win = 0;
+    x11::XVisualInfo t_vinfo;
+    int t_screen = x11::XDefaultScreen(t_dpy);
+    if (x11::XMatchVisualInfo(t_dpy, t_screen, 24, TrueColor, &t_vinfo))
+    {
+        m_colormap = x11::XCreateColormap(
+            t_dpy, t_parent_xid, t_vinfo.visual, AllocNone);
+        x11::XSetWindowAttributes t_attrs;
+        memset(&t_attrs, 0, sizeof(t_attrs));
+        t_attrs.background_pixel = 0;
+        t_attrs.border_pixel = 0;
+        t_attrs.colormap = m_colormap;
+        t_win = x11::XCreateWindow(
+            t_dpy, t_parent_xid, t_x, t_y, t_w, t_h,
+            0, t_vinfo.depth, InputOutput, t_vinfo.visual,
+            CWBackPixel | CWBorderPixel | CWColormap, &t_attrs);
+    }
+    else
+    {
+        t_win = x11::XCreateSimpleWindow(
+            t_dpy, t_parent_xid, t_x, t_y, t_w, t_h, 0, 0, 0);
+    }
+
+    if (t_win == 0)
+    {
+        if (m_colormap != 0)
+        {
+            x11::XFreeColormap(t_dpy, m_colormap);
+            m_colormap = 0;
+        }
+        return false;
+    }
+
     x11::XMapWindow(t_dpy, t_win);
     x11::XFlush(t_dpy);
 
@@ -2347,6 +2396,15 @@ void MCVLCPlayer::SetProperty(MCPlatformPlayerProperty p_property,
             if (t_new_offscreen == m_offscreen)
                 break;
             m_offscreen = t_new_offscreen;
+#if defined(TARGET_PLATFORM_LINUX)
+            if (m_offscreen && m_view != nullptr)
+            {
+                x11::Display *t_dpy = x11::gdk_x11_display_get_xdisplay(
+                    gdk_display_get_default());
+                x11::XUnmapWindow(t_dpy, (x11::Window)(uintptr_t)m_view);
+                x11::XFlush(t_dpy);
+            }
+#endif
             if (m_media != nullptr)
             {
                 // Re-attach VLC to the correct output.
@@ -2354,8 +2412,17 @@ void MCVLCPlayer::SetProperty(MCPlatformPlayerProperty p_property,
                 if (m_offscreen)
                     SetupOffscreenCallbacks();
                 else
+                {
                     AttachNativeView();
+                    Synchronize();
+                }
             }
+#if defined(TARGET_PLATFORM_LINUX)
+            else if (!m_offscreen)
+            {
+                Synchronize();
+            }
+#endif
             break;
         }
 
