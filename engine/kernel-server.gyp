@@ -107,6 +107,8 @@
                         [
 	                        'PANGO_ENABLE_BACKEND',
 	                        'PANGO_ENABLE_ENGINE',
+	                        'GLIB_VERSION_MIN_REQUIRED=(2<<16|68<<8)',
+	                        'GLIB_VERSION_MAX_ALLOWED=(2<<16|68<<8)',
 	                    ],
 					},
 				],

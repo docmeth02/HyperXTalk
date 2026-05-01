@@ -627,6 +627,8 @@ glib libglib-2.0.so.0
 	g_main_context_dispatch: (pointer) -> ()
 	g_main_context_find_source_by_id: (pointer, integer) -> (pointer)
 	g_source_destroy: (pointer) -> ()
+	g_source_remove: (integer) -> (integer)
+	g_slist_free: (pointer) -> ()
 	g_error_free: (pointer) -> ()
 
 esd libesd.so.0

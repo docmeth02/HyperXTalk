@@ -14,9 +14,15 @@ for more details.
 You should have received a copy of the GNU General Public License
 along with LiveCode.  If not see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GLIB_VERSION_MIN_REQUIRED
+#define GLIB_VERSION_MIN_REQUIRED ((2 << 16 | 68 << 8))
+#endif
+#ifndef GLIB_VERSION_MAX_ALLOWED
+#define GLIB_VERSION_MAX_ALLOWED GLIB_VERSION_MIN_REQUIRED
+#endif
+
 #include "globdefs.h"
 
-#define GLIB_VERSION_MIN_REQUIRED ((2 << 16 | 68 << 8))
 #include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 

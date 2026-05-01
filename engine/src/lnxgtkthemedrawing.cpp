@@ -599,9 +599,28 @@ gint moz_gtk_widget_paint(GtkThemeWidgetType widget, cairo_t *cr,
             result = moz_gtk_generic_paint(cr, rect, gListboxWidget, state);
             break;
         case MOZ_GTK_SPINBUTTON:
+        {
             ensure_spin_widget();
             result = moz_gtk_generic_paint(cr, rect, gSpinbuttonWidget, state);
+            if (flags == GTK_POS_TOP || flags == GTK_POS_BOTTOM)
+            {
+                GtkArrowType t_arrow = (flags == GTK_POS_TOP) ? GTK_ARROW_UP : GTK_ARROW_DOWN;
+                GdkRectangle t_frame, t_btn;
+                spinbutton_get_rects(t_arrow, rect, t_frame, t_btn);
+                GtkStyleContext *t_style = GetWidgetStyleContext(gSpinbuttonWidget);
+                gtk_style_context_save(t_style);
+                GtkStateFlags t_flags = ConvertWidgetState(state);
+                gtk_style_context_set_state(t_style, t_flags);
+                gtk_render_background(t_style, cr, t_btn.x, t_btn.y, t_btn.width, t_btn.height);
+                gtk_render_frame(t_style, cr, t_btn.x, t_btn.y, t_btn.width, t_btn.height);
+                gtk_render_arrow(t_style, cr,
+                    (t_arrow == GTK_ARROW_UP) ? 0 : G_PI,
+                    t_btn.x + t_btn.width / 4, t_btn.y + t_btn.height / 4,
+                    MIN(t_btn.width, t_btn.height) / 2);
+                gtk_style_context_restore(t_style);
+            }
             break;
+        }
         case MOZ_GTK_MENUITEMHIGHLIGHT:
             ensure_menu_item_widget();
             result = moz_gtk_generic_paint(cr, rect, gMenuitemWidget, state);
@@ -755,7 +774,7 @@ void spinbutton_get_rects(GtkArrowType type, GdkRectangle *rect,
 }
 
 void moz_gtk_get_widget_color(GtkStateType widgettype,
-                               uint2 &red, uint2 &blue, uint2 &green)
+                               uint2 &red, uint2 &green, uint2 &blue)
 {
     ensure_proto_container();
     if (!gProtoWindow)

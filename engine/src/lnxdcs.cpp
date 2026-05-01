@@ -364,8 +364,9 @@ Boolean MCScreenDC::open()
 						defs[i].blue  = (i & bmsk) * b_scale;
 					}
                     // gdk_colors_store removed in GTK 3 — colormap manipulation no longer needed
+                    break;
                 }
-                    
+
                 case GDK_VISUAL_GRAYSCALE:
                 {
                     // Create a grayscale colormap with a linear ramp
@@ -824,6 +825,7 @@ void MCScreenDC::copyarea(Drawable s, Drawable d, int2 depth,
 		return;
 
     cairo_t *t_cr = gdk_cairo_create(d);
+    cairo_set_operator(t_cr, CAIRO_OPERATOR_SOURCE);
     gdk_cairo_set_source_window(t_cr, s, dx - sx, dy - sy);
     cairo_rectangle(t_cr, dx, dy, sw, sh);
     cairo_fill(t_cr);

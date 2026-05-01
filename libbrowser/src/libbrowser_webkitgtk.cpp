@@ -579,7 +579,7 @@ bool MCWebKitGTKBrowser::EvaluateJavaScript(const char *p_script, char *&r_resul
 	ctx.success = false;
 
 	webkit_web_view_evaluate_javascript(
-		m_web_view, (void *)p_script, (size_t)-1,
+		m_web_view, (void *)p_script, -1,
 		nil, nil, nil,
 		(void *)eval_js_finished, &ctx);
 
@@ -644,9 +644,13 @@ void MCWebKitGTKBrowser::SyncJavaScriptHandlers()
 		if (needed > script_size)
 		{
 			script_size = needed * 2;
+			void *t_old = script;
 			MCBrowserMemoryReallocate(script, script_size, (void *&)script);
 			if (script == nil)
+			{
+				MCBrowserMemoryDeallocate(t_old);
 				return;
+			}
 		}
 
 		pos += snprintf(script + pos, script_size - pos,

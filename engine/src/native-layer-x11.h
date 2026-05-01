@@ -49,9 +49,6 @@ private:
     x11Window getStackX11Window();
     GdkWindow* getStackGdkWindow();
     
-    // Returns the GtkFixed used for layouts within the stack
-    GtkFixed* getStackLayout();
-    
     // Performs the attach/detach operations
     virtual void doAttach();
     virtual void doDetach();

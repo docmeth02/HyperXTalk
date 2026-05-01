@@ -235,6 +235,11 @@
 						[
 							'libbrowser_webkitgtk_stubs.gyp:libwebkitgtk_stubs',
 						],
+						'defines':
+						[
+							'GLIB_VERSION_MIN_REQUIRED=(2<<16|68<<8)',
+							'GLIB_VERSION_MAX_ALLOWED=(2<<16|68<<8)',
+						],
 						'cflags':
 						[
 							'<!@(pkg-config --cflags webkit2gtk-4.1)',
