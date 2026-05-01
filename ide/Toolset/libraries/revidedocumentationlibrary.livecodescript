@@ -12,22 +12,32 @@ on extensionFinalize
 end extensionFinalize
 
 private on ideDocsEnsureDatabase pLocation
-   if there is not a file (pLocation & slash & "api.sqlite") then
-      -- Only copy the distributed api.sqlite if it actually exists and is
-      -- non-empty.  On installed Windows builds there is no pre-built
-      -- api.sqlite in the distributed folder (it is gitignored and generated
-      -- at runtime).  Writing empty data here would produce a corrupt SQLite
-      -- file that makes revDocsOpenAPIDatabase fail and aborts the entire doc
-      -- update.  When the source is absent we leave the cache location alone
-      -- so that revDocsOpenAPIDatabase creates a fresh database itself.
-      local tSource
-      put revIDESpecialFolderPath("API") & slash & "api.sqlite" into tSource
-      if there is a file tSource then
-         local tSourceData
-         put url ("binfile:" & tSource) into tSourceData
-         if tSourceData is not empty then
-            put tSourceData into url ("binfile:" & pLocation & slash & "api.sqlite")
-         end if
+   -- Always read from the shipped (app bundle) location, not the cache.
+   -- revIDESpecialFolderPath("API") redirects to the cache on installed
+   -- builds, creating a circular lookup where source and destination are the
+   -- same empty directory.  Build the source path from stack "home" directly.
+   local tSource
+   set the itemdel to "/"
+   put item 1 to -3 of the filename of stack "home" & \
+         "/Documentation/html_viewer/resources/data/api/api.sqlite" into tSource
+   if there is not a file tSource then exit ideDocsEnsureDatabase
+
+   local tDest
+   put pLocation & slash & "api.sqlite" into tDest
+
+   -- Copy if the destination is absent OR is smaller than the shipped
+   -- database.  A previous broken launch may have let revDocsOpenAPIDatabase
+   -- create a tiny stub file here; we must overwrite it with the real data.
+   local tShouldCopy
+   if there is not a file tDest then
+      put true into tShouldCopy
+   end if
+
+   if tShouldCopy then
+      local tSourceData
+      put url ("binfile:" & tSource) into tSourceData
+      if tSourceData is not empty then
+         put tSourceData into url ("binfile:" & tDest)
       end if
    end if
 end ideDocsEnsureDatabase

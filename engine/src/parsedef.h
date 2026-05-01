@@ -478,6 +478,7 @@ enum Functions {
     F_PARAM,
     F_PARAMS,
     F_PARAM_COUNT,
+    F_NOTIFICATION_PERMISSION,
     F_PENDING_MESSAGES,
     F_PLATFORM,
 	// JS-2013-06-19: [[ StatsFunctions ]] Tag for 'populationStdDev'
@@ -1280,6 +1281,9 @@ enum Properties {
     P_DESTROY_WINDOW,
     P_ALWAYS_BUFFER,
     P_PASSWORD,
+    P_PASSWORD_FIELD,
+    P_PASSWORD_TOGGLE,
+    P_CANCEL_BUTTON,
     P_KEY,
     P_MODE,
     P_WM_PLACE,
@@ -1438,6 +1442,17 @@ enum Properties {
     P_DEFAULT,
     P_LABEL,
     P_LABEL_WIDTH,
+    P_HINT_TEXT,
+    // toolbar properties
+    P_TOOLBAR_DISPLAY_MODE,
+    P_TOOLBAR_VISIBLE,
+    P_TOOLBAR_ITEM_NAMES,
+    // toolbar item properties
+    P_TOOLBAR_ITEM_LABEL,
+    P_TOOLBAR_ITEM_TOOLTIP,
+    P_TOOLBAR_ITEM_ENABLED,
+    P_TOOLBAR_ITEM_ICON,
+    P_TOOLBAR_ITEM_STYLE,
     P_FAMILY,
     P_VISITED,
     // button menu item properties
@@ -2014,6 +2029,8 @@ enum Statements {
     S_BREAKPOINT,
     S_CALL,
     S_CANCEL,
+    S_CANCEL_ALL_NOTIFICATIONS,
+    S_CANCEL_NOTIFICATION,
     S_CHOOSE,
     S_CLICK,
     S_CLONE,
@@ -2102,6 +2119,7 @@ enum Statements {
     S_REPLACE,
     S_REPLY,
     S_REQUEST,
+    S_REQUEST_NOTIFICATION_PERMISSION,
 	S_REQUIRE,
     S_RESET,
     // MERG-2013-09-23: [[ ResolveImage ]] resolve image [id] relative to <object>
@@ -2120,6 +2138,7 @@ enum Statements {
     S_SET,
     S_SHEET,
     S_SHOW,
+    S_SHOW_NOTIFICATION,
     S_SORT,
     S_SPLIT,
     S_START,
@@ -2185,7 +2204,8 @@ enum There_mode {
     TM_DIRECTORY,
     TM_FILE,
     TM_PROCESS,
-    TM_URL
+    TM_URL,
+    TM_WORKER
 };
 
 // types returned from lex

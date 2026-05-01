@@ -63,6 +63,12 @@
 				[
 					'OS == "linux"',
 					{
+						'include_dirs':
+						[
+							'<!@(pkg-config --cflags-only-I dbus-1 2>/dev/null | sed "s/-I//g")',
+						],
+
+
 						'defines':
                         [
                             'PANGO_ENABLE_BACKEND',
@@ -266,6 +272,7 @@
 								'-ldl',
 								'-lpthread',
 								'-lcups',
+								'-ldbus-1',
 							],
 						},
 					],
