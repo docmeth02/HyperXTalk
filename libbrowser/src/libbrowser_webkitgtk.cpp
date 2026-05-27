@@ -407,6 +407,8 @@ MCWebKitGTKBrowser::MCWebKitGTKBrowser()
 	m_script_message_handler = 0;
 	m_progress_handler = 0;
 	m_web_process_handler = 0;
+
+	m_in_dispatch = false;
 }
 
 MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
@@ -426,6 +428,9 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 			g_signal_handler_disconnect(m_web_view, m_progress_handler);
 		if (m_web_process_handler)
 			g_signal_handler_disconnect(m_web_view, m_web_process_handler);
+
+		// Drop our strong reference; GtkPlug still holds one until destroy
+		g_object_unref(m_web_view);
 	}
 
 	if (m_content_manager != nil && m_script_message_handler)
@@ -476,6 +481,9 @@ bool MCWebKitGTKBrowser::Init(void)
 
 	// Weak pointer so external destruction nulls m_web_view safely
 	g_object_add_weak_pointer((GObject *)m_web_view, &m_web_view);
+
+	// Take our own strong reference so destruction order is deterministic
+	g_object_ref(m_web_view);
 
 	// Create a GtkPlug for XEMBED embedding
 	m_plug = gtk_plug_new(0);
@@ -583,21 +591,32 @@ enum MCWebKitGTKAction
     kMCWebKitGTKActionGoBack,
     kMCWebKitGTKActionGoForward,
     kMCWebKitGTKActionStopLoading,
-    kMCWebKitGTKActionReload
+    kMCWebKitGTKActionReload,
+    kMCWebKitGTKActionEvalJS
 };
 
 struct MCWebKitGTKDispatch
 {
     void *web_view;
+    void *browser;
     MCWebKitGTKAction action;
     char *str1;
     char *str2;
+    void *js_ctx;
     bool done;
 };
 
 static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 {
     MCWebKitGTKDispatch *t_dispatch = (MCWebKitGTKDispatch*)p_data;
+
+    // UAF safety: verify the browser object still exists and its web_view matches
+    MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser*)t_dispatch->browser;
+    if (browser == nil || browser->GetWebView() == nil || browser->GetWebView() != t_dispatch->web_view)
+    {
+        t_dispatch->done = true;
+        return G_SOURCE_REMOVE;
+    }
 
     switch (t_dispatch->action)
     {
@@ -619,6 +638,11 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
         case kMCWebKitGTKActionReload:
             webkit_web_view_reload(t_dispatch->web_view);
             break;
+        case kMCWebKitGTKActionEvalJS:
+            webkit_web_view_evaluate_javascript(t_dispatch->web_view, (void *)t_dispatch->str1, -1,
+                                                nil, nil, nil,
+                                                (void *)eval_js_finished, t_dispatch->js_ctx);
+            break;
     }
 
     t_dispatch->done = true;
@@ -627,17 +651,36 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 
 static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 {
+    MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser*)p_dispatch->browser;
+    if (browser != nil && browser->GetInDispatch())
+        return;
+
+    if (browser != nil)
+        browser->SetInDispatch(true);
+
+    // Hold a strong reference so the web view stays alive even if the
+    // browser destructor runs while another thread is blocked in the
+    // wait loop below.
+    g_object_ref(p_dispatch->web_view);
+
     // If already on the GTK main thread, execute directly to avoid
     // deadlock and re-entrancy from pumping the main loop inline.
     if (g_main_context_is_owner(g_main_context_default()))
     {
         mcwebkitgtk_dispatch_idle(p_dispatch);
-        return;
     }
-    p_dispatch->done = false;
-    g_idle_add(mcwebkitgtk_dispatch_idle, p_dispatch);
-    while (!p_dispatch->done)
-        MCBrowserRunloopWait();
+    else
+    {
+        p_dispatch->done = false;
+        g_idle_add(mcwebkitgtk_dispatch_idle, p_dispatch);
+        while (!p_dispatch->done)
+            MCBrowserRunloopWait();
+    }
+
+    g_object_unref(p_dispatch->web_view);
+
+    if (browser != nil)
+        browser->SetInDispatch(false);
 }
 
 bool MCWebKitGTKBrowser::GoToURL(const char *p_url)
@@ -647,6 +690,8 @@ bool MCWebKitGTKBrowser::GoToURL(const char *p_url)
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
+	t_dispatch.browser = this;
 	t_dispatch.str2 = nil;
 
 	if (MCCStringIsEmpty(p_url))
@@ -678,6 +723,7 @@ bool MCWebKitGTKBrowser::LoadHTMLText(const char *p_htmltext, const char *p_base
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
 	t_dispatch.action = kMCWebKitGTKActionLoadHTML;
 	t_dispatch.str1 = nil;
 	t_dispatch.str2 = nil;
@@ -701,6 +747,7 @@ bool MCWebKitGTKBrowser::GoBack()
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
 	t_dispatch.action = kMCWebKitGTKActionGoBack;
 	t_dispatch.str1 = nil;
 	t_dispatch.str2 = nil;
@@ -716,6 +763,7 @@ bool MCWebKitGTKBrowser::GoForward()
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
 	t_dispatch.action = kMCWebKitGTKActionGoForward;
 	t_dispatch.str1 = nil;
 	t_dispatch.str2 = nil;
@@ -731,6 +779,7 @@ bool MCWebKitGTKBrowser::StopLoading()
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
 	t_dispatch.action = kMCWebKitGTKActionStopLoading;
 	t_dispatch.str1 = nil;
 	t_dispatch.str2 = nil;
@@ -746,6 +795,7 @@ bool MCWebKitGTKBrowser::Reload()
 
 	MCWebKitGTKDispatch t_dispatch;
 	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
 	t_dispatch.action = kMCWebKitGTKActionReload;
 	t_dispatch.str1 = nil;
 	t_dispatch.str2 = nil;
@@ -767,10 +817,18 @@ bool MCWebKitGTKBrowser::EvaluateJavaScript(const char *p_script, char *&r_resul
 	ctx.result = nil;
 	ctx.success = false;
 
-	webkit_web_view_evaluate_javascript(
-		m_web_view, (void *)p_script, -1,
-		nil, nil, nil,
-		(void *)eval_js_finished, &ctx);
+	MCWebKitGTKDispatch t_dispatch;
+	t_dispatch.web_view = m_web_view;
+	t_dispatch.browser = this;
+	t_dispatch.action = kMCWebKitGTKActionEvalJS;
+	t_dispatch.str1 = nil;
+	t_dispatch.str2 = nil;
+	t_dispatch.js_ctx = &ctx;
+	MCCStringClone(p_script, t_dispatch.str1);
+
+	mcwebkitgtk_dispatch(&t_dispatch);
+
+	MCCStringFree(t_dispatch.str1);
 
 	while (ctx.evaluating)
 		MCBrowserRunloopWait();

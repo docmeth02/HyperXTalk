@@ -55,6 +55,8 @@ public:
 	// Safe accessors for C signal callbacks (avoid friend+static linkage clash)
 	void *GetWebView() const { return m_web_view; }
 	void *GetContentManager() const { return m_content_manager; }
+	bool GetInDispatch() const { return m_in_dispatch; }
+	void SetInDispatch(bool p_val) { m_in_dispatch = p_val; }
 
 private:
 	void *m_plug;
@@ -75,6 +77,9 @@ private:
 	gulong m_script_message_handler;
 	gulong m_progress_handler;
 	gulong m_web_process_handler;
+
+	// Dispatch re-entrancy guard (prevents nested inline execution)
+	bool m_in_dispatch;
 
 	bool GetUrl(char *&r_url);
 	bool GetHTMLText(char *&r_htmltext);
