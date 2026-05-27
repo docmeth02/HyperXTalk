@@ -136,6 +136,9 @@ int jsc_value_is_string(void *value);
 int jsc_value_is_undefined(void *value);
 int jsc_value_is_null(void *value);
 
+void *webkit_javascript_result_get_js_value(void *js_result);
+void webkit_javascript_result_unref(void *js_result);
+
 int initialise_weak_link_webkit2gtk(void);
 int initialise_weak_link_javascriptcoregtk(void);
 
@@ -283,14 +286,19 @@ static void on_script_message(void *manager, void *js_result, void *user_data)
 	if (browser->GetWebView() == nil || browser->GetContentManager() == nil)
 		return;
 
-	// js_result is a WebKitJavascriptResult* — on webkit2gtk 4.1 this is a JSCValue*
-	JSCValue *value = (JSCValue *)js_result;
-	if (!jsc_value_is_string(value))
+	JSCValue *value = (JSCValue *)webkit_javascript_result_get_js_value(js_result);
+	if (value == nil || !jsc_value_is_string(value))
+	{
+		webkit_javascript_result_unref(js_result);
 		return;
+	}
 
 	char *json_str = (char *)jsc_value_to_string(value);
 	if (json_str == nil)
+	{
+		webkit_javascript_result_unref(js_result);
 		return;
+	}
 
 	// Parse the JSON array: ["handlerName", [arg1, arg2, ...]]
 	// Simple parsing: find the handler name between first pair of quotes
@@ -298,26 +306,27 @@ static void on_script_message(void *manager, void *js_result, void *user_data)
 
 	// Skip to opening bracket
 	while (*p && *p != '[') p++;
-	if (!*p) { g_free(json_str); return; }
+	if (!*p) { g_free(json_str); webkit_javascript_result_unref(js_result); return; }
 	p++;
 
 	// Skip whitespace
 	while (*p && (*p == ' ' || *p == '\t')) p++;
 
 	// Expect opening quote for handler name
-	if (*p != '"') { g_free(json_str); return; }
+	if (*p != '"') { g_free(json_str); webkit_javascript_result_unref(js_result); return; }
 	p++;
 
 	// Extract handler name
 	char *name_start = p;
 	while (*p && *p != '"') p++;
-	if (!*p) { g_free(json_str); return; }
+	if (!*p) { g_free(json_str); webkit_javascript_result_unref(js_result); return; }
 
 	size_t name_len = p - name_start;
 	char *handler_name = nil;
 	if (!MCCStringCloneSubstring(name_start, name_len, handler_name))
 	{
 		g_free(json_str);
+		webkit_javascript_result_unref(js_result);
 		return;
 	}
 
@@ -331,6 +340,7 @@ static void on_script_message(void *manager, void *js_result, void *user_data)
 	MCBrowserListRelease(t_args);
 	MCCStringFree(handler_name);
 	g_free(json_str);
+	webkit_javascript_result_unref(js_result);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -425,12 +435,15 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 			m_content_manager, (void *)"liveCode");
 	}
 
+	if (m_content_manager != nil)
+		g_object_unref(m_content_manager);
+	m_content_manager = nil;
+
 	if (m_plug != nil)
 		gtk_widget_destroy((GtkWidget *)m_plug);
 
 	// Null out pointers so late callbacks can detect destruction
 	m_web_view = nil;
-	m_content_manager = nil;
 	m_plug = nil;
 
 	MCBrowserCStringAssign(m_js_handlers, nil);
@@ -616,22 +629,17 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 
 static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 {
-    // Always post to the GLib idle queue so the action runs on the GTK main
-    // thread. If we are already on that thread, pump the main loop inline
-    // instead of blocking in MCBrowserRunloopWait — otherwise the idle
-    // callback would never run and we'd deadlock.
-    p_dispatch->done = false;
-    g_idle_add(mcwebkitgtk_dispatch_idle, p_dispatch);
+    // If already on the GTK main thread, execute directly to avoid
+    // deadlock and re-entrancy from pumping the main loop inline.
     if (g_thread_self() == s_main_thread)
     {
-        while (!p_dispatch->done)
-            g_main_context_iteration(g_main_context_default(), TRUE);
+        mcwebkitgtk_dispatch_idle(p_dispatch);
+        return;
     }
-    else
-    {
-        while (!p_dispatch->done)
-            MCBrowserRunloopWait();
-    }
+    p_dispatch->done = false;
+    g_idle_add(mcwebkitgtk_dispatch_idle, p_dispatch);
+    while (!p_dispatch->done)
+        MCBrowserRunloopWait();
 }
 
 bool MCWebKitGTKBrowser::GoToURL(const char *p_url)
@@ -817,6 +825,19 @@ void MCWebKitGTKBrowser::SyncJavaScriptHandlers()
 
 		size_t name_len = p - name_start;
 		if (name_len == 0)
+			continue;
+
+		// Validate handler name is a safe JS identifier: [A-Za-z_$][A-Za-z0-9_$]*
+		bool t_valid = true;
+		for (size_t i = 0; i < name_len && t_valid; i++)
+		{
+			char c = name_start[i];
+			if (i == 0)
+				t_valid = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '$';
+			else
+				t_valid = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '$';
+		}
+		if (!t_valid)
 			continue;
 
 		// Build: window.liveCode.<name> = function() {
