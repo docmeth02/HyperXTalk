@@ -61,7 +61,7 @@ gobject libgobject-2.0.so.0
 
 javascriptcoregtk libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0
 
-webkit_javascript_result_get_js_value: (pointer) -> (pointer)
+	webkit_javascript_result_get_js_value: (pointer) -> (pointer)
 	webkit_javascript_result_unref: (pointer) -> ()
 
 	# JSCValue
