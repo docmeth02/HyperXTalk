@@ -57,6 +57,8 @@ public:
 	void *GetContentManager() const { return m_content_manager; }
 	bool GetInDispatch() const { return m_in_dispatch; }
 	void SetInDispatch(bool p_val) { m_in_dispatch = p_val; }
+	bool IsAlive() const { return m_alive; }
+	void SetAlive(bool p_val) { m_alive = p_val; }
 
 private:
 	void *m_plug;
@@ -80,6 +82,9 @@ private:
 
 	// Dispatch re-entrancy guard (prevents nested inline execution)
 	bool m_in_dispatch;
+
+	// Lifetime guard for idle callbacks when destructor races dispatch
+	bool m_alive;
 
 	bool GetUrl(char *&r_url);
 	bool GetHTMLText(char *&r_htmltext);

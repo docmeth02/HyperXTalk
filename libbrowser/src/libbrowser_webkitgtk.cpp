@@ -408,11 +408,17 @@ MCWebKitGTKBrowser::MCWebKitGTKBrowser()
 	m_progress_handler = 0;
 	m_web_process_handler = 0;
 
+	// Lifetime guard: mark alive so idle callbacks can detect destructor start
+	m_alive = true;
+
 	m_in_dispatch = false;
 }
 
 MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 {
+	// Mark not-alive so any pending idle callback bails before accessing members
+	m_alive = false;
+
 	if (m_web_view != nil)
 	{
 		g_object_remove_weak_pointer((GObject *)m_web_view, &m_web_view);
@@ -610,9 +616,9 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 {
     MCWebKitGTKDispatch *t_dispatch = (MCWebKitGTKDispatch*)p_data;
 
-    // UAF safety: verify the browser object still exists and its web_view matches
+    // UAF safety: verify the browser object still exists, is alive, and its web_view matches
     MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser*)t_dispatch->browser;
-    if (browser == nil || browser->GetWebView() == nil || browser->GetWebView() != t_dispatch->web_view)
+    if (browser == nil || !browser->IsAlive() || browser->GetWebView() == nil || browser->GetWebView() != t_dispatch->web_view)
     {
         t_dispatch->done = true;
         return G_SOURCE_REMOVE;
@@ -649,11 +655,11 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
     return G_SOURCE_REMOVE;
 }
 
-static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
+static bool mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 {
     MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser*)p_dispatch->browser;
     if (browser != nil && browser->GetInDispatch())
-        return;
+        return false;
 
     if (browser != nil)
         browser->SetInDispatch(true);
@@ -681,6 +687,8 @@ static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 
     if (browser != nil)
         browser->SetInDispatch(false);
+
+    return true;
 }
 
 bool MCWebKitGTKBrowser::GoToURL(const char *p_url)
@@ -826,8 +834,11 @@ bool MCWebKitGTKBrowser::EvaluateJavaScript(const char *p_script, char *&r_resul
 	t_dispatch.js_ctx = &ctx;
 	MCCStringClone(p_script, t_dispatch.str1);
 
-	mcwebkitgtk_dispatch(&t_dispatch);
-
+	if (!mcwebkitgtk_dispatch(&t_dispatch))
+	{
+		MCCStringFree(t_dispatch.str1);
+		return false;
+	}
 	MCCStringFree(t_dispatch.str1);
 
 	while (ctx.evaluating)
