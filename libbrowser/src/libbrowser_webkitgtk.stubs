@@ -54,6 +54,11 @@ webkit2gtk libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0
 	# WebKitURIRequest
 	webkit_uri_request_get_uri: (pointer) -> (pointer)
 
+gobject libgobject-2.0.so.0
+
+	g_object_add_weak_pointer: (pointer, pointer) -> ()
+	g_object_remove_weak_pointer: (pointer, pointer) -> ()
+
 javascriptcoregtk libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0 libjavascriptcoregtk-4.1.so.0
 
 webkit_javascript_result_get_js_value: (pointer) -> (pointer)

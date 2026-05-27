@@ -145,7 +145,6 @@ int initialise_weak_link_javascriptcoregtk(void);
 // Cached identity of the GTK main thread so dispatch can avoid deadlock
 // when called from that thread (pump the main loop inline instead of
 // blocking in MCBrowserRunloopWait).
-static gpointer s_main_thread = nil;
 
 }
 
@@ -414,6 +413,7 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 {
 	if (m_web_view != nil)
 	{
+		g_object_remove_weak_pointer((GObject *)m_web_view, &m_web_view);
 		if (m_load_changed_handler)
 			g_signal_handler_disconnect(m_web_view, m_load_changed_handler);
 		if (m_load_failed_handler)
@@ -455,11 +455,6 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 
 bool MCWebKitGTKBrowser::Init(void)
 {
-	// Cache the GTK main thread identity so dispatch wrappers can avoid
-	// deadlock when called from that thread.
-	if (s_main_thread == nil)
-		s_main_thread = (gpointer)g_thread_self();
-
 	// Create the user content manager
 	m_content_manager = webkit_user_content_manager_new();
 	if (m_content_manager == nil)
@@ -478,6 +473,9 @@ bool MCWebKitGTKBrowser::Init(void)
 	m_web_view = webkit_web_view_new_with_user_content_manager(m_content_manager);
 	if (m_web_view == nil)
 		return false;
+
+	// Weak pointer so external destruction nulls m_web_view safely
+	g_object_add_weak_pointer((GObject *)m_web_view, &m_web_view);
 
 	// Create a GtkPlug for XEMBED embedding
 	m_plug = gtk_plug_new(0);
@@ -631,7 +629,7 @@ static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 {
     // If already on the GTK main thread, execute directly to avoid
     // deadlock and re-entrancy from pumping the main loop inline.
-    if (g_thread_self() == s_main_thread)
+    if (g_main_context_is_owner(g_main_context_default()))
     {
         mcwebkitgtk_dispatch_idle(p_dispatch);
         return;
