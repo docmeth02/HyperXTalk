@@ -130,6 +130,8 @@ int jsc_value_is_string(void *value);
 int jsc_value_is_undefined(void *value);
 int jsc_value_is_null(void *value);
 
+void *g_thread_self(void);
+
 int initialise_weak_link_webkit2gtk(void);
 int initialise_weak_link_javascriptcoregtk(void);
 
@@ -145,6 +147,8 @@ int initialise_weak_link_javascriptcoregtk(void);
 static void on_load_changed(void *web_view, int load_event, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return;
 	const char *uri = (const char *)webkit_web_view_get_uri(web_view);
 	if (uri == nil)
 		uri = "";
@@ -169,6 +173,8 @@ static int on_load_failed(void *web_view, int load_event,
 	char *failing_uri, GError *error, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return 0;
 	const char *msg = (error && error->message) ? error->message : "unknown error";
 	browser->OnDocumentLoadFailed(false, failing_uri, msg);
 	browser->OnNavigationFailed(false, failing_uri, msg);
@@ -181,7 +187,7 @@ static bool uri_scheme_is_navigable(const char *p_uri)
 		return false;
 
 	static const char *s_navigable[] = {
-		"http://", "https://", "file://", "about:", "data:", "blob:", "javascript:",
+		"http://", "https://", "file://", "about:", "data:", "blob:",
 	};
 
 	for (size_t i = 0; i < sizeof(s_navigable) / sizeof(s_navigable[0]); i++)
@@ -196,6 +202,8 @@ static bool uri_scheme_is_navigable(const char *p_uri)
 static int on_decide_policy(void *web_view, void *decision, int type, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return 0;
 
 	if (type == WEBKIT_POLICY_DECISION_TYPE_NEW_WINDOW_ACTION)
 	{
@@ -229,6 +237,8 @@ static int on_context_menu(void *web_view, void *menu,
 	void *event, void *hit_test, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return 0;
 	bool t_enabled = true;
 	browser->GetBoolProperty(kMCBrowserEnableContextMenu, t_enabled);
 	if (!t_enabled)
@@ -239,6 +249,8 @@ static int on_context_menu(void *web_view, void *menu,
 static void on_progress_changed(void *object, void *pspec, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return;
 	double progress = webkit_web_view_get_estimated_load_progress(object);
 	const char *uri = (const char *)webkit_web_view_get_uri(object);
 	if (uri == nil)
@@ -246,9 +258,21 @@ static void on_progress_changed(void *object, void *pspec, void *user_data)
 	browser->OnProgressChanged(uri, (uint32_t)(progress * 100));
 }
 
+// GTK3: web-process crash recovery
+static void on_web_process_terminated(void *web_view, int reason, void *user_data)
+{
+	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil)
+		return;
+	// Emit a browser error event so x-talk scripts can handle recovery
+	browser->OnDocumentLoadFailed(false, "", "web process terminated");
+}
+
 static void on_script_message(void *manager, void *js_result, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
+	if (browser->m_web_view == nil || browser->m_content_manager == nil)
+		return;
 
 	// js_result is a WebKitJavascriptResult* — on webkit2gtk 4.1 this is a JSCValue*
 	JSCValue *value = (JSCValue *)js_result;
@@ -364,6 +388,7 @@ MCWebKitGTKBrowser::MCWebKitGTKBrowser()
 	m_context_menu_handler = 0;
 	m_script_message_handler = 0;
 	m_progress_handler = 0;
+	m_web_process_handler = 0;
 }
 
 MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
@@ -380,6 +405,8 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 			g_signal_handler_disconnect(m_web_view, m_context_menu_handler);
 		if (m_progress_handler)
 			g_signal_handler_disconnect(m_web_view, m_progress_handler);
+		if (m_web_process_handler)
+			g_signal_handler_disconnect(m_web_view, m_web_process_handler);
 	}
 
 	if (m_content_manager != nil && m_script_message_handler)
@@ -392,6 +419,11 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 	if (m_plug != nil)
 		gtk_widget_destroy((GtkWidget *)m_plug);
 
+	// Null out pointers so late callbacks can detect destruction
+	m_web_view = nil;
+	m_content_manager = nil;
+	m_plug = nil;
+
 	MCBrowserCStringAssign(m_js_handlers, nil);
 	MCBrowserCStringAssign(m_htmltext, nil);
 	MCBrowserCStringAssign(m_url, nil);
@@ -401,6 +433,11 @@ MCWebKitGTKBrowser::~MCWebKitGTKBrowser()
 
 bool MCWebKitGTKBrowser::Init(void)
 {
+	// Cache the GTK main thread identity so dispatch wrappers can avoid
+	// deadlock when called from that thread.
+	if (s_main_thread == nil)
+		s_main_thread = g_thread_self();
+
 	// Create the user content manager
 	m_content_manager = webkit_user_content_manager_new();
 	if (m_content_manager == nil)
@@ -449,6 +486,24 @@ bool MCWebKitGTKBrowser::Init(void)
 	m_progress_handler = g_signal_connect(
 		m_web_view, "notify::estimated-load-progress",
 		G_CALLBACK(on_progress_changed), this);
+
+	// GTK3: detect web process crashes so x-talk scripts can recover
+	m_web_process_handler = g_signal_connect(
+		m_web_view, "web-process-terminated",
+		G_CALLBACK(on_web_process_terminated), this);
+
+	// GTK3: harden WebKitSettings — disable Java, plugins, file:// access
+	void *t_settings = webkit_settings_new();
+	if (t_settings != nil)
+	{
+		webkit_settings_set_enable_java(t_settings, false);
+		webkit_settings_set_enable_plugins(t_settings, false);
+		webkit_settings_set_enable_media_stream(t_settings, false);
+		webkit_settings_set_allow_file_access_from_file_urls(t_settings, false);
+		webkit_settings_set_allow_universal_access_from_file_urls(t_settings, false);
+		webkit_web_view_set_settings(m_web_view, t_settings);
+		g_object_unref(t_settings);
+	}
 
 	return true;
 }
@@ -520,6 +575,11 @@ struct MCWebKitGTKDispatch
     bool done;
 };
 
+// Cached identity of the GTK main thread so dispatch can avoid deadlock
+// when called from that thread (pump the main loop inline instead of
+// blocking in MCBrowserRunloopWait).
+static gpointer s_main_thread = nil;
+
 static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 {
     MCWebKitGTKDispatch *t_dispatch = (MCWebKitGTKDispatch*)p_data;
@@ -552,10 +612,22 @@ static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 
 static void mcwebkitgtk_dispatch(MCWebKitGTKDispatch *p_dispatch)
 {
+    // Always post to the GLib idle queue so the action runs on the GTK main
+    // thread. If we are already on that thread, pump the main loop inline
+    // instead of blocking in MCBrowserRunloopWait — otherwise the idle
+    // callback would never run and we'd deadlock.
     p_dispatch->done = false;
     g_idle_add(mcwebkitgtk_dispatch_idle, p_dispatch);
-    while (!p_dispatch->done)
-        MCBrowserRunloopWait();
+    if (g_thread_self() == s_main_thread)
+    {
+        while (!p_dispatch->done)
+            g_main_context_iteration(g_main_context_default(), TRUE);
+    }
+    else
+    {
+        while (!p_dispatch->done)
+            MCBrowserRunloopWait();
+    }
 }
 
 bool MCWebKitGTKBrowser::GoToURL(const char *p_url)

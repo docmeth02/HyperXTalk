@@ -795,6 +795,17 @@ Boolean MCScreenDC::handle(Boolean dispatch, Boolean anyevent, Boolean& abort, B
                 }                        
                 
                 MCdispatcher->wreshape(t_event->configure.window);
+
+                // HiDPI: window may have moved to a different monitor — re-query scale factor
+                {
+                    MCStack *t_scale_stack = MCdispatcher->findstackd(t_event->configure.window);
+                    if (t_scale_stack != nil)
+                    {
+                        int t_new_scale = gdk_window_get_scale_factor(t_event->configure.window);
+                        if (t_new_scale > 0)
+                            t_scale_stack->view_setbackingscale((MCGFloat)t_new_scale);
+                    }
+                }
                 break;
             }
                 

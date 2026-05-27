@@ -640,6 +640,8 @@ glib libglib-2.0.so.0
 	g_list_free: (pointer) -> ()
 	g_main_context_iteration: (pointer, integer) -> ()
 	g_main_context_default: () -> (pointer)
+	g_main_context_is_owner: (pointer) -> (integer)
+	g_thread_self: () -> (pointer)
 	g_main_context_pending: (pointer) -> (integer)
 	g_main_context_prepare: (pointer, pointer) -> (integer)
 	g_main_context_query: (pointer, integer, pointer, pointer, integer) -> (integer)

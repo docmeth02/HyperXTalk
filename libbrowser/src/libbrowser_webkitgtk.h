@@ -70,6 +70,7 @@ private:
 	gulong m_context_menu_handler;
 	gulong m_script_message_handler;
 	gulong m_progress_handler;
+	gulong m_web_process_handler;
 
 	bool GetUrl(char *&r_url);
 	bool GetHTMLText(char *&r_htmltext);

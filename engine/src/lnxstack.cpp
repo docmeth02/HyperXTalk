@@ -74,6 +74,16 @@ MCStack *MCStack::findstackd(Window w)
 	return NULL;
 }
 
+// GTK3 HiDPI: GObject notify callback for GdkWindow scale-factor changes
+static void mc_linux_stack_scale_factor_changed(GObject *p_object, GParamSpec *p_pspec, gpointer p_data)
+{
+    MCStack *t_stack = (MCStack *)p_data;
+    GdkWindow *t_window = (GdkWindow *)p_object;
+    int t_scale_factor = gdk_window_get_scale_factor(t_window);
+    if (t_scale_factor > 0)
+        t_stack->view_setbackingscale((MCGFloat)t_scale_factor);
+}
+
 void MCStack::realize()
 {
 	if (MCnoui)
@@ -134,6 +144,9 @@ void MCStack::realize()
         int t_scale_factor = gdk_window_get_scale_factor(window);
         if (t_scale_factor > 0)
             view_setbackingscale((MCGFloat)t_scale_factor);
+
+        // GTK3 HiDPI: react to monitor scale factor changes (e.g. moving window across displays)
+        g_signal_connect(window, "notify::scale-factor", G_CALLBACK(mc_linux_stack_scale_factor_changed), this);
 
         // DEBUGGING
         //gdk_window_set_debug_updates(TRUE);

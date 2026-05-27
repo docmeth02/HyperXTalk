@@ -22,6 +22,12 @@ webkit2gtk libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0 libwebkit2gtk-4.1.so.0
 	webkit_settings_new: () -> (pointer)
 	webkit_settings_get_user_agent: (pointer) -> (pointer)
 	webkit_settings_set_user_agent: (pointer, pointer) -> ()
+	webkit_settings_set_enable_java: (pointer, integer) -> ()
+	webkit_settings_set_enable_plugins: (pointer, integer) -> ()
+	webkit_settings_set_enable_media_stream: (pointer, integer) -> ()
+	webkit_settings_set_allow_file_access_from_file_urls: (pointer, integer) -> ()
+	webkit_settings_set_allow_universal_access_from_file_urls: (pointer, integer) -> ()
+	webkit_web_view_set_settings: (pointer, pointer) -> ()
 
 	# WebKitUserContentManager
 	webkit_user_content_manager_new: () -> (pointer)
