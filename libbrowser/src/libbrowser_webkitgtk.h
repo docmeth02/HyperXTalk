@@ -52,6 +52,10 @@ public:
 
 	void SyncJavaScriptHandlers();
 
+	// Safe accessors for C signal callbacks (avoid friend+static linkage clash)
+	void *GetWebView() const { return m_web_view; }
+	void *GetContentManager() const { return m_content_manager; }
+
 private:
 	void *m_plug;
 	void *m_web_view;

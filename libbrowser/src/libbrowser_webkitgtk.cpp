@@ -104,6 +104,12 @@ void *webkit_web_view_evaluate_javascript_finish(void *web_view, void *result, v
 void *webkit_settings_new(void);
 void *webkit_settings_get_user_agent(void *settings);
 void webkit_settings_set_user_agent(void *settings, void *user_agent);
+void webkit_settings_set_enable_java(void *settings, int enabled);
+void webkit_settings_set_enable_plugins(void *settings, int enabled);
+void webkit_settings_set_enable_media_stream(void *settings, int enabled);
+void webkit_settings_set_allow_file_access_from_file_urls(void *settings, int enabled);
+void webkit_settings_set_allow_universal_access_from_file_urls(void *settings, int enabled);
+void webkit_web_view_set_settings(void *web_view, void *settings);
 
 void *webkit_user_content_manager_new(void);
 int webkit_user_content_manager_register_script_message_handler(void *manager, void *name);
@@ -130,10 +136,13 @@ int jsc_value_is_string(void *value);
 int jsc_value_is_undefined(void *value);
 int jsc_value_is_null(void *value);
 
-void *g_thread_self(void);
-
 int initialise_weak_link_webkit2gtk(void);
 int initialise_weak_link_javascriptcoregtk(void);
+
+// Cached identity of the GTK main thread so dispatch can avoid deadlock
+// when called from that thread (pump the main loop inline instead of
+// blocking in MCBrowserRunloopWait).
+static gpointer s_main_thread = nil;
 
 }
 
@@ -147,7 +156,7 @@ int initialise_weak_link_javascriptcoregtk(void);
 static void on_load_changed(void *web_view, int load_event, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return;
 	const char *uri = (const char *)webkit_web_view_get_uri(web_view);
 	if (uri == nil)
@@ -173,7 +182,7 @@ static int on_load_failed(void *web_view, int load_event,
 	char *failing_uri, GError *error, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return 0;
 	const char *msg = (error && error->message) ? error->message : "unknown error";
 	browser->OnDocumentLoadFailed(false, failing_uri, msg);
@@ -202,7 +211,7 @@ static bool uri_scheme_is_navigable(const char *p_uri)
 static int on_decide_policy(void *web_view, void *decision, int type, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return 0;
 
 	if (type == WEBKIT_POLICY_DECISION_TYPE_NEW_WINDOW_ACTION)
@@ -237,7 +246,7 @@ static int on_context_menu(void *web_view, void *menu,
 	void *event, void *hit_test, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return 0;
 	bool t_enabled = true;
 	browser->GetBoolProperty(kMCBrowserEnableContextMenu, t_enabled);
@@ -249,7 +258,7 @@ static int on_context_menu(void *web_view, void *menu,
 static void on_progress_changed(void *object, void *pspec, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return;
 	double progress = webkit_web_view_get_estimated_load_progress(object);
 	const char *uri = (const char *)webkit_web_view_get_uri(object);
@@ -262,7 +271,7 @@ static void on_progress_changed(void *object, void *pspec, void *user_data)
 static void on_web_process_terminated(void *web_view, int reason, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil)
+	if (browser->GetWebView() == nil)
 		return;
 	// Emit a browser error event so x-talk scripts can handle recovery
 	browser->OnDocumentLoadFailed(false, "", "web process terminated");
@@ -271,7 +280,7 @@ static void on_web_process_terminated(void *web_view, int reason, void *user_dat
 static void on_script_message(void *manager, void *js_result, void *user_data)
 {
 	MCWebKitGTKBrowser *browser = (MCWebKitGTKBrowser *)user_data;
-	if (browser->m_web_view == nil || browser->m_content_manager == nil)
+	if (browser->GetWebView() == nil || browser->GetContentManager() == nil)
 		return;
 
 	// js_result is a WebKitJavascriptResult* — on webkit2gtk 4.1 this is a JSCValue*
@@ -436,7 +445,7 @@ bool MCWebKitGTKBrowser::Init(void)
 	// Cache the GTK main thread identity so dispatch wrappers can avoid
 	// deadlock when called from that thread.
 	if (s_main_thread == nil)
-		s_main_thread = g_thread_self();
+		s_main_thread = (gpointer)g_thread_self();
 
 	// Create the user content manager
 	m_content_manager = webkit_user_content_manager_new();
@@ -574,11 +583,6 @@ struct MCWebKitGTKDispatch
     char *str2;
     bool done;
 };
-
-// Cached identity of the GTK main thread so dispatch can avoid deadlock
-// when called from that thread (pump the main loop inline instead of
-// blocking in MCBrowserRunloopWait).
-static gpointer s_main_thread = nil;
 
 static gboolean mcwebkitgtk_dispatch_idle(gpointer p_data)
 {
