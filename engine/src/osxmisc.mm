@@ -158,7 +158,7 @@ void MCMacEnableScreenUpdates(void)
 //  REFACTORED FROM HC.CPP 
 //
 
-#if !defined(__arm64__) && !defined(__aarch64__)
+#if !defined(__arm64__) && !defined(__aarch64__) && !defined(__x86_64__)
 IO_stat MCHcstak::macreadresources(void)
 {		//on MAC, read resources in MAC stack directly, by opening stack's resource fork
 	ResFileRefNum resFileRefNum;
@@ -223,7 +223,7 @@ IO_stat MCHcstak::macreadresources(void)
 	
 	return IO_NORMAL;
 }
-#endif // !__arm64__
+#endif // !__arm64__ && !__x86_64__
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -246,7 +246,7 @@ void MCMacFlushThemeBackgroundPatterns(void)
     }
 }
 
-#if !defined(__arm64__) && !defined(__aarch64__)
+#if !defined(__arm64__) && !defined(__aarch64__) && !defined(__x86_64__)
 bool MCMacThemeGetBackgroundPattern(Window_mode p_mode, bool p_active, MCPatternRef &r_pattern)
 {
 	bool t_success = true;
@@ -359,6 +359,6 @@ bool MCMacThemeGetBackgroundPattern(Window_mode p_mode, bool p_active, MCPattern
     
 	return t_success;
 }
-#endif // !__arm64__
+#endif // !__arm64__ && !__x86_64__
 
 

@@ -21,10 +21,10 @@ env:
 jobs:
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # Build ARM64 on Apple Silicon runner
+  # macOS Universal Binary (x86_64 + arm64) on Apple Silicon runner
   # ─────────────────────────────────────────────────────────────────────────────
-  build-macos-arm64:
-    name: macOS ARM64
+  build-macos:
+    name: macOS Universal
     runs-on: macos-15
 
     steps:
@@ -53,108 +53,40 @@ jobs:
         env:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
-      - name: Compile
+      - name: Compile arm64
         run: make compile-mac CODESIGN_IDENTITY="-" XCODEBUILD="xcodebuild ARCHS=arm64"
         env:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
-      - name: Package
-        run: make package-mac-bin CODESIGN_IDENTITY="-"
-        env:
-          BUILDTYPE: ${{ inputs.build_type || 'Release' }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-arm64
-          path: mac-bin/
-          retention-days: 1
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Build x86_64 on Intel runner
-  # ─────────────────────────────────────────────────────────────────────────────
-  build-macos-x86_64:
-    name: macOS x86_64
-    runs-on: macos-13
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Accept Xcode licence
-        run: sudo xcodebuild -license accept
-
-      - name: Install Homebrew dependencies
+      - name: Save arm64 build
         run: |
-          brew install openssl@3 libpq mysql-client pixman meson ninja pkg-config
-          brew install --cask vlc
+          mkdir -p builds
+          cp -R mac-bin builds/mac-bin-arm64
+          cp -R _build/mac/${{ inputs.build_type || 'Release' }} builds/_build-arm64
 
-      - name: Set up Java (Temurin)
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Configure
-        run: make config-mac
-
-      - name: Build prebuilt libraries
-        run: make prebuilt-mac
+      - name: Compile x86_64
+        run: |
+          rm -rf mac-bin _build/mac/${{ inputs.build_type || 'Release' }} _cache/mac/${{ inputs.build_type || 'Release' }}
+          make compile-mac CODESIGN_IDENTITY="-" XCODEBUILD="xcodebuild ARCHS=x86_64"
         env:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
-      - name: Compile
-        run: make compile-mac CODESIGN_IDENTITY="-" XCODEBUILD="xcodebuild ARCHS=x86_64"
-        env:
-          BUILDTYPE: ${{ inputs.build_type || 'Release' }}
-
-      - name: Package
-        run: make package-mac-bin CODESIGN_IDENTITY="-"
-        env:
-          BUILDTYPE: ${{ inputs.build_type || 'Release' }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-x86_64
-          path: mac-bin/
-          retention-days: 1
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Lipo both architectures into a single universal binary
-  # ─────────────────────────────────────────────────────────────────────────────
-  build-macos-universal:
-    name: macOS Universal
-    runs-on: macos-15
-    needs: [build-macos-arm64, build-macos-x86_64]
-
-    steps:
-      - name: Download ARM64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-arm64
-          path: artifacts/arm64/
-
-      - name: Download x86_64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-x86_64
-          path: artifacts/x86_64/
+      - name: Save x86_64 build
+        run: |
+          cp -R mac-bin builds/mac-bin-x86_64
+          cp -R _build/mac/${{ inputs.build_type || 'Release' }} builds/_build-x86_64
 
       - name: Create universal binary
         run: |
-          # The ARM64 app bundle is the base — we will lipo x86_64 binaries into it
+          # The arm64 app bundle is the base — lipo x86_64 binaries into it
           mkdir -p universal
-          cp -R artifacts/arm64/HyperXTalk.app universal/
+          cp -R builds/mac-bin-arm64/HyperXTalk.app universal/
 
-          # Find every Mach-O executable in the arm64 app and lipo with x86_64
           echo "=== Lipo'ing Mach-O binaries ==="
           find universal/HyperXTalk.app -type f | while read F; do
-            # Check if this is a Mach-O binary
             if file "$F" | grep -q "Mach-O"; then
-              # Find the corresponding x86_64 binary
               REL="${F#universal/HyperXTalk.app/}"
-              X86="artifacts/x86_64/HyperXTalk.app/$REL"
+              X86="builds/mac-bin-x86_64/HyperXTalk.app/$REL"
               if [ -f "$X86" ] && file "$X86" | grep -q "Mach-O"; then
                 echo "  Universal: $REL"
                 lipo -create "$F" "$X86" -o "$F" || echo "    WARN: lipo failed for $REL"
@@ -164,20 +96,8 @@ jobs:
             fi
           done
 
-          # Also standalone engine is duplicated in both Runtime dirs
-          echo "=== Lipo'ing standalone engine ==="
-          for arch in arm64 x86_64; do
-            STANDALONE="universal/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/$arch/Standalone.app/Contents/MacOS/HyperXTalk-Standalone"
-            if [ -f "$STANDALONE" ]; then
-              X86_SA="artifacts/x86_64/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/$arch/Standalone.app/Contents/MacOS/HyperXTalk-Standalone"
-              if [ -f "$X86_SA" ]; then
-                lipo -create "$STANDALONE" "$X86_SA" -o "$STANDALONE"
-              fi
-            fi
-          done
-
           # Re-sign the universal bundle
-          echo "=== Re-signing universal bundle ==="
+          echo "=== Re-signing ==="
           codesign --force --sign - --options runtime --entitlements HyperXTalk.entitlements universal/HyperXTalk.app || true
 
           # Verify
@@ -188,8 +108,10 @@ jobs:
           # Package into a zip
           cd universal
           zip -r ../HyperXTalk-macOS-Universal.zip .
+          cd ..
+          cp HyperXTalk-macOS-Universal.zip mac-bin/
 
-      - name: Upload universal artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: HyperXTalk-macOS-Universal-${{ inputs.build_type || 'Release' }}
@@ -202,7 +124,7 @@ jobs:
   release:
     name: Create Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-macos-universal]
+    needs: [build-macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write

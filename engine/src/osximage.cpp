@@ -1,5 +1,5 @@
 
-#if !defined(__arm64__) && !defined(__aarch64__)
+#if !defined(__arm64__) && !defined(__aarch64__) && !defined(__x86_64__)
 #include "osxprefix.h"
 
 #include "globdefs.h"
@@ -222,4 +222,4 @@ bool MCImageBitmapToPICT(MCImageBitmap *p_bitmap, MCMacSysPictHandle &r_pict)
 }
 
 
-#endif // !__arm64__
+#endif // !__arm64__ && !__x86_64__

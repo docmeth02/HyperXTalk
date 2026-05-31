@@ -1,5 +1,5 @@
 
-#if !defined(__arm64__) && !defined(__aarch64__)
+#if !defined(__arm64__) && !defined(__aarch64__) && !defined(__x86_64__)
 #include "osxprefix.h"
 
 #include "globdefs.h"
@@ -1346,4 +1346,4 @@ bool MCThemeDraw(MCGContextRef p_context, MCThemeDrawType p_type, MCThemeDrawInf
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#endif // !__arm64__
+#endif // !__arm64__ && !__x86_64__

@@ -1,6 +1,7 @@
-// ARM64 stubs for functions defined in Carbon-era files excluded on arm64
+// Modern macOS stubs (AppKit-based) for functions previously in Carbon-era files.
+// Now compiles for both arm64 and x86_64 since Carbon/HITheme is removed on macOS 11.0+.
 
-#if defined(__arm64__) || defined(__aarch64__)
+#if defined(__arm64__) || defined(__aarch64__) || defined(__x86_64__)
 
 #import <AppKit/AppKit.h>
 #include <math.h>
