@@ -118,23 +118,33 @@ build_for_arch() {
 
 # Build both architectures
 ARM64_LIBCAIRO=$(build_for_arch arm64)
-X86_64_LIBCAIRO=$(build_for_arch x86_64)
 
-echo "=== Copying generated headers into thirdparty/libcairo/src ==="
-cp "${REPO_ROOT}/_cache/mac/cairo-build-arm64/src/cairo-features.h" \
-    "${CAIRO_SRC}/src/cairo-features.h"
-
-echo "=== Installing universal libcairo.a into prebuilt/lib/mac ==="
-mkdir -p "${PREBUILT_LIB}"
-
-# Merge pixman into each arch's libcairo.a, then lipo them together
+# Check if pixman is available for x86_64
 LIBPIXMAN="$(brew --prefix pixman)/lib/libpixman-1.a"
 if [ ! -f "${LIBPIXMAN}" ]; then
     echo "ERROR: libpixman-1.a not found. Run: brew install pixman"
     exit 1
 fi
 
-for ARCH in arm64 x86_64; do
+PIXMAN_ARCH=$(lipo -info "${LIBPIXMAN}" 2>&1 | grep -o 'x86_64\|arm64\|universal' | head -1 || echo 'unknown')
+BUILD_X86_64=0
+if [ "${PIXMAN_ARCH}" = "x86_64" ] || [ "${PIXMAN_ARCH}" = "universal" ]; then
+    BUILD_X86_64=1
+fi
+
+if [ ${BUILD_X86_64} -eq 1 ]; then
+    X86_64_LIBCAIRO=$(build_for_arch x86_64)
+fi
+
+echo "=== Copying generated headers into thirdparty/libcairo/src ==="
+cp "${REPO_ROOT}/_cache/mac/cairo-build-arm64/src/cairo-features.h" \
+    "${CAIRO_SRC}/src/cairo-features.h"
+
+echo "=== Installing libcairo.a into prebuilt/lib/mac ==="
+mkdir -p "${PREBUILT_LIB}"
+
+# Merge pixman into each arch's libcairo.a, then lipo them together
+for ARCH in arm64; do
     BUILD_DIR="${REPO_ROOT}/_cache/mac/cairo-build-${ARCH}"
     LIBCAIRO=$(find "${BUILD_DIR}" -name "libcairo.a" | head -1)
     MERGE_DIR="${BUILD_DIR}/merge_tmp"
@@ -149,10 +159,27 @@ for ARCH in arm64 x86_64; do
 done
 
 rm -f "${PREBUILT_LIB}/libcairo.a"
-lipo -create \
-    "${REPO_ROOT}/_cache/mac/cairo-build-x86_64/libcairo_merged_x86_64.a" \
-    "${REPO_ROOT}/_cache/mac/cairo-build-arm64/libcairo_merged_arm64.a" \
-    -o "${PREBUILT_LIB}/libcairo.a"
-
-echo "=== Done: prebuilt/lib/mac/libcairo.a updated to universal cairo 1.18.4 (with pixman merged) ==="
+if [ ${BUILD_X86_64} -eq 1 ]; then
+    BUILD_DIR="${REPO_ROOT}/_cache/mac/cairo-build-x86_64"
+    LIBCAIRO=$(find "${BUILD_DIR}" -name "libcairo.a" | head -1)
+    MERGE_DIR="${BUILD_DIR}/merge_tmp"
+    rm -rf "${MERGE_DIR}"
+    mkdir -p "${MERGE_DIR}/cairo" "${MERGE_DIR}/pixman"
+    (cd "${MERGE_DIR}/cairo"  && ar -x "${LIBCAIRO}")
+    (cd "${MERGE_DIR}/pixman" && ar -x "${LIBPIXMAN}")
+    ar -rcs "${BUILD_DIR}/libcairo_merged_x86_64.a" \
+        "${MERGE_DIR}/cairo"/*.o \
+        "${MERGE_DIR}/pixman"/*.o
+    rm -rf "${MERGE_DIR}"
+    lipo -create \
+        "${REPO_ROOT}/_cache/mac/cairo-build-x86_64/libcairo_merged_x86_64.a" \
+        "${REPO_ROOT}/_cache/mac/cairo-build-arm64/libcairo_merged_arm64.a" \
+        -o "${PREBUILT_LIB}/libcairo.a"
+    echo "=== Done: prebuilt/lib/mac/libcairo.a updated to universal cairo 1.18.4 (with pixman merged) ==="
+else
+    cp "${REPO_ROOT}/_cache/mac/cairo-build-arm64/libcairo_merged_arm64.a" \
+        "${PREBUILT_LIB}/libcairo.a"
+    echo "=== Done: prebuilt/lib/mac/libcairo.a updated to arm64-only cairo 1.18.4 (with pixman merged) ==="
+    echo "    (x86_64 pixman not available; for a universal binary install x86_64 Homebrew pixman)"
+fi
 file "${PREBUILT_LIB}/libcairo.a"

@@ -51,7 +51,7 @@ build_for_arch() {
     local CXXFLAGS="${CFLAGS} -std=c++11 -stdlib=libc++"
     local LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${MACOS_MIN} -isysroot ${SDK}"
 
-    echo "=== Building ICU ${ICU_VERSION} for ${ARCH} ==="
+    echo "=== Building ICU ${ICU_VERSION} for ${ARCH} ===" >&2
 
     rm -rf "${ICU_BUILD}" "${ICU_INSTALL}"
     mkdir -p "${ICU_BUILD}"
@@ -60,16 +60,17 @@ build_for_arch() {
     export CXXFLAGS="${CXXFLAGS}"
     export LDFLAGS="${LDFLAGS}"
 
-    echo "Configuring ICU (${ARCH})..."
+    echo "Configuring ICU (${ARCH})..." >&2
     (cd "${ICU_BUILD}" && "${ICU_SRC}/source/runConfigureICU" MacOSX \
-        "${ICU_CONFIGURE_FLAGS[@]}" "--prefix=${ICU_INSTALL}")
+        "${ICU_CONFIGURE_FLAGS[@]}" "--prefix=${ICU_INSTALL}") >&2
 
-    echo "Building ICU (${ARCH})..."
-    make -C "${ICU_BUILD}" -j"$(sysctl -n hw.logicalcpu)" 2>&1 | tail -5
+    echo "Building ICU (${ARCH})..." >&2
+    make -C "${ICU_BUILD}" -j"$(sysctl -n hw.logicalcpu)" 2>&1 | tail -5 >&2
 
-    echo "Installing ICU (${ARCH})..."
-    make -C "${ICU_BUILD}" install 2>&1 | tail -5
+    echo "Installing ICU (${ARCH})..." >&2
+    make -C "${ICU_BUILD}" install 2>&1 | tail -5 >&2
 
+    # Return only the path on stdout
     echo "${ICU_INSTALL}"
 }
 

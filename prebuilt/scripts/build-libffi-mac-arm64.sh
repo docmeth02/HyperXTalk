@@ -30,7 +30,7 @@ build_for_arch() {
     local INCLUDES="-I${LIBFFI_INCLUDE_DARWIN} -I${LIBFFI_DARWIN_IOS}/include -I${LIBFFI_DARWIN_COMMON}/include"
     local OBJECTS=""
 
-    echo "Building ${ARCH} libffi for macOS..."
+    echo "Building ${ARCH} libffi for macOS..." >&2
 
     # ── Compile common C sources ─────────────────────────────────────────
     for SRC in \
@@ -43,16 +43,42 @@ build_for_arch() {
     do
         BASE="$(basename "${SRC}" .c)"
         OBJ="${WORK_DIR}/${BASE}.o"
-        echo "  CC  ${BASE}.c (${ARCH})"
+        echo "  CC  ${BASE}.c (${ARCH})" >&2
         ${CLANG} ${CFLAGS} ${INCLUDES} -c "${SRC}" -o "${OBJ}"
         OBJECTS="${OBJECTS} ${OBJ}"
     done
+
+    # Write a small shim header for missing types in the Darwin headers
+    SHIM_H="${WORK_DIR}/ffi_shim.h"
+    if [ "${ARCH}" = "x86_64" ]; then
+        cat > "${SHIM_H}" <<'EOF'
+/* Shim for missing EFI64 / ffi_go_closure declarations in Darwin headers */
+#define FFI_EFI64 FFI_UNIX64
+typedef struct { void* tramp; void* cif; void* fun; void* user_data; } ffi_go_closure;
+EOF
+        # Also write stub implementations for the missing EFI64 functions.
+        # These are declared extern in ffi64_x86_64.c but never provided by
+        # the Darwin headers — the EFI64 ABI is only used on Win64/EFI, not
+        # macOS, so these stubs are never called at runtime.
+        cat > "${WORK_DIR}/ffi_efi64_stubs.c" <<'EOF'
+#include "ffi.h"
+ffi_status ffi_prep_cif_machdep_efi64(ffi_cif *cif) { return FFI_OK; }
+void ffi_call_efi64(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue) { (void)cif; (void)fn; (void)rvalue; (void)avalue; }
+void ffi_call_go_efi64(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue, void *closure) { (void)cif; (void)fn; (void)rvalue; (void)avalue; (void)closure; }
+ffi_status ffi_prep_closure_loc_efi64(ffi_closure* closure, ffi_cif* cif, void (*fun)(ffi_cif*, void*, void**, void*), void *user_data, void *codeloc) { (void)closure; (void)cif; (void)fun; (void)user_data; (void)codeloc; return FFI_OK; }
+ffi_status ffi_prep_go_closure_efi64(ffi_go_closure* closure, ffi_cif* cif, void (*fun)(ffi_cif*, void*, void**, void*)) { (void)closure; (void)cif; (void)fun; return FFI_OK; }
+EOF
+    else
+        cat > "${SHIM_H}" <<'EOF'
+/* Empty shim for arm64 */
+EOF
+    fi
 
     if [ "${ARCH}" = "arm64" ]; then
         # ── Compile arm64-specific C source ───────────────────────────────
         SRC="${LIBFFI_DARWIN_IOS}/src/aarch64/ffi_arm64.c"
         OBJ="${WORK_DIR}/ffi_arm64.o"
-        echo "  CC  ffi_arm64.c (${ARCH})"
+        echo "  CC  ffi_arm64.c (${ARCH})" >&2
         ${CLANG} ${CFLAGS} ${INCLUDES} \
             -I${ARCH_SRC}/aarch64 \
             -DFFI_TRAMPOLINE_CLOSURE_OFFSET=40 \
@@ -63,10 +89,10 @@ build_for_arch() {
         ASM="${LIBFFI_DARWIN_IOS}/src/aarch64/sysv_arm64.S"
         ASM_PP="${WORK_DIR}/sysv_arm64.s"
         OBJ="${WORK_DIR}/sysv_arm64.o"
-        echo "  CPP sysv_arm64.S (${ARCH})"
-        ${CLANG} ${CFLAGS} ${INCLUDES} -E -x assembler-with-cpp "${ASM}" -o "${ASM_PP}"
+        echo "  CPP sysv_arm64.S (${ARCH})" >&2
+        ${CLANG} ${CFLAGS} ${INCLUDES} -I${ARCH_SRC}/aarch64 -E -x assembler-with-cpp "${ASM}" -o "${ASM_PP}"
         sed -i '' '/^[[:space:]]*\.cfi_/d' "${ASM_PP}"
-        echo "  AS  sysv_arm64.s (${ARCH})"
+        echo "  AS  sysv_arm64.s (${ARCH})" >&2
         ${CLANG} -arch ${ARCH} -mmacosx-version-min=11.0 -isysroot "${SDK_PATH}" \
                  -x assembler -c "${ASM_PP}" -o "${OBJ}"
         OBJECTS="${OBJECTS} ${OBJ}"
@@ -74,18 +100,27 @@ build_for_arch() {
         # ── Compile x86_64-specific C source ──────────────────────────────
         SRC="${LIBFFI_DARWIN_IOS}/src/x86/ffi64_x86_64.c"
         OBJ="${WORK_DIR}/ffi64_x86_64.o"
-        echo "  CC  ffi64_x86_64.c (${ARCH})"
-        ${CLANG} ${CFLAGS} ${INCLUDES} -I${ARCH_SRC}/x86 -c "${SRC}" -o "${OBJ}"
+        echo "  CC  ffi64_x86_64.c (${ARCH})" >&2
+        ${CLANG} ${CFLAGS} ${INCLUDES} -I${ARCH_SRC}/x86 -include "${SHIM_H}" \
+            -c "${SRC}" -o "${OBJ}"
         OBJECTS="${OBJECTS} ${OBJ}"
+
+        # Compile EFI64 stub functions
+        echo "  CC  ffi_efi64_stubs.c (${ARCH})" >&2
+        ${CLANG} ${CFLAGS} ${INCLUDES} -I${ARCH_SRC}/x86 -include "${SHIM_H}" \
+            -c "${WORK_DIR}/ffi_efi64_stubs.c" -o "${WORK_DIR}/ffi_efi64_stubs.o"
+        OBJECTS="${OBJECTS} ${WORK_DIR}/ffi_efi64_stubs.o"
 
         # ── Assemble x86_64 trampoline ────────────────────────────────────
         ASM="${LIBFFI_DARWIN_IOS}/src/x86/unix64_x86_64.S"
         ASM_PP="${WORK_DIR}/unix64_x86_64.s"
         OBJ="${WORK_DIR}/unix64_x86_64.o"
-        echo "  CPP unix64_x86_64.S (${ARCH})"
-        ${CLANG} ${CFLAGS} ${INCLUDES} -E -x assembler-with-cpp "${ASM}" -o "${ASM_PP}"
+        echo "  CPP unix64_x86_64.S (${ARCH})" >&2
+        # Darwin assembler uses "X - ." for PC-relative, not "X@rel".
+        ${CLANG} ${CFLAGS} ${INCLUDES} -I${ARCH_SRC}/x86 \
+            -DHAVE_AS_X86_PCREL=1 -E -x assembler-with-cpp "${ASM}" -o "${ASM_PP}"
         sed -i '' '/^[[:space:]]*\.cfi_/d' "${ASM_PP}"
-        echo "  AS  unix64_x86_64.s (${ARCH})"
+        echo "  AS  unix64_x86_64.s (${ARCH})" >&2
         ${CLANG} -arch ${ARCH} -mmacosx-version-min=11.0 -isysroot "${SDK_PATH}" \
                  -x assembler -c "${ASM_PP}" -o "${OBJ}"
         OBJECTS="${OBJECTS} ${OBJ}"
@@ -93,8 +128,9 @@ build_for_arch() {
 
     # ── Archive ───────────────────────────────────────────────────────────
     local ARCH_LIB="${WORK_DIR}/libffi_${ARCH}.a"
-    echo "  AR  libffi_${ARCH}.a"
+    echo "  AR  libffi_${ARCH}.a" >&2
     ar rcs "${ARCH_LIB}" ${OBJECTS}
+    # Return only the path on stdout
     echo "${ARCH_LIB}"
 }
 

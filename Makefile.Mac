@@ -77,6 +77,7 @@ endif
 	  echo "Pre-signed server-community ($(BUILDTYPE))." || true; \
 	fi
 	$(XCODEBUILD) -project "build-mac$(BUILD_SUBDIR)/$(BUILD_PROJECT).xcodeproj" -configuration $(BUILDTYPE) -target default \
+	  $(XCODEBUILD_EXTRA) \
 	  $(XCODEBUILD_FILTER)
 	@# Sign the app with Hardened Runtime (--options runtime) so that all
 	@# embedded entitlements are actually honored by the kernel (AMFI only
@@ -638,7 +639,6 @@ package-mac-bin:
 	  QLAPPEX="$$QLOUT/HyperXTalkQL.appex" && \
 	  SDKPATH=$$(xcrun --sdk macosx --show-sdk-path 2>/dev/null) && \
 	  mkdir -p "$$QLOUT" && \
-	  # Build Quick Look extension as universal (x86_64 + arm64)
 	  swiftc \
 	    -target x86_64-apple-macos11.0 \
 	    -sdk "$$SDKPATH" \
