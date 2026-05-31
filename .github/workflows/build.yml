@@ -54,7 +54,7 @@ jobs:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
       - name: Compile
-        run: make compile-mac CODESIGN_IDENTITY="-"
+        run: make compile-mac CODESIGN_IDENTITY="-" XCODEBUILD="xcodebuild ARCHS=arm64"
         env:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
@@ -104,7 +104,7 @@ jobs:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
       - name: Compile
-        run: make compile-mac CODESIGN_IDENTITY="-"
+        run: make compile-mac CODESIGN_IDENTITY="-" XCODEBUILD="xcodebuild ARCHS=x86_64"
         env:
           BUILDTYPE: ${{ inputs.build_type || 'Release' }}
 
