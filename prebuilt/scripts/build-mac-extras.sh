@@ -38,7 +38,7 @@ for LIB in libgif libjpeg libpng libpcre; do
     xcodebuild \
         -project "${REPO_ROOT}/build-mac/livecode/thirdparty/${LIB}/${LIB}.xcodeproj" \
         -configuration Debug \
-        -arch arm64 \
+        -arch x86_64 -arch arm64 \
         SOLUTION_DIR="${REPO_ROOT}" \
         2>&1 | grep -E "BUILD (SUCCEEDED|FAILED)|error:" || true
     if [ ! -f "${DEBUG_OUT}/${LIB}.a" ]; then
@@ -55,14 +55,30 @@ if [ -z "${OPENSSL_PREFIX}" ] || [ ! -f "${OPENSSL_PREFIX}/lib/libcrypto.a" ]; t
     echo "ERROR: Homebrew openssl@3 not installed. Run: brew install openssl@3"
     exit 1
 fi
-# Homebrew installs these archives read-only. A plain `cp` copies the
-# source's permission bits, so the destination also becomes read-only and
-# the *next* `make prebuilt-mac` run fails with "Permission denied" here
-# (set -e then aborts the whole script). `cp -f` replaces a read-only
-# destination; the chmod keeps the installed copies writable thereafter.
-cp -f "${OPENSSL_PREFIX}/lib/libcrypto.a" "${PREBUILT_LIB}/libcustomcrypto.a"
-cp -f "${OPENSSL_PREFIX}/lib/libssl.a"    "${PREBUILT_LIB}/libcustomssl.a"
-chmod u+w "${PREBUILT_LIB}/libcustomcrypto.a" "${PREBUILT_LIB}/libcustomssl.a"
+
+# Check for Intel Homebrew openssl@3 for universal build
+X86_64_OPENSSL=""
+if [ -d "/usr/local" ] && [ -f "/usr/local/opt/openssl@3/lib/libcrypto.a" ]; then
+    X86_64_OPENSSL="/usr/local/opt/openssl@3"
+fi
+
+build_openssl_lib() {
+    local NAME="$1"
+    local LIBNAME="$2"
+    local OUT="${PREBUILT_LIB}/${NAME}"
+    rm -f "${OUT}"
+    if [ -n "${X86_64_OPENSSL}" ] && [ "${OPENSSL_PREFIX}" != "${X86_64_OPENSSL}" ]; then
+        echo "Creating universal ${NAME}..."
+        lipo -create "${X86_64_OPENSSL}/lib/${LIBNAME}" "${OPENSSL_PREFIX}/lib/${LIBNAME}" \
+            -o "${OUT}"
+    else
+        cp -f "${OPENSSL_PREFIX}/lib/${LIBNAME}" "${OUT}"
+    fi
+    chmod u+w "${OUT}"
+}
+
+build_openssl_lib "libcustomcrypto.a" "libcrypto.a"
+build_openssl_lib "libcustomssl.a" "libssl.a"
 
 # ── 3. Stub libpq.a and libmysql.a ───────────────────────────────────────────
 # dbpostgresql.bundle and dbmysql.dylib link with -undefined dynamic_lookup
@@ -81,10 +97,13 @@ cat > "${STUB_C}" <<'EOF'
  * prebuilt/scripts/build-mac-extras.sh for context. */
 int _hxt_db_driver_stub(void) { return 0; }
 EOF
-STUB_O="${STUB_DIR}/db-driver-stub.o"
-clang -arch arm64 -c "${STUB_C}" -o "${STUB_O}"
-ar rcs "${PREBUILT_LIB}/libpq.a"    "${STUB_O}"
-ar rcs "${PREBUILT_LIB}/libmysql.a" "${STUB_O}"
+STUB_O_ARM64="${STUB_DIR}/db-driver-stub_arm64.o"
+STUB_O_X86_64="${STUB_DIR}/db-driver-stub_x86_64.o"
+clang -arch arm64 -c "${STUB_C}" -o "${STUB_O_ARM64}"
+clang -arch x86_64 -c "${STUB_C}" -o "${STUB_O_X86_64}"
+rm -f "${PREBUILT_LIB}/libpq.a" "${PREBUILT_LIB}/libmysql.a"
+libtool -static "${STUB_O_X86_64}" "${STUB_O_ARM64}" -o "${PREBUILT_LIB}/libpq.a"
+libtool -static "${STUB_O_X86_64}" "${STUB_O_ARM64}" -o "${PREBUILT_LIB}/libmysql.a"
 
 echo ""
 echo "=== Done. prebuilt/lib/mac now has: ==="

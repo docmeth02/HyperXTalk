@@ -42,7 +42,7 @@ for LIB in ${LIBS}; do
     if xcodebuild \
         -project "${REPO_ROOT}/build-mac/livecode/thirdparty/${LIB}/${LIB}.xcodeproj" \
         -configuration Debug \
-        -arch arm64 \
+        -arch x86_64 -arch arm64 \
         SOLUTION_DIR="${REPO_ROOT}" \
         > "${BUILD_LOG}" 2>&1 \
         && ! grep -q "BUILD FAILED" "${BUILD_LOG}"; then

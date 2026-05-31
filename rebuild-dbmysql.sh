@@ -62,29 +62,32 @@ fi
 echo ""
 echo "=== Deploying ==="
 DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Externals/Database Drivers"
-RT_DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/arm64/Externals/Database Drivers"
 
 # Use ditto — unlike cp -R, ditto replaces existing directories rather than nesting
 ditto "$BUILT" "mac-bin/dbmysql.bundle"
 ditto "$BUILT" "$DRIVERS/dbmysql.bundle"
-ditto "$BUILT" "$RT_DRIVERS/dbmysql.bundle"
 echo "✓ mac-bin"
 
+# Deploy to both arm64 and x86_64 runtime directories
+for ARCH in arm64 x86_64; do
+  RT_DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/${ARCH}/Externals/Database Drivers"
+  ditto "$BUILT" "$RT_DRIVERS/dbmysql.bundle"
+  echo "✓ Runtime Mac OS X/${ARCH}"
+done
+
 # Also deploy to every _build/mac/<config>/ directory that exists.
-# make compile-mac outputs there, and HyperXTalk run from _build/ loads bundles
-# from that location — without this, a stale bundle without HXT_MYSQL_STATIC
-# would be used instead of the freshly-built one.
 for CONFIG in Debug Release Fast; do
   BUILD_DIR="_build/mac/${CONFIG}"
   if [ -d "${BUILD_DIR}" ]; then
     ditto "$BUILT" "${BUILD_DIR}/dbmysql.bundle" 2>/dev/null && \
       echo "✓ _build/mac/${CONFIG}/dbmysql.bundle" || true
-    # Also update inside the app bundle if it's there
     APP_DRIVERS="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Externals/Database Drivers"
-    APP_RT="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/arm64/Externals/Database Drivers"
     [ -d "${APP_DRIVERS}" ] && ditto "$BUILT" "${APP_DRIVERS}/dbmysql.bundle" 2>/dev/null && \
       echo "✓ _build/mac/${CONFIG}/.app/.../Database Drivers" || true
-    [ -d "${APP_RT}" ] && ditto "$BUILT" "${APP_RT}/dbmysql.bundle" 2>/dev/null || true
+    for ARCH in arm64 x86_64; do
+      APP_RT="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/${ARCH}/Externals/Database Drivers"
+      [ -d "${APP_RT}" ] && ditto "$BUILT" "${APP_RT}/dbmysql.bundle" 2>/dev/null || true
+    done
   fi
 done
 echo ""

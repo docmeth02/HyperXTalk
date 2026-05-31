@@ -901,11 +901,9 @@ on revSBDefaultStandaloneSettings pStack, @xSettingsA
    
    -- build for every platform we have engines for
    repeat for each item tTarget in kInitialTargets
-      if tTarget is "MacOSX x86-64" then
-         if xSettingsA["MacOSX x86-32"] then next repeat
-         -- arm64 takes precedence on Apple Silicon builds; skip x86-64 default when arm64 is set
-         if xSettingsA["MacOSX arm64"] then next repeat
-      end if
+       if tTarget is "MacOSX x86-64" then
+          if xSettingsA["MacOSX x86-32"] then next repeat
+       end if
       if xSettingsA[tTarget] = "" then
          put revEngineCheck(tTarget) into xSettingsA[tTarget]
       end if
@@ -919,25 +917,23 @@ on revSBDefaultStandaloneSettings pStack, @xSettingsA
    if xSettingsA["Windows,LegalCopyright"] = "" then put item 1 of it&&the cUserOrganisation of stack "Home"&&"All rights reserved worldwide" into xSettingsA["Windows,LegalCopyright"]
    if xSettingsA["Windows,companyname"] = "" then put the cUserOrganisation of stack "Home" into xSettingsA["Windows,companyname"]
    
-   -- Since the intel choice, set the default here:
-   -- MM-2014-03-21: [[ PPC Support Dropped ]] Only create standalone setting for Intel (for OS X) by default.
-   -- Prefer arm64 on Apple Silicon; fall back to x86-64 if no Mac arch is selected.
-   -- Only auto-enable a MacOSX target when running on macOS; on Windows/Linux the user must opt in explicitly.
-   if the platform is "MacOS" then
-      if xSettingsA["MacOSX arm64"] is empty and xSettingsA["MacOSX x86-64"] is empty and xSettingsA["MacOSX x86-32"] is empty then
-         if revEngineCheck("MacOSX arm64") then
-            put true into xSettingsA["MacOSX arm64"]
-         else
-            put true into xSettingsA["MacOSX x86-64"]
-         end if
-      end if
-   end if
+    -- Since the intel choice, set the default here:
+    -- MM-2014-03-21: [[ PPC Support Dropped ]] Only create standalone setting for Intel (for OS X) by default.
+    -- HyperXTalk: enable both arm64 and x86-64 when running on macOS if both engines are available.
+    -- Only auto-enable a MacOSX target when running on macOS; on Windows/Linux the user must opt in explicitly.
+    if the platform is "MacOS" then
+       if xSettingsA["MacOSX arm64"] is empty and xSettingsA["MacOSX x86-64"] is empty and xSettingsA["MacOSX x86-32"] is empty then
+          if revEngineCheck("MacOSX arm64") then
+             put true into xSettingsA["MacOSX arm64"]
+          end if
+          if revEngineCheck("MacOSX x86-64") then
+             put true into xSettingsA["MacOSX x86-64"]
+          end if
+       end if
+    end if
    
-   -- Migration: if arm64 is now selected and x86-64 is also set (from old saved settings),
-   -- clear x86-64 so we don't attempt to build both.  arm64 takes precedence on Apple Silicon.
-   if xSettingsA["MacOSX arm64"] and xSettingsA["MacOSX x86-64"] then
-      put false into xSettingsA["MacOSX x86-64"]
-   end if
+    -- HyperXTalk: both arm64 and x86-64 are now supported (universal binary).
+    -- If both are selected, keep both enabled.
    
    -- Auto-remove stack passwords from community stacks
    if not revEnvironmentEditionProperty("password_protection") then

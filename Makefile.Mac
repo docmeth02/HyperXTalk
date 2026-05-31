@@ -5,7 +5,7 @@
 # Prettifying output for CI builds
 XCODEBUILD_FILTER ?=
 
-# Build all macOS arm64 prebuilt dependencies in one pass.
+# Build all macOS universal prebuilt dependencies in one pass.
 # Replaces the manual ritual previously documented in BUILD1.md.
 # Requires Homebrew prereqs: openssl@3, libpq, mysql-client, pixman.
 #
@@ -227,6 +227,7 @@ BUNDLE      = $(MAC_BIN)/HyperXTalk.app
 TOOLS_DIR   = $(BUNDLE)/Contents/Tools
 SUPPORT_DIR = $(BUNDLE)/Contents/Support
 RUNTIME_ARM64 = $(TOOLS_DIR)/Runtime/Mac OS X/arm64
+RUNTIME_X86_64 = $(TOOLS_DIR)/Runtime/Mac OS X/x86_64
 
 package-mac:
 	@echo "=== Packaging $(BUNDLE) ==="
@@ -238,6 +239,8 @@ package-mac:
 	@mkdir -p "$(TOOLS_DIR)/Externals/Database Drivers"
 	@mkdir -p "$(RUNTIME_ARM64)/Support"
 	@mkdir -p "$(RUNTIME_ARM64)/Externals/Database Drivers"
+	@mkdir -p "$(RUNTIME_X86_64)/Support"
+	@mkdir -p "$(RUNTIME_X86_64)/Externals/Database Drivers"
 	@mkdir -p "$(TOOLS_DIR)/Extensions"
 	@mkdir -p "$(TOOLS_DIR)/Toolchain"
 	@mkdir -p "$(SUPPORT_DIR)"
@@ -291,61 +294,63 @@ package-mac:
 	@# ----------------------------------------------------------------
 	@# Externals discovery files (read by the standalone builder)
 	@# ----------------------------------------------------------------
-	@printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
-	    > "$(RUNTIME_ARM64)/Externals/Externals.txt"
-	@printf 'Database,revdb.bundle\n' \
-	    >> "$(RUNTIME_ARM64)/Externals/Externals.txt"
-	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
-	    > "$(RUNTIME_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@for rt in "$(RUNTIME_ARM64)" "$(RUNTIME_X86_64)"; do \
+	  printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
+	      > "$$rt/Externals/Externals.txt"; \
+	  printf 'Database,revdb.bundle\n' \
+	      >> "$$rt/Externals/Externals.txt"; \
+	  printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
+	      > "$$rt/Externals/Database Drivers/Database Drivers.txt"; \
+	done
 	@# ----------------------------------------------------------------
 	@# Externals (Runtime standalone use) — mirror of Tools/Externals
 	@# ----------------------------------------------------------------
-	@for b in revbrowser revxml revspeech revzip revdb; do \
-	  [ -d "$(TOOLS_DIR)/Externals/$$b.bundle" ] && \
-	    cp -R "$(TOOLS_DIR)/Externals/$$b.bundle" \
-	      "$(RUNTIME_ARM64)/Externals/" || true; \
-	done
-	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
-	  [ -d "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" ] && \
-	    cp -R "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" \
-	      "$(RUNTIME_ARM64)/Externals/Database Drivers/" || true; \
+	@for rt in "$(RUNTIME_ARM64)" "$(RUNTIME_X86_64)"; do \
+	  for b in revbrowser revxml revspeech revzip revdb; do \
+	    [ -d "$(TOOLS_DIR)/Externals/$$b.bundle" ] && \
+	      cp -R "$(TOOLS_DIR)/Externals/$$b.bundle" \
+	        "$$rt/Externals/" || true; \
+	  done; \
+	  for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	    [ -d "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" ] && \
+	      cp -R "$(TOOLS_DIR)/Externals/Database Drivers/$$b.bundle" \
+	        "$$rt/Externals/Database Drivers/" || true; \
+	  done; \
 	done
 	@# ----------------------------------------------------------------
-	@# Runtime: arm64 standalone engine + support libraries
+	@# Runtime: universal standalone engine in both arch directories
 	@# ----------------------------------------------------------------
-	@# Remove existing Standalone.app first so cp -R replaces it rather
-	@# than nesting HyperXTalk-Standalone.app inside it on re-runs.
-	@rm -rf "$(RUNTIME_ARM64)/Standalone.app"
-	@[ -d "$(MAC_BIN)/HyperXTalk-Standalone.app" ] && \
+	@for rt in "$(RUNTIME_ARM64)" "$(RUNTIME_X86_64)"; do \
+	  rm -rf "$$rt/Standalone.app"; \
+	  [ -d "$(MAC_BIN)/HyperXTalk-Standalone.app" ] && \
 	    cp -R "$(MAC_BIN)/HyperXTalk-Standalone.app" \
-	      "$(RUNTIME_ARM64)/Standalone.app" || true
-	@# Re-sign Standalone.app inside-out with hardened runtime so
-	@# notarization accepts it (strips get-task-allow from debug build).
-	@if [ -d "$(RUNTIME_ARM64)/Standalone.app" ]; then \
-	  find "$(RUNTIME_ARM64)/Standalone.app" \
-	      \( -name "*.framework" -o -name "*.dylib" \) | \
-	      sort -r | while read F; do \
+	      "$$rt/Standalone.app" || true; \
+	  if [ -d "$$rt/Standalone.app" ]; then \
+	    find "$$rt/Standalone.app" \
+	        \( -name "*.framework" -o -name "*.dylib" \) | \
+	        sort -r | while read F; do \
+	      codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	          --options runtime \
+	          --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	    done; \
+	    find "$$rt/Standalone.app" -name "*.bundle" | \
+	        while read F; do \
+	      codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	          --options runtime \
+	          --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	    done; \
 	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	        --options runtime \
-	        --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	  done; \
-	  find "$(RUNTIME_ARM64)/Standalone.app" -name "*.bundle" | \
-	      while read F; do \
-	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	        --options runtime \
-	        --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	  done; \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements HyperXTalk.entitlements \
-	      "$(RUNTIME_ARM64)/Standalone.app"; \
-	fi
-	@[ -d "$(MAC_BIN)/revpdfprinter.bundle" ] && \
+	        --entitlements HyperXTalk.entitlements \
+	        "$$rt/Standalone.app"; \
+	  fi; \
+	  [ -d "$(MAC_BIN)/revpdfprinter.bundle" ] && \
 	    cp -R "$(MAC_BIN)/revpdfprinter.bundle" \
-	      "$(RUNTIME_ARM64)/Support/" || true
-	@[ -f "$(MAC_BIN)/revsecurity.dylib" ] && \
+	      "$$rt/Support/" || true; \
+	  [ -f "$(MAC_BIN)/revsecurity.dylib" ] && \
 	    cp "$(MAC_BIN)/revsecurity.dylib" \
-	      "$(RUNTIME_ARM64)/Support/" || true
+	      "$$rt/Support/" || true; \
+	done
 	@# ----------------------------------------------------------------
 	@# Toolchain: compiler, runner, LCB modules
 	@# ----------------------------------------------------------------
@@ -423,6 +428,7 @@ MACBIN_BUNDLE    = $(MACBIN_BIN)/HyperXTalk.app
 MACBIN_TOOLS     = $(MACBIN_BUNDLE)/Contents/Tools
 MACBIN_SUPPORT   = $(MACBIN_BUNDLE)/Contents/Support
 MACBIN_RT_ARM64  = $(MACBIN_TOOLS)/Runtime/Mac OS X/arm64
+MACBIN_RT_X86_64 = $(MACBIN_TOOLS)/Runtime/Mac OS X/x86_64
 
 bump-revision:
 	@perl -i -pe 's/(BUILD_REVISION\s*=\s*)(\d+)/$$1.($$2+1)/e' version
@@ -448,6 +454,8 @@ package-mac-bin:
 	@[ -d "docs/glossary"  ] && cp -R "docs/glossary"  "$(MACBIN_TOOLS)/docs/" || true
 	@mkdir -p "$(MACBIN_RT_ARM64)/Support"
 	@mkdir -p "$(MACBIN_RT_ARM64)/Externals/Database Drivers"
+	@mkdir -p "$(MACBIN_RT_X86_64)/Support"
+	@mkdir -p "$(MACBIN_RT_X86_64)/Externals/Database Drivers"
 	@mkdir -p "$(MACBIN_TOOLS)/Extensions"
 	@mkdir -p "$(MACBIN_TOOLS)/Toolchain"
 	@mkdir -p "$(MACBIN_SUPPORT)"
@@ -489,10 +497,12 @@ package-mac-bin:
 	@# ----------------------------------------------------------------
 	@[ -d "ide/Runtime" ] && cp -R "ide/Runtime/." "$(MACBIN_TOOLS)/Runtime/" || true
 	@# Create Sample Icons folder for standalone builder (expects icons in Support/Sample Icons/)
-	@mkdir -p "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/Sample Icons"
-	@[ -f "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/GenericApplication.icns" ] && \
-	  cp "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/GenericApplication.icns" \
-	  "$(MACBIN_TOOLS)/Runtime/Mac OS X/arm64/Support/Sample Icons/" || true
+	@for rt in "$(MACBIN_RT_ARM64)" "$(MACBIN_RT_X86_64)"; do \
+	  mkdir -p "$$rt/Support/Sample Icons"; \
+	  [ -f "$$rt/Support/GenericApplication.icns" ] && \
+	    cp "$$rt/Support/GenericApplication.icns" \
+	    "$$rt/Support/Sample Icons/" || true; \
+	done
 	@# ----------------------------------------------------------------
 	@# Toolset libraries: IDE support scripts from ide-support/
 	@# ----------------------------------------------------------------
@@ -525,61 +535,63 @@ package-mac-bin:
 	@# ----------------------------------------------------------------
 	@# Externals discovery files (read by the standalone builder)
 	@# ----------------------------------------------------------------
-	@printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
-	    > "$(MACBIN_RT_ARM64)/Externals/Externals.txt"
-	@printf 'Database,revdb.bundle\n' \
-	    >> "$(MACBIN_RT_ARM64)/Externals/Externals.txt"
-	@printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
-	    > "$(MACBIN_RT_ARM64)/Externals/Database Drivers/Database Drivers.txt"
+	@for rt in "$(MACBIN_RT_ARM64)" "$(MACBIN_RT_X86_64)"; do \
+	  printf 'Speech,revspeech.bundle\nXML,revxml.bundle\nBrowser,revbrowser.bundle\nRevolution Zip,revzip.bundle\n' \
+	      > "$$rt/Externals/Externals.txt"; \
+	  printf 'Database,revdb.bundle\n' \
+	      >> "$$rt/Externals/Externals.txt"; \
+	  printf 'MySQL,dbmysql.bundle\nODBC,dbodbc.bundle\nPostgreSQL,dbpostgresql.bundle\nSQLite,dbsqlite.bundle\n' \
+	      > "$$rt/Externals/Database Drivers/Database Drivers.txt"; \
+	done
 	@# ----------------------------------------------------------------
 	@# Externals (Runtime standalone use) — mirror of Tools/Externals
 	@# ----------------------------------------------------------------
-	@for b in revbrowser revxml revspeech revzip revdb; do \
-	  [ -d "$(MACBIN_TOOLS)/Externals/$$b.bundle" ] && \
-	    cp -R "$(MACBIN_TOOLS)/Externals/$$b.bundle" \
-	      "$(MACBIN_RT_ARM64)/Externals/" || true; \
-	done
-	@for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
-	  [ -d "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" ] && \
-	    cp -R "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" \
-	      "$(MACBIN_RT_ARM64)/Externals/Database Drivers/" || true; \
+	@for rt in "$(MACBIN_RT_ARM64)" "$(MACBIN_RT_X86_64)"; do \
+	  for b in revbrowser revxml revspeech revzip revdb; do \
+	    [ -d "$(MACBIN_TOOLS)/Externals/$$b.bundle" ] && \
+	      cp -R "$(MACBIN_TOOLS)/Externals/$$b.bundle" \
+	        "$$rt/Externals/" || true; \
+	  done; \
+	  for b in dbmysql dbodbc dbpostgresql dbsqlite; do \
+	    [ -d "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" ] && \
+	      cp -R "$(MACBIN_TOOLS)/Externals/Database Drivers/$$b.bundle" \
+	        "$$rt/Externals/Database Drivers/" || true; \
+	  done; \
 	done
 	@# ----------------------------------------------------------------
-	@# Runtime: arm64 standalone engine + support libraries
+	@# Runtime: universal standalone engine in both arch directories
 	@# ----------------------------------------------------------------
-	@# Remove existing Standalone.app first so cp -R replaces it rather
-	@# than nesting HyperXTalk-Standalone.app inside it on re-runs.
-	@rm -rf "$(MACBIN_RT_ARM64)/Standalone.app"
-	@[ -d "$(MACBIN_BIN)/HyperXTalk-Standalone.app" ] && \
+	@for rt in "$(MACBIN_RT_ARM64)" "$(MACBIN_RT_X86_64)"; do \
+	  rm -rf "$$rt/Standalone.app"; \
+	  [ -d "$(MACBIN_BIN)/HyperXTalk-Standalone.app" ] && \
 	    cp -R "$(MACBIN_BIN)/HyperXTalk-Standalone.app" \
-	      "$(MACBIN_RT_ARM64)/Standalone.app" || true
-	@# Re-sign Standalone.app inside-out with hardened runtime so
-	@# notarization accepts it (strips get-task-allow from debug build).
-	@if [ -d "$(MACBIN_RT_ARM64)/Standalone.app" ]; then \
-	  find "$(MACBIN_RT_ARM64)/Standalone.app" \
-	      \( -name "*.framework" -o -name "*.dylib" \) | \
-	      sort -r | while read F; do \
+	      "$$rt/Standalone.app" || true; \
+	  if [ -d "$$rt/Standalone.app" ]; then \
+	    find "$$rt/Standalone.app" \
+	        \( -name "*.framework" -o -name "*.dylib" \) | \
+	        sort -r | while read F; do \
+	      codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	          --options runtime \
+	          --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	    done; \
+	    find "$$rt/Standalone.app" -name "*.bundle" | \
+	        while read F; do \
+	      codesign --force --sign "$(CODESIGN_IDENTITY)" \
+	          --options runtime \
+	          --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
+	    done; \
 	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
 	        --options runtime \
-	        --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	  done; \
-	  find "$(MACBIN_RT_ARM64)/Standalone.app" -name "*.bundle" | \
-	      while read F; do \
-	    codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	        --options runtime \
-	        --entitlements HyperXTalk.entitlements "$$F" 2>/dev/null || true; \
-	  done; \
-	  codesign --force --sign "$(CODESIGN_IDENTITY)" \
-	      --options runtime \
-	      --entitlements HyperXTalk.entitlements \
-	      "$(MACBIN_RT_ARM64)/Standalone.app"; \
-	fi
-	@[ -d "$(MACBIN_BIN)/revpdfprinter.bundle" ] && \
+	        --entitlements HyperXTalk.entitlements \
+	        "$$rt/Standalone.app"; \
+	  fi; \
+	  [ -d "$(MACBIN_BIN)/revpdfprinter.bundle" ] && \
 	    cp -R "$(MACBIN_BIN)/revpdfprinter.bundle" \
-	      "$(MACBIN_RT_ARM64)/Support/" || true
-	@[ -f "$(MACBIN_BIN)/revsecurity.dylib" ] && \
+	      "$$rt/Support/" || true; \
+	  [ -f "$(MACBIN_BIN)/revsecurity.dylib" ] && \
 	    cp "$(MACBIN_BIN)/revsecurity.dylib" \
-	      "$(MACBIN_RT_ARM64)/Support/" || true
+	      "$$rt/Support/" || true; \
+	done
 	@# ----------------------------------------------------------------
 	@# Toolchain: compiler, runner, LCB modules
 	@# ----------------------------------------------------------------
@@ -626,6 +638,16 @@ package-mac-bin:
 	  QLAPPEX="$$QLOUT/HyperXTalkQL.appex" && \
 	  SDKPATH=$$(xcrun --sdk macosx --show-sdk-path 2>/dev/null) && \
 	  mkdir -p "$$QLOUT" && \
+	  # Build Quick Look extension as universal (x86_64 + arm64)
+	  swiftc \
+	    -target x86_64-apple-macos11.0 \
+	    -sdk "$$SDKPATH" \
+	    -module-name HyperXTalkQL \
+	    -framework Quartz \
+	    -Xfrontend -application-extension \
+	    -Xlinker -e -Xlinker _NSExtensionMain \
+	    ide/HyperXTalkQL/HyperXTalkQL/PreviewViewController.swift \
+	    -o "$$QLOUT/HyperXTalkQL_x86_64" && \
 	  swiftc \
 	    -target arm64-apple-macos11.0 \
 	    -sdk "$$SDKPATH" \
@@ -634,11 +656,13 @@ package-mac-bin:
 	    -Xfrontend -application-extension \
 	    -Xlinker -e -Xlinker _NSExtensionMain \
 	    ide/HyperXTalkQL/HyperXTalkQL/PreviewViewController.swift \
+	    -o "$$QLOUT/HyperXTalkQL_arm64" && \
+	  lipo -create "$$QLOUT/HyperXTalkQL_x86_64" "$$QLOUT/HyperXTalkQL_arm64" \
 	    -o "$$QLOUT/HyperXTalkQL" && \
 	  mkdir -p "$$QLAPPEX/Contents/MacOS" && \
 	  cp "$$QLOUT/HyperXTalkQL" "$$QLAPPEX/Contents/MacOS/" && \
 	  cp ide/HyperXTalkQL/HyperXTalkQL/Info.plist "$$QLAPPEX/Contents/" && \
-	  echo "Built HyperXTalkQL.appex." || \
+	  echo "Built HyperXTalkQL.appex (universal)." || \
 	  echo "Warning: HyperXTalkQL build failed; Quick Look preview will not be available."
 	@mkdir -p "$(MACBIN_BUNDLE)/Contents/PlugIns"
 	@if [ -d "_build/mac/$(BUILDTYPE)/ql/HyperXTalkQL.appex" ]; then \
@@ -690,7 +714,7 @@ package-mac-bin:
 	  echo "VLC bundled successfully."; \
 	else \
 	  echo "WARNING: VLC.app not found at $$VLC_APP — skipping VLC bundling."; \
-	  echo "         Install VLC ARM64 from https://www.videolan.org/ to enable media playback."; \
+	  echo "         Install VLC (universal) from https://www.videolan.org/ to enable media playback."; \
 	fi
 	@# ----------------------------------------------------------------
 	@# Strip extended attributes (resource forks, Finder info, etc.)

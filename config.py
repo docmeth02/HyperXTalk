@@ -32,7 +32,7 @@ BUILDBOT_PLATFORM_TRIPLES = (
     'arm64-android-ndk16r15',
     'x86-android-ndk16r15',
     'x86_64-android-ndk16r15',
-    'arm64-mac-macosx11.0',         # Apple Silicon (arm64)
+    'x86_64 arm64-mac-macosx11.0',  # Universal macOS (Intel + Apple Silicon)
     'universal-ios-iphoneos14.5',
     'universal-ios-iphoneos14.4',
     'universal-ios-iphoneos13.2',
@@ -305,11 +305,8 @@ def host_platform(opts):
 def guess_xcode_arch(target_sdk):
     sdk, ver = re.match('^([^\\d]*)(\\d*)', target_sdk).groups()
     if sdk == 'macosx':
-        # Return arm64 for Apple Silicon (M-series) Macs.
-        import platform as _platform
-        if _platform.machine() == 'arm64':
-            return 'arm64'
-        return 'x86_64'
+        # Build universal binaries for both Intel and Apple Silicon.
+        return 'x86_64 arm64'
     if sdk == 'iphoneos':
         if int(ver) < 8:
             return 'armv7'

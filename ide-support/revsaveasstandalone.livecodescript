@@ -179,12 +179,8 @@ on revSaveAsStandalone pStack, pFolder, pPreview, pSuppressSuccessMsg
       put true into tEdited
    end if
 
-   -- HyperXTalk: arm64 and x86-64 are mutually exclusive on Apple Silicon.
-   -- If arm64 is set, strip x86-64 so we never attempt to build the absent x86-64 engine.
-   if tSettings["MacOSX arm64"] and tSettings["MacOSX x86-64"] then
-      put false into tSettings["MacOSX x86-64"]
-      put true into tEdited
-   end if
+    -- HyperXTalk: both arm64 and x86-64 are now supported (universal binary).
+    -- Keep both enabled if selected.
 
    -- Make sure there is actually something to build..
    if revSBNoPlatforms(tSettings) then

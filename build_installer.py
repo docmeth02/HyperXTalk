@@ -596,17 +596,18 @@ def create_payload(payload_path):
             add_single(src, f"{ext_dir}/{bundle}", zf, is_exec=True)
 
         # ----------------------------------------------------------------
-        # 7. Runtime.MacOSX: HyperXTalk-Standalone.app → Runtime/Mac OS X/arm64
+        # 7. Runtime.MacOSX: HyperXTalk-Standalone.app → Runtime/Mac OS X/{arm64,x86_64}
         # ----------------------------------------------------------------
         print("  Adding Runtimes …")
-        rt_mac = f"{SF}/Runtime/Mac OS X/arm64"
-        if os.path.isdir(f"{MAC_BIN}/HyperXTalk-Standalone.app"):
-            add_tree(f"{MAC_BIN}/HyperXTalk-Standalone.app",
-                     f"{rt_mac}/Standalone.app", zf, force_exec=True)
-            add_folder_entry(f"{rt_mac}/Support")
-            for fname in ["revpdfprinter.bundle", "revsecurity.dylib"]:
-                src = f"{MAC_BIN}/{fname}"
-                add_single(src, f"{rt_mac}/Support/{fname}", zf, is_exec=True)
+        for arch in ["arm64", "x86_64"]:
+            rt_mac = f"{SF}/Runtime/Mac OS X/{arch}"
+            if os.path.isdir(f"{MAC_BIN}/HyperXTalk-Standalone.app"):
+                add_tree(f"{MAC_BIN}/HyperXTalk-Standalone.app",
+                         f"{rt_mac}/Standalone.app", zf, force_exec=True)
+                add_folder_entry(f"{rt_mac}/Support")
+                for fname in ["revpdfprinter.bundle", "revsecurity.dylib"]:
+                    src = f"{MAC_BIN}/{fname}"
+                    add_single(src, f"{rt_mac}/Support/{fname}", zf, is_exec=True)
 
         # ----------------------------------------------------------------
         # 8. Misc: License/about/Open-Source-Licenses → SF

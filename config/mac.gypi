@@ -221,8 +221,8 @@
 		{
 			'xcode_settings':
 			{
-				'ARCHS': 'arm64',
-				'ONLY_ACTIVE_ARCH': 'YES',
+				'ARCHS': 'x86_64 arm64',
+				'ONLY_ACTIVE_ARCH': 'NO',
 				'GCC_OPTIMIZATION_LEVEL': '0',
 			},
 		},
@@ -231,7 +231,8 @@
 		{
 			'xcode_settings':
 			{
-				'ARCHS': 'arm64',
+				'ARCHS': 'x86_64 arm64',
+				'ONLY_ACTIVE_ARCH': 'NO',
 				'GCC_OPTIMIZATION_LEVEL': '3',
 				'GCC_ENABLE_FIX_AND_CONTINUE': 'NO',
 			},
@@ -241,7 +242,8 @@
 		{
 			'xcode_settings':
 			{
-				'ARCHS': 'arm64',
+				'ARCHS': 'x86_64 arm64',
+				'ONLY_ACTIVE_ARCH': 'NO',
 				'GCC_OPTIMIZATION_LEVEL': '0',
 				'GCC_ENABLE_FIX_AND_CONTINUE': 'NO',
 			},

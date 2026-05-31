@@ -53,12 +53,12 @@ Rebuilt the archive cleanly by deleting the old one first and using ar rcs from 
 
 To reproduce from a clean checkout, these steps must be run before make compile-mac:
 
-Rebuild FFI
+Rebuild FFI (universal)
 ```
 sh prebuilt/scripts/build-libffi-mac-arm64.sh
 ```
 
-Rebuild the third party libraries
+Rebuild the third party libraries (universal)
 ```
 REPO=/Users/emily-elizabethhoward/Developer/HyperXTalk
 for LIB in libskia libsqlite libxml libzip libcairo libxslt libiodbc; do
@@ -66,12 +66,12 @@ for LIB in libskia libsqlite libxml libzip libcairo libxslt libiodbc; do
   xcodebuild \
     -project "$REPO/build-mac/livecode/thirdparty/$LIB/$LIB.xcodeproj" \
     -configuration Debug \
-    -arch arm64 \
+    -arch x86_64 -arch arm64 \
     SOLUTION_DIR="$REPO" 2>&1 | grep -E "BUILD (SUCCEEDED|FAILED)|error:"
 done
 ```
 
-Rebuild libz
+Rebuild libz (universal)
 ```
 sh prebuilt/scripts/build-libz-mac-arm64.sh
 ```
@@ -94,7 +94,7 @@ Rebuild MySQL
 rebuild-dbmysql.sh
 ```
 
-Build the standalone. The first command will make the executables and the second one will build the standalone in the /mac-bin folder
+Build the standalone (universal binary). The first command will make the executables and the second one will build the standalone in the /mac-bin folder
 ```
 make compile-mac
 make package-mac-bin

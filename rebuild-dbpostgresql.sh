@@ -62,12 +62,16 @@ fi
 echo ""
 echo "=== Deploying ==="
 DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Externals/Database Drivers"
-RT_DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/arm64/Externals/Database Drivers"
 
 ditto "$BUILT" "mac-bin/dbpostgresql.bundle"
 ditto "$BUILT" "$DRIVERS/dbpostgresql.bundle"
-ditto "$BUILT" "$RT_DRIVERS/dbpostgresql.bundle"
 echo "✓ mac-bin"
+
+for ARCH in arm64 x86_64; do
+  RT_DRIVERS="mac-bin/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/${ARCH}/Externals/Database Drivers"
+  ditto "$BUILT" "$RT_DRIVERS/dbpostgresql.bundle"
+  echo "✓ Runtime Mac OS X/${ARCH}"
+done
 
 for CONFIG in Debug Release Fast; do
   BUILD_DIR="_build/mac/${CONFIG}"
@@ -75,10 +79,12 @@ for CONFIG in Debug Release Fast; do
     ditto "$BUILT" "${BUILD_DIR}/dbpostgresql.bundle" 2>/dev/null && \
       echo "✓ _build/mac/${CONFIG}/dbpostgresql.bundle" || true
     APP_DRIVERS="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Externals/Database Drivers"
-    APP_RT="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/arm64/Externals/Database Drivers"
     [ -d "${APP_DRIVERS}" ] && ditto "$BUILT" "${APP_DRIVERS}/dbpostgresql.bundle" 2>/dev/null && \
       echo "✓ _build/mac/${CONFIG}/.app/.../Database Drivers" || true
-    [ -d "${APP_RT}" ] && ditto "$BUILT" "${APP_RT}/dbpostgresql.bundle" 2>/dev/null || true
+    for ARCH in arm64 x86_64; do
+      APP_RT="${BUILD_DIR}/HyperXTalk.app/Contents/Tools/Runtime/Mac OS X/${ARCH}/Externals/Database Drivers"
+      [ -d "${APP_RT}" ] && ditto "$BUILT" "${APP_RT}/dbpostgresql.bundle" 2>/dev/null || true
+    done
   fi
 done
 echo ""

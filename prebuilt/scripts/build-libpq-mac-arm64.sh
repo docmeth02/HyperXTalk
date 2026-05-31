@@ -1,16 +1,11 @@
 #!/bin/bash
 # Install PostgreSQL C client library (libpq) from Homebrew into the repo.
+# Builds a universal libpq.a if both x86_64 and arm64 Homebrew libraries are available.
 #
 # Requires: brew install libpq
 #
 # Usage (from repo root):
 #   sh prebuilt/scripts/build-libpq-mac-arm64.sh
-#
-# What it does:
-#   1. Locates the pre-built arm64 libpq.a from Homebrew
-#   2. Copies it to prebuilt/lib/mac/libpq.a
-#   3. Updates thirdparty/libpq/include/ with the modern headers
-#   4. Updates thirdparty/libpq/ORIGIN
 
 set -euo pipefail
 
@@ -48,7 +43,6 @@ fi
 # ── Show what we found ────────────────────────────────────────────────────────
 PQ_VER="$(cat "${PQ_PREFIX}/include/libpq-fe.h" 2>/dev/null | \
     grep 'PG_VERSION' | head -1 | sed 's/.*"\(.*\)".*/\1/' || echo "unknown")"
-# If not in libpq-fe.h, try pg_config
 if [ "${PQ_VER}" = "unknown" ]; then
     PQ_VER="$("${PQ_PREFIX}/bin/pg_config" --version 2>/dev/null | sed 's/PostgreSQL //' || echo "unknown")"
 fi
@@ -58,34 +52,51 @@ echo "  Prefix  : ${PQ_PREFIX}"
 echo "  Version : PostgreSQL ${PQ_VER}"
 echo ""
 
-# Verify architecture
-ARCH_INFO="$(file "${PQ_PREFIX}/lib/libpq.a" 2>/dev/null | \
-    grep -o 'arm64\|x86_64\|universal' | head -1 || echo 'unknown')"
-echo "  Architecture : ${ARCH_INFO}"
-if [ "${ARCH_INFO}" = "x86_64" ]; then
-    echo ""
-    echo "WARNING: Library is x86_64, not arm64."
-    echo "Make sure you installed libpq using the arm64 Homebrew"
-    echo "at /opt/homebrew (not /usr/local which is the Intel prefix)."
-    echo ""
-    read -r -p "Continue anyway? [y/N] " reply
-    case "${reply}" in [yY]*) ;; *) exit 1 ;; esac
+# ── Check for universal build possibility ──────────────────────────────────────
+# On Apple Silicon, /usr/local is the Intel (x86_64) Homebrew prefix.
+X86_64_PREFIX=""
+if [ -d "/usr/local" ] && [ -f "/usr/local/lib/libpq.a" ]; then
+    X86_64_PREFIX="/usr/local"
 fi
-echo ""
 
-# ── Copy static library ───────────────────────────────────────────────────────
-echo "--- Installing prebuilt/lib/mac/libpq.a ---"
+# Also check for x86_64 in versioned prefixes
+for prefix in /usr/local/opt/libpq /usr/local/opt/libpq@17 /usr/local/opt/libpq@16; do
+    if [ -f "${prefix}/lib/libpq.a" ]; then
+        X86_64_PREFIX="${prefix}"
+        break
+    fi
+done
+
+# ── Build universal or single-arch library ───────────────────────────────────
 mkdir -p "$(dirname "${OUT_LIB}")"
-cp "${PQ_PREFIX}/lib/libpq.a" "${OUT_LIB}"
+rm -f "${OUT_LIB}"
+
+if [ -n "${X86_64_PREFIX}" ] && [ "${PQ_PREFIX}" != "${X86_64_PREFIX}" ]; then
+    echo "Creating universal libpq.a from:"
+    echo "  x86_64: ${X86_64_PREFIX}/lib/libpq.a"
+    echo "  arm64:  ${PQ_PREFIX}/lib/libpq.a"
+    lipo -create "${X86_64_PREFIX}/lib/libpq.a" "${PQ_PREFIX}/lib/libpq.a" \
+        -o "${OUT_LIB}"
+    echo "  Universal: ${OUT_LIB}"
+else
+    echo "--- Installing prebuilt/lib/mac/libpq.a ---"
+    cp "${PQ_PREFIX}/lib/libpq.a" "${OUT_LIB}"
+    ARCH_INFO="$(file "${OUT_LIB}" 2>/dev/null | grep -o 'arm64\|x86_64\|universal' | head -1 || echo 'unknown')"
+    echo "  Architecture : ${ARCH_INFO}"
+    if [ "${ARCH_INFO}" = "x86_64" ]; then
+        echo ""
+        echo "WARNING: Library is x86_64 only."
+        echo "For universal binaries, install libpq via both Intel and ARM Homebrew."
+    fi
+fi
 
 SIZE_KB="$(du -k "${OUT_LIB}" | cut -f1)"
 echo "  Size    : ${SIZE_KB} KB"
 
-# Spot-check for PQconnectdb symbol
 if nm "${OUT_LIB}" 2>/dev/null | grep -q " T _PQconnectdb"; then
     echo "  Symbols : PQconnectdb OK"
 else
-    echo "  Symbols : (could not verify — nm not available or symbol mangled)"
+    echo "  Symbols : (could not verify)"
 fi
 
 # ── Update thirdparty/libpq/include ───────────────────────────────────────────
@@ -95,13 +106,7 @@ echo "--- Updating thirdparty/libpq/include ---"
 INCLUDE_DST="${THIRDPARTY_PQ}/include"
 mkdir -p "${INCLUDE_DST}"
 
-# Homebrew's libpq places headers directly in {prefix}/include/
-# The driver only needs libpq-fe.h and its transitive includes
-# (libpq-events.h, postgres_ext.h, pg_config_ext.h).
-# Copy all .h files from the Homebrew include root so every transitive
-# #include is satisfied without guessing.
 INCLUDE_SRC="${PQ_PREFIX}/include"
-
 if [ ! -f "${INCLUDE_SRC}/libpq-fe.h" ]; then
     echo "ERROR: Could not find libpq-fe.h under ${INCLUDE_SRC}/"
     exit 1
@@ -138,5 +143,5 @@ done
 echo ""
 echo "=== Done ==="
 echo ""
-echo "libpq.a is now PostgreSQL ${PQ_VER} (arm64, static, from Homebrew)."
+echo "libpq.a is now PostgreSQL ${PQ_VER} (static, from Homebrew)."
 echo "Next: run ./rebuild-dbpostgresql.sh to recompile dbpostgresql.bundle."

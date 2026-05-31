@@ -1,4 +1,4 @@
-# HyperXTalk — macOS ARM64 Build Instructions
+# HyperXTalk — macOS Universal Build Instructions (x86_64 + arm64)
 
 ## Prerequisites
 
@@ -54,9 +54,9 @@ From the repo root:
 
 ```bash
 cd ~/Developer/HyperXTalk
-make config-mac      # generates Xcode projects from GYP files
-make prebuilt-mac    # builds libffi, libskia & friends, libz, ICU, openssl
-                     #   extras, libpq, libmysql — about 10 min on an M1
+make config-mac      # generates Xcode projects from GYP files (universal binary)
+make prebuilt-mac    # builds universal libffi, libskia & friends, libz, ICU, openssl
+                     #   extras, libpq, libmysql — about 15 min on an M1
 make compile-mac
 make package-mac-bin
 ```
@@ -73,25 +73,35 @@ make package-mac-bin
 
 The scripts run in this order — the order matters (see the note below):
 
-1. `prebuilt/scripts/build-libffi-mac-arm64.sh` — vendored libffi → `prebuilt/lib/mac/libffi.a`.
-2. `prebuilt/scripts/build-libz-mac-arm64.sh` — zlib from `thirdparty/libz` → `prebuilt/lib/mac/libz.a`.
+1. `prebuilt/scripts/build-libffi-mac-arm64.sh` — vendored libffi → universal `prebuilt/lib/mac/libffi.a`.
+2. `prebuilt/scripts/build-libz-mac-arm64.sh` — zlib from `thirdparty/libz` → universal `prebuilt/lib/mac/libz.a`.
 3. `prebuilt/scripts/build-mac-extras.sh` — libgif, libjpeg, libpng, libpcre
-   (xcodebuild); `libcustomcrypto`/`libcustomssl` (copied from Homebrew
-   openssl@3); and stub `libpq.a`/`libmysql.a`.
+   (xcodebuild universal); `libcustomcrypto`/`libcustomssl` (universal from Homebrew
+   openssl@3 or lipo'd from both Intel and ARM Homebrew); and universal stub
+   `libpq.a`/`libmysql.a`.
 4. `prebuilt/scripts/build-libcairo-mac-arm64.sh` — cairo 1.18.4 (meson),
-   linking the repo's own zlib and libpng from steps 2–3.
+    linking the repo's own zlib and libpng from steps 2–3, built for both architectures.
 5. `prebuilt/scripts/build-thirdparty-mac-arm64.sh` — xcodebuild over the
-   vendored libs (libskia, libsqlite, libxml, libzip, libxslt, libiodbc) and
-   copies the resulting `.a` files into `prebuilt/lib/mac/`.
-6. `prebuilt/scripts/build-icu-mac-arm64.sh` — ICU 58.2 (icupkg host tool + five
-   `libicu*.a` static libs in one pass).
+    vendored libs (libskia, libsqlite, libxml, libzip, libxslt, libiodbc) as
+    universal binaries and copies the resulting `.a` files into `prebuilt/lib/mac/`.
+6. `prebuilt/scripts/build-icu-mac-arm64.sh` — ICU 58.2 built for both architectures
+    and lipo'd into universal `libicu*.a` static libs.
 7. `prebuilt/scripts/build-libpq-mac-arm64.sh` — real static libpq from Homebrew.
+    If both Intel and ARM Homebrew libraries are available, creates a universal
+    library via `lipo`.
 8. `prebuilt/scripts/build-libmysql-mac-arm64.sh` — real static libmysqlclient.
+    If both Intel and ARM Homebrew libraries are available, creates a universal
+    library via `lipo`.
 
 > **Order note:** `build-libcairo` is configured to link the repo's vendored
 > zlib and libpng (via generated `pkg-config` files) rather than the macOS
 > SDK / Homebrew copies, so `build-libz` and `build-mac-extras` must run
 > before it.
+
+> **Homebrew note:** For a fully universal binary, install both Intel and ARM
+> Homebrew copies of `libpq` and `mysql-client`. The scripts will automatically
+> `lipo` them together. If only one architecture is available, the build will
+> still work but produce a single-architecture library.
 
 Steps 7+8 replace the stub `libpq.a` / `libmysql.a` archives so that the
 `dbpostgresql` / `dbmysql` driver bundles link against functional
